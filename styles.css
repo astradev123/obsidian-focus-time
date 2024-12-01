@@ -1,0 +1,104 @@
+.reading-time-text {
+	margin-left: 5px;
+}
+
+.leaderboard-modal-title {
+	text-align: center;
+	font-size: 20px;
+	margin-bottom: 20px;
+	font-weight: bold;
+}
+
+.leaderboard-container {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 10px;
+	max-height: 600px;
+	overflow-y: auto;
+}
+
+.leaderboard-entry {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px;
+	border-radius: 8px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	font-size: 16px;
+	transition: background-color 0.2s ease;
+}
+
+.leaderboard-file-name {
+	font-weight: bold;
+	color: #333;
+	flex: 1;
+}
+
+.leaderboard-time {
+	font-weight: bold;
+	color: #4CAF50;
+}
+
+/*------------------- Day Mode Styling Begin ------------------ */
+
+.theme-light .leaderboard-no-data {
+	text-align: center;
+	font-size: 14px;
+	color: #333;
+}
+
+.theme-light .leaderboard-modal-title {
+
+}
+
+.theme-light .leaderboard-entry {
+	background-color: #f9f9f9;
+	color: #333;
+}
+
+.theme-light .leaderboard-entry:hover {
+	background-color: #e1f7e1;
+}
+
+.theme-light .leaderboard-file-name {
+	color: #333;
+}
+
+.theme-light .leaderboard-time {
+	color: #4CAF50;
+}
+
+/*------------------- Day Mode Styling End ------------------ */
+
+
+/*-------------------  Night Mode Styling Begin ------------------- */
+
+.theme-dark .leaderboard-no-data {
+	text-align: center;
+	font-size: 14px;
+	color: #c5c5c5;
+}
+
+.theme-dark .leaderboard-modal-title {
+
+}
+
+.theme-dark .leaderboard-entry {
+	background-color: #424242;
+	color: #f1f1f1;
+}
+
+.theme-dark .leaderboard-file-name {
+	color: #f1f1f1;
+}
+
+.theme-dark .leaderboard-time {
+	color: #81C784;
+}
+
+.theme-dark .leaderboard-entry:hover {
+	background-color: #616161;
+}
+
+/*------------------- Night Mode Styling End ------------------- */

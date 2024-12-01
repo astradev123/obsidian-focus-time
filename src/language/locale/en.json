@@ -1,0 +1,12 @@
+{
+	"minutes": "{minute}m",
+	"hours_minutes": "{hour}h {minute}m",
+	"language": "Language",
+	"strictMode": "Strict mode",
+	"strictModeDesc": "Timer will be suspend if the window lost focus or minimized while the strict mode activated.",
+	"leaderboardTitle": "\uD83C\uDFC6 Top 10 Reading Time",
+	"leaderboardNoData": "No data available, start reading now!",
+	"leaderboardNoData2": "Only records with reading time greater than 5 minutes will be counted.",
+	"openLeaderboardModal": "View Top 10 Reading Time",
+	"fileNotFound": "File not found"
+}

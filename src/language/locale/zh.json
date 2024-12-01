@@ -1,0 +1,12 @@
+{
+	"minutes": "{minute}分钟",
+	"hours_minutes": "{hour}小时 {minute}分钟",
+	"language": "语言",
+	"strictMode": "严格模式",
+	"strictModeDesc": "开启严格模式后，当窗口失去焦点或最小化时，计时将会暂停。",
+	"leaderboardTitle": "\uD83C\uDFC6 总阅读时长 Top 10",
+	"leaderboardNoData": "暂无数据，快去阅读吧！",
+	"leaderboardNoData2": "排行榜仅统计时长大于5分钟的阅读记录",
+	"openLeaderboardModal": "查看阅读时长排行榜",
+	"fileNotFound": "文件不存在"
+}
