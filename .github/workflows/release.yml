@@ -24,16 +24,12 @@ jobs:
                   npm install
                   npm run build
 
-            - name: Compress files with zip
-              run: |
-                  zip ${{ env.PLUGIN_NAME }}-$tag.zip main.js manifest.json styles.css
-
             - name: Create release
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   tag="${GITHUB_REF#refs/tags/}"
-                  
+                  zip ${{ env.PLUGIN_NAME }}-$tag.zip main.js manifest.json styles.css
                   gh release create "$tag" \
                     --title="$tag" \
                     --draft \
