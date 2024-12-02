@@ -9,7 +9,7 @@ export class DailyReadDataManager {
 
 	constructor(app: App) {
 		this.app = app;
-		this.dataDir = `${app.vault.configDir}/plugins/obsidian-focus-time/data`;
+		this.dataDir = `${app.vault.configDir}/plugins/focus-time/data`;
 		this.mkdir().finally();
 	}
 
