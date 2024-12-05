@@ -7,16 +7,15 @@ export class TimeUtils {
 	 * @param timeMilliseconds
 	 */
 	static getFormattedReadingTime(timeMilliseconds: number): string {
-
 		const readMinutes = timeMilliseconds / 1000 / 60;
 		const hours = Math.floor(readMinutes / 60);
-		const minutes = (readMinutes % 60).toFixed(0);
+		const minutes = Math.floor(readMinutes % 60);
 
 		if (hours === 0) {
-			return I18n.t("minutes", {minute: minutes});
+			return I18n.t("minutes", {minute: minutes.toFixed(0)});
 		}
 
-		return I18n.t("hours_minutes", {hour: hours, minute: minutes});
+		return I18n.t("hours_minutes", {hour: hours, minute: minutes.toFixed(0)});
 	}
 
 	/**
