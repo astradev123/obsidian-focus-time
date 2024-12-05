@@ -21,6 +21,8 @@ export class LeaderboardModal extends Modal {
 
 		const leaderboardData = this.plugin.dataAnalyzer.analyzeLeaderboardTotal();
 
+		// TODO: Pointer file path
+
 		if (!leaderboardData || leaderboardData.length === 0) {
 			contentEl.createEl("p", {
 				text: i18n.t('leaderboardNoData'),

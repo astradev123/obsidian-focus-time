@@ -40,12 +40,12 @@ export class DataAnalyzer {
 		return leaderboard.filter(item => item.totalTime > 5 * 60 * 1000).slice(0, 10);
 	}
 
-	private getFormattedNoteName(fileName: string) {
-		const fileNameWithoutSuffix = fileName.split(".")[0];
-		if (fileNameWithoutSuffix.length > 20) {
-			return fileNameWithoutSuffix.substring(0, 20) + "...";
+	private getFormattedNoteName(filePath: string) {
+		const noteName = filePath.split("/").pop() ?? "";
+		if (noteName.length > 30) {
+			return noteName.substring(0, 30) + "...";
 		} else {
-			return fileNameWithoutSuffix;
+			return noteName;
 		}
 	}
 
