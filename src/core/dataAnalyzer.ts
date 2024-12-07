@@ -1,4 +1,4 @@
-import {App, Plugin} from "obsidian";
+import {App, Plugin, TFile} from "obsidian";
 import {PluginDataManager} from "./pluginDataManager";
 import {DailyReadDataManager} from "./dailyReadDataManager";
 
@@ -14,18 +14,29 @@ export class DataAnalyzer {
 		this.app = app;
 		this.dataManager = dataManager;
 		this.dailyReadDataManager = dailyReadDataManager;
+
+		// Change data reference when the file is renamed
+		this.app.vault.on('rename', (absFile, oldPath) => {
+			const file = this.app.vault.getFileByPath(absFile.path);
+			if (!file) {
+				return;
+			}
+			this.onFileRename(file, oldPath);
+		});
 	}
 
 	public analyzeLeaderboardTotal() {
 
 		const readData = this.dataManager.getCategory("readData");
 
-		if(!readData) return;
+		if (!readData) {
+			return;
+		}
 
 		const leaderboard = Object.keys(readData).map(fileId => {
 			const fileRecord = readData[fileId];
 			const totalTime = fileRecord.duration;
-			const filePath = this.getFormattedNoteName(readData[fileId].filePath);
+			const filePath = readData[fileId].filePath;
 			return {
 				fileRecord,
 				filePath,
@@ -40,13 +51,14 @@ export class DataAnalyzer {
 		return leaderboard.filter(item => item.totalTime > 5 * 60 * 1000).slice(0, 10);
 	}
 
-	private getFormattedNoteName(filePath: string) {
-		const noteName = filePath.split("/").pop() ?? "";
-		if (noteName.length > 30) {
-			return noteName.substring(0, 30) + "...";
-		} else {
-			return noteName;
+	private onFileRename(file: TFile, oldPath: string) {
+		const readData = this.dataManager.get('readData', file.stat.ctime.toString());
+		if (!readData) {
+			return;
 		}
+
+		readData.filePath = file.path;
+		this.dataManager.put('readData', file.stat.ctime.toString(), readData).finally();
 	}
 
 }

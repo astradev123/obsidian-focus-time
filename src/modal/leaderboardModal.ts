@@ -21,8 +21,6 @@ export class LeaderboardModal extends Modal {
 
 		const leaderboardData = this.plugin.dataAnalyzer.analyzeLeaderboardTotal();
 
-		// TODO: Pointer file path
-
 		if (!leaderboardData || leaderboardData.length === 0) {
 			contentEl.createEl("p", {
 				text: i18n.t('leaderboardNoData'),
@@ -52,7 +50,8 @@ export class LeaderboardModal extends Modal {
 			});
 
 			entry.createEl("span", {
-				text: `${index + 1}. ${item.filePath}`,
+				text: `${index + 1}. ` + this.getFormattedNoteName(item.filePath),
+				title: item.filePath,
 				cls: "leaderboard-file-name",
 			});
 
@@ -75,5 +74,14 @@ export class LeaderboardModal extends Modal {
 			return;
 		}
 		this.app.workspace.getLeaf().openFile(file).finally();
+	}
+
+	private getFormattedNoteName(filePath: string) {
+		const noteName = filePath.split("/").pop() ?? "";
+		if (noteName.length > 30) {
+			return noteName.substring(0, 30) + "...";
+		} else {
+			return noteName;
+		}
 	}
 }
