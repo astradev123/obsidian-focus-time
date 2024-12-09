@@ -6,11 +6,11 @@ import {StatusBarManager} from "../view/display/statusBar/statusBarManager";
 import {StatusBarFactory} from "../view/display/statusBar/statusBarFactory";
 import {DailyReadDataManager} from "./dailyReadDataManager";
 import FocusTimePlugin from "../main";
+import {Context} from "../context/context";
 
 export class TimeTracker {
 
 	private readonly app: App;
-	private currentFile: TFile | null;
 	private readonly dataManager: PluginDataManager;
 	private readonly statusBarManager: StatusBarManager;
 	private readonly dailyReadDataManager: DailyReadDataManager;
@@ -23,7 +23,6 @@ export class TimeTracker {
 		this.dataManager = dataManager;
 		this.dailyReadDataManager = dailyReadDataManager;
 		this.statusBarManager = new StatusBarManager(plugin);
-		this.currentFile = null;
 		this.app.workspace.on("file-open", () => this.handleFileChange());
 		window.addEventListener("focus", () => this.handleWindowFocus());
 		window.addEventListener("blur", () => this.handleWindowBlur());
@@ -55,9 +54,10 @@ export class TimeTracker {
 	 * Updates the status bar with the current file's read time
 	 */
 	private updateStatusBar() {
-		if (this.currentFile) {
-			const readData = this.getTotalReadData(this.currentFile);
+		const currentFile = Context.getCurrentFile();
 
+		if (currentFile) {
+			const readData = this.getTotalReadData(currentFile);
 			StatusBarFactory.createIconTextStatusBar(this.statusBarManager, readData?.duration ?? 0);
 		} else {
 			this.statusBarManager.remove();
@@ -70,12 +70,13 @@ export class TimeTracker {
 	public handleFileChange() {
 		const activeFile = this.app.workspace.getActiveFile();
 
-		if (this.currentFile && this.currentFile !== activeFile) {
-			//this.refreshAndSave(this.refreshTime);
-			this.incTotalReadCount(this.currentFile);
+		const currentFile = Context.getCurrentFile();
+
+		if (currentFile && currentFile !== activeFile) {
+			this.incTotalReadCount(currentFile);
 		}
 
-		this.currentFile = activeFile;
+		Context.setCurrentFile(activeFile);
 
 		this.updateStatusBar();
 	}
@@ -100,19 +101,21 @@ export class TimeTracker {
 	 * Refreshes the read time and saves it
 	 */
 	private refreshAndSave(refreshTime: number) {
-		if (!this.currentFile || this.needSuspendTimer()) {
+		const currentFile = Context.getCurrentFile();
+
+		if (!currentFile || this.needSuspendTimer()) {
 			return;
 		}
 
-		const readData = this.getTotalReadData(this.currentFile);
+		const readData = this.getTotalReadData(currentFile);
 
 		this.saveDailyReadData(
-			this.currentFile,
+			currentFile,
 			readData ? readData.duration + refreshTime : refreshTime,
 		);
 
 		this.saveTotalReadData(
-			this.currentFile,
+			currentFile,
 			readData ? readData.duration + refreshTime : refreshTime,
 			readData ? readData.openCount : 1,
 			readData ? readData.firstStartTime : Date.now()
