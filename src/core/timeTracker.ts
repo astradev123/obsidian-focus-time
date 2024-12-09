@@ -105,12 +105,10 @@ export class TimeTracker {
 		}
 
 		const readData = this.getTotalReadData(this.currentFile);
-		// TODO: Maybe some field is redundant
+
 		this.saveDailyReadData(
 			this.currentFile,
 			readData ? readData.duration + refreshTime : refreshTime,
-			readData ? readData.openCount : 1,
-			readData ? readData.firstStartTime : Date.now()
 		);
 
 		this.saveTotalReadData(
@@ -123,11 +121,9 @@ export class TimeTracker {
 
 	public saveDailyReadData(
 		file: TFile,
-		duration: number,
-		openCount: number,
-		firstStartTime: number
+		duration: number
 	) {
-		const readRecord: ReadRecord = this.buildReadData(file, duration, openCount, firstStartTime);
+		const readRecord: ReadRecord = this.buildReadData(file, duration, 0, 0, true);
 		this.dailyReadDataManager.saveTodayData("dailyReadData", readRecord).finally();
 	}
 
@@ -140,7 +136,7 @@ export class TimeTracker {
 		openCount: number,
 		firstStartTime: number
 	) {
-		const readRecord: ReadRecord = this.buildReadData(file, duration, openCount, firstStartTime);
+		const readRecord: ReadRecord = this.buildReadData(file, duration, openCount, firstStartTime, false);
 		this.dataManager.put("readData", readRecord.id, readRecord).finally();
 	}
 
@@ -150,9 +146,20 @@ export class TimeTracker {
 	 * @param duration
 	 * @param openCount
 	 * @param firstStartTime
+	 * @param isDailyData Daily read data only need id and duration
 	 * @private
 	 */
-	private buildReadData(file: TFile, duration: number, openCount: number, firstStartTime: number): ReadRecord {
+	private buildReadData(file: TFile, duration: number, openCount: number, firstStartTime: number, isDailyData: boolean): ReadRecord {
+		if(isDailyData) {
+			return {
+				filePath: "",
+				firstStartTime: 0,
+				openCount: 0,
+				id: RecordUtils.generateFileId(file),
+				duration: duration
+			};
+		}
+
 		return {
 			id: RecordUtils.generateFileId(file),
 			filePath: file.path,
@@ -169,7 +176,8 @@ export class TimeTracker {
 			file,
 			totalReadData ? totalReadData.duration : 0,
 			totalReadData ? totalReadData.openCount + 1 : 1,
-			totalReadData ? totalReadData.firstStartTime : Date.now()
+			totalReadData ? totalReadData.firstStartTime : Date.now(),
+			false
 		);
 		this.saveTotalReadData(file, totalRecord.duration, totalRecord.openCount, totalRecord.firstStartTime);
 	}
