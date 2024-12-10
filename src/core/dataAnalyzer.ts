@@ -44,11 +44,10 @@ export class DataAnalyzer {
 			};
 		});
 
-		// Top 10 sort
 		leaderboard.sort((a, b) => b.totalTime - a.totalTime)
 
-		// Filter out less than 5 minutes
-		return leaderboard.filter(item => item.totalTime > 5 * 60 * 1000).slice(0, 10);
+		// Filter out less than 1 minutes
+		return leaderboard.filter(item => item.totalTime > 60 * 1000);
 	}
 
 	private onFileRename(file: TFile, oldPath: string) {

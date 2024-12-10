@@ -78,8 +78,8 @@ export class LeaderboardModal extends Modal {
 
 	private getFormattedNoteName(filePath: string) {
 		const noteName = filePath.split("/").pop() ?? "";
-		if (noteName.length > 30) {
-			return noteName.substring(0, 30) + "...";
+		if (noteName.length > 25) {
+			return noteName.substring(0, 25) + "...";
 		} else {
 			return noteName;
 		}
