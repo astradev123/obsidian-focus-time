@@ -107,18 +107,17 @@ export class TimeTracker {
 			return;
 		}
 
-		const readData = this.getTotalReadData(currentFile);
+		this.dailyReadDataManager.loadTodayData().then(data => {
+			const todayReadData = data["dailyReadData"]? data["dailyReadData"][RecordUtils.generateFileId(currentFile)] : undefined;
+			this.saveDailyReadData(currentFile, todayReadData ? todayReadData.duration + refreshTime : refreshTime);
+		});
 
-		this.saveDailyReadData(
-			currentFile,
-			readData ? readData.duration + refreshTime : refreshTime,
-		);
-
+		const totalReadData = this.getTotalReadData(currentFile);
 		this.saveTotalReadData(
 			currentFile,
-			readData ? readData.duration + refreshTime : refreshTime,
-			readData ? readData.openCount : 1,
-			readData ? readData.firstStartTime : Date.now()
+			totalReadData ? totalReadData.duration + refreshTime : refreshTime,
+			totalReadData ? totalReadData.openCount : 1,
+			totalReadData ? totalReadData.firstStartTime : Date.now()
 		);
 	}
 
