@@ -59,8 +59,7 @@ export default class FocusTimePlugin extends Plugin {
 	 * @private
 	 */
 	private setLanguage() {
-		const languageSetting: string = this.dataManager.get('settings', 'language');
-		I18n.getInstance().setLanguage(languageSetting ? languageSetting : I18n.autoDetectLanguage());
+		I18n.getInstance().setLanguage(I18n.autoDetectLanguage());
 	}
 
 }

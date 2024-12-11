@@ -14,7 +14,6 @@ export class TimeTracker {
 	private readonly dataManager: PluginDataManager;
 	private readonly statusBarManager: StatusBarManager;
 	private readonly dailyReadDataManager: DailyReadDataManager;
-	private refreshInterval: number | null = null;
 	private globalRefreshTime: number = 1000 * 6;
 	private windowFocus: boolean = true;
 
@@ -23,31 +22,20 @@ export class TimeTracker {
 		this.dataManager = dataManager;
 		this.dailyReadDataManager = dailyReadDataManager;
 		this.statusBarManager = new StatusBarManager(plugin);
-		this.app.workspace.on("file-open", () => this.handleFileChange());
+
+		plugin.registerEvent(this.app.workspace.on("file-open", () => this.handleFileChange()));
+		plugin.registerInterval(window.setInterval(() => this.handleRefresh(), this.globalRefreshTime));
+
 		window.addEventListener("focus", () => this.handleWindowFocus());
 		window.addEventListener("blur", () => this.handleWindowBlur());
-		this.startRefreshTimer();
 	}
 
 	/**
 	 * Set up the refresh timer
 	 */
-	private startRefreshTimer() {
-		this.refreshInterval = window.setInterval(() => {
-			this.refreshAndSave(this.globalRefreshTime);
-			this.updateStatusBar();
-			//console.log("Refreshed", new Date().toLocaleTimeString());
-		}, this.globalRefreshTime);
-	}
-
-	/**
-	 * Stops the refresh timer
-	 */
-	public stopRefreshTimer() {
-		if (this.refreshInterval !== null) {
-			clearInterval(this.refreshInterval);
-			this.refreshInterval = null;
-		}
+	private handleRefresh() {
+		this.refreshAndSave(this.globalRefreshTime);
+		this.updateStatusBar();
 	}
 
 	/**
@@ -194,7 +182,6 @@ export class TimeTracker {
 	 * Unloads the time tracker
 	 */
 	public unload() {
-		this.stopRefreshTimer();
 		this.statusBarManager.remove();
 	}
 

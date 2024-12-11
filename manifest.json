@@ -3,7 +3,7 @@
 	"name": "Focus Time",
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "Focus Time is a plugin that helps you track how much time you spend on each note.",
+	"description": "Track the time spent on each note and visualize the data.",
 	"author": "AstraDev",
 	"authorUrl": "https://github.com/astradev123",
 	"fundingUrl": "https://afdian.com/a/astradev",

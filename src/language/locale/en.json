@@ -4,9 +4,9 @@
 	"language": "Language",
 	"strictMode": "Strict mode",
 	"strictModeDesc": "Timer will be suspend if the window lost focus while the strict mode activated.",
-	"leaderboardTitle": "\uD83E\uDDD0 Total Focus Time Data",
+	"leaderboardTitle": "\uD83E\uDDD0 Total focus time data",
 	"leaderboardNoData": "No data available, start reading now!",
 	"leaderboardNoData2": "Only notes with focus time greater than 1 minute are counted",
-	"openLeaderboardModal": "View Total Focus Time Data",
+	"openLeaderboardModal": "View total focus time data",
 	"fileNotFound": "File not found"
 }

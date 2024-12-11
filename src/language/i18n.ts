@@ -2,6 +2,7 @@
 import en from './locale/en.json';
 // @ts-ignore
 import zh from './locale/zh.json';
+import {moment} from "obsidian";
 
 type Translations = { [key: string]: string };
 
@@ -30,7 +31,7 @@ class I18n {
 	}
 
 	public t(key: string, params: { [key: string]: string | number } = {}): string {
-		let translation = this.translations[this.language][key] || key;
+		let translation = this.translations[this.language] ? this.translations[this.language][key] : this.translations['en'][key];
 		Object.keys(params).forEach((param) => {
 			translation = translation.replace(`{${param}}`, String(params[param]));
 		});
@@ -42,8 +43,7 @@ class I18n {
 	}
 
 	public static autoDetectLanguage(defaultLanguage: string = "en") {
-		const systemLanguage = navigator.language || navigator.languages?.[0] || defaultLanguage;
-		return systemLanguage.split("-")[0];
+		return moment.locale().split('-')[0] || defaultLanguage;
 	}
 }
 

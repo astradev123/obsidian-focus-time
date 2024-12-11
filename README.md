@@ -1,8 +1,8 @@
-# Obsidian Focus Time Plugin
+# Focus Time Plugin
 
 English | [简体中文](README_zh.md)
 
-The Obsidian Focus Time Plugin automatically tracks the time you spend focused on your notes and allows you to view a leaderboard of your total focus time for each note. With this tool, you can better review your focus journey, uncover "hidden gem notes" marked by time, and make your Obsidian note-taking more planned and rewarding!
+The Focus Time Plugin automatically tracks the time you spend focused on your notes and allows you to view the data of your total focus time for each note. With this tool, you can better review your focus journey, uncover "hidden gem notes" marked by time, and make your Obsidian note-taking more planned and rewarding!
 
 ## Features Overview
 
@@ -39,7 +39,7 @@ To view your focus time leaderboard:
 
    ![ribbon](asset/ribbon.png)
 
-2. The leaderboard will display the top 10 notes ranked by total focus time.
+2. The leaderboard will show you the focus time data of all your notes.
 
    ![leaderboard](asset/leaderboard.png)
 

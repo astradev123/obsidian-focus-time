@@ -14,26 +14,8 @@ export class FocusTimeSettingTab extends PluginSettingTab {
 		const {containerEl} = this;
 		containerEl.empty();
 
-		this.addLanguageSetting(containerEl);
 		this.addStrictModeSetting(containerEl);
 
-	}
-
-	private addLanguageSetting(containerEl: HTMLElement) {
-		const languageSetting = this.plugin.dataManager.get('settings', 'language');
-		new Setting(containerEl)
-			.setName(I18n.t('language'))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOption('en', "English")
-					.addOption('zh', "简体中文")
-					.setValue(languageSetting ? languageSetting : I18n.autoDetectLanguage())
-					.onChange((value) => {
-						this.plugin.dataManager.put('settings', 'language', value).finally();
-						// Update language immediately
-						I18n.getInstance().setLanguage(value);
-					})
-			)
 	}
 
 	private addStrictModeSetting(containerEl: HTMLElement) {
