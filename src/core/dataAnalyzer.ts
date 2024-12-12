@@ -16,13 +16,13 @@ export class DataAnalyzer {
 		this.dailyReadDataManager = dailyReadDataManager;
 
 		// Change data reference when the file is renamed
-		this.app.vault.on('rename', (absFile, oldPath) => {
+		plugin.registerEvent(this.app.vault.on('rename', (absFile, oldPath) => {
 			const file = this.app.vault.getFileByPath(absFile.path);
 			if (!file) {
 				return;
 			}
 			this.onFileRename(file, oldPath);
-		});
+		}));
 	}
 
 	public analyzeLeaderboardTotal() {
