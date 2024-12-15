@@ -14,7 +14,7 @@ export class TimeTracker {
 	private readonly dataManager: PluginDataManager;
 	private readonly statusBarManager: StatusBarManager;
 	private readonly dailyReadDataManager: DailyReadDataManager;
-	private globalRefreshTime: number = 1000 * 1;
+	private globalRefreshTime: number = 1000 * 6;
 	private windowFocus: boolean = true;
 
 	constructor(plugin: FocusTimePlugin, app: App, dataManager: PluginDataManager, dailyReadDataManager: DailyReadDataManager) {
