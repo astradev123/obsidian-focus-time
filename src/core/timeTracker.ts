@@ -14,7 +14,7 @@ export class TimeTracker {
 	private readonly dataManager: PluginDataManager;
 	private readonly statusBarManager: StatusBarManager;
 	private readonly dailyReadDataManager: DailyReadDataManager;
-	private globalRefreshTime: number = 1000 * 6;
+	private globalRefreshTime: number = 1000 * 1;
 	private windowFocus: boolean = true;
 
 	constructor(plugin: FocusTimePlugin, app: App, dataManager: PluginDataManager, dailyReadDataManager: DailyReadDataManager) {
@@ -96,7 +96,7 @@ export class TimeTracker {
 		}
 
 		this.dailyReadDataManager.loadTodayData().then(data => {
-			const todayReadData = data["dailyReadData"]? data["dailyReadData"][RecordUtils.generateFileId(currentFile)] : undefined;
+			const todayReadData = data["dailyReadData"]? data["dailyReadData"][this.getFileId(currentFile.path)] : undefined;
 			this.saveDailyReadData(currentFile, todayReadData ? todayReadData.duration + refreshTime : refreshTime);
 		});
 
@@ -104,8 +104,7 @@ export class TimeTracker {
 		this.saveTotalReadData(
 			currentFile,
 			totalReadData ? totalReadData.duration + refreshTime : refreshTime,
-			totalReadData ? totalReadData.openCount : 1,
-			totalReadData ? totalReadData.firstStartTime : Date.now()
+			totalReadData ? totalReadData.openCount : 1
 		);
 	}
 
@@ -113,7 +112,7 @@ export class TimeTracker {
 		file: TFile,
 		duration: number
 	) {
-		const readRecord: ReadRecord = this.buildReadData(file, duration, 0, 0, true);
+		const readRecord: ReadRecord = this.buildReadData(file, duration, 0, true);
 		this.dailyReadDataManager.saveTodayData("dailyReadData", readRecord).finally();
 	}
 
@@ -123,11 +122,10 @@ export class TimeTracker {
 	public saveTotalReadData(
 		file: TFile,
 		duration: number,
-		openCount: number,
-		firstStartTime: number
+		openCount: number
 	) {
-		const readRecord: ReadRecord = this.buildReadData(file, duration, openCount, firstStartTime, false);
-		this.dataManager.put("readData", readRecord.id, readRecord).finally();
+		const readRecord: ReadRecord = this.buildReadData(file, duration, openCount, false);
+		this.dataManager.put("readData", readRecord.filePath, readRecord).finally();
 	}
 
 	/**
@@ -135,28 +133,43 @@ export class TimeTracker {
 	 * @param file
 	 * @param duration
 	 * @param openCount
-	 * @param firstStartTime
 	 * @param isDailyData Daily read data only need id and duration
 	 * @private
 	 */
-	private buildReadData(file: TFile, duration: number, openCount: number, firstStartTime: number, isDailyData: boolean): ReadRecord {
+	private buildReadData(file: TFile, duration: number, openCount: number, isDailyData: boolean): ReadRecord {
 		if(isDailyData) {
 			return {
 				filePath: "",
-				firstStartTime: 0,
 				openCount: 0,
-				id: RecordUtils.generateFileId(file),
+				fileId: this.getFileId(file.path),
 				duration: duration
 			};
 		}
 
 		return {
-			id: RecordUtils.generateFileId(file),
+			fileId: this.getOrCreateFileId(file.path),
 			filePath: file.path,
 			duration: duration,
-			openCount: openCount,
-			firstStartTime: firstStartTime,
+			openCount: openCount
 		};
+	}
+
+	private getOrCreateFileId(filePath: string) {
+		const readData = this.dataManager.get("readData", filePath);
+		if (readData && readData.fileId) {
+			return readData.fileId;
+		}
+
+		return Date.now().toString();
+	}
+
+	private getFileId(filePath: string) {
+		const readData = this.dataManager.get("readData", filePath);
+		if (readData && readData.fileId) {
+			return readData.fileId;
+		}
+
+		return undefined;
 	}
 
 
@@ -166,10 +179,9 @@ export class TimeTracker {
 			file,
 			totalReadData ? totalReadData.duration : 0,
 			totalReadData ? totalReadData.openCount + 1 : 1,
-			totalReadData ? totalReadData.firstStartTime : Date.now(),
 			false
 		);
-		this.saveTotalReadData(file, totalRecord.duration, totalRecord.openCount, totalRecord.firstStartTime);
+		this.saveTotalReadData(file, totalRecord.duration, totalRecord.openCount);
 	}
 	/**
 	 * Gets the read data

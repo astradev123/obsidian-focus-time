@@ -2,7 +2,7 @@ export interface ReadRecord {
 	/**
 	 * File id
 	 */
-	id: string;
+	fileId: string;
 
 	/**
 	 * File name
@@ -18,9 +18,4 @@ export interface ReadRecord {
 	 * Number of times the file was opened
 	 */
 	openCount: number;
-
-	/**
-	 * The time the file was first opened
-	 */
-	firstStartTime: number;
 }

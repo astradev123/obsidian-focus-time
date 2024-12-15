@@ -35,7 +35,7 @@ export class DailyReadDataManager {
 			existingData[category] = {};
 		}
 
-		existingData[category][`${data.id}`] = data;
+		existingData[category][`${data.fileId}`] = data;
 
 		const jsonContent = JSON.stringify(existingData, null, 2);
 		await this.saveFile(filePath, jsonContent);
