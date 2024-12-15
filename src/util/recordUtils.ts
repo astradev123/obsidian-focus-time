@@ -2,6 +2,6 @@ import {TFile} from "obsidian";
 
 export class RecordUtils {
 	static generateFileId(file: TFile): string {
-		return file.stat.ctime.toString();
+		return file.path;
 	}
 }

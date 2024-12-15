@@ -51,13 +51,14 @@ export class DataAnalyzer {
 	}
 
 	private onFileRename(file: TFile, oldPath: string) {
-		const readData = this.dataManager.get('readData', file.stat.ctime.toString());
+		const readData = this.dataManager.get('readData', oldPath);
 		if (!readData) {
 			return;
 		}
 
 		readData.filePath = file.path;
-		this.dataManager.put('readData', file.stat.ctime.toString(), readData).finally();
+		this.dataManager.delete('readData', oldPath).finally();
+		this.dataManager.put('readData', file.path, readData).finally();
 	}
 
 }
