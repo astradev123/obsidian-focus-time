@@ -1,5 +1,5 @@
 import {App} from 'obsidian';
-import {LeaderboardModal} from "../modal/leaderboardModal";
+import {LeaderboardModal} from "../view/display/modal/leaderboardModal";
 import FocusTimePlugin from "../main";
 export class CommandFactory {
 

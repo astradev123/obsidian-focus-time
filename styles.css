@@ -1,5 +1,11 @@
 .reading-time-text {
-	margin-left: 5px;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.reading-time-text > span[aria-hidden] {
+	display: inline-flex;
 }
 
 .leaderboard-modal-title {

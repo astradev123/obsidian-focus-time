@@ -1,5 +1,5 @@
 import {App} from "obsidian";
-import {LeaderboardModal} from "../../../modal/leaderboardModal";
+import {LeaderboardModal} from "../modal/leaderboardModal";
 import FocusTimePlugin from "../../../main";
 import I18n from "../../../language/i18n";
 
