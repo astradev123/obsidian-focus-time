@@ -30,7 +30,10 @@ export function LeaderboardRoot(props: { plugin: FocusTimePlugin; onSelect: (fil
                             className="leaderboard-entry"
                             onClick={() => onSelect(item.fileRecord.filePath)}
                         >
-                            <span className="leaderboard-file-name" title={item.filePath}>{`${index + 1}. ${noteName}`}</span>
+                            <div className="leaderboard-left">
+                                <div className="leaderboard-file-name" title={item.filePath}>{`${index + 1}. ${noteName}`}</div>
+                                <div className="leaderboard-file-path" title={item.filePath}>{item.filePath}</div>
+                            </div>
                             <span className="leaderboard-time">{formattedReadTime}</span>
                         </div>
                     );

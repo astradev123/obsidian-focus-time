@@ -21,13 +21,21 @@
 	gap: 12px;
 	padding: 10px;
 	max-height: 600px;
-	overflow-y: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.leaderboard-container::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 .leaderboard-entry {
 	display: flex;
-	justify-content: space-between;
-	align-items: center;
+    justify-content: space-between;
+    align-items: center;
 	padding: 10px;
 	border-radius: 8px;
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -35,15 +43,36 @@
 	transition: background-color 0.2s ease;
 }
 
+.leaderboard-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
 .leaderboard-file-name {
 	font-weight: bold;
-	color: #333;
-	flex: 1;
+    color: #333;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.leaderboard-file-path {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.9;
 }
 
 .leaderboard-time {
 	font-weight: bold;
 	color: #4CAF50;
+    white-space: nowrap;
+    flex: 0 0 auto;
 }
 
 /*------------------- Day Mode Styling Begin ------------------ */
@@ -54,9 +83,6 @@
 	color: #333;
 }
 
-.theme-light .leaderboard-modal-title {
-
-}
 
 .theme-light .leaderboard-entry {
 	background-color: #f9f9f9;
@@ -69,6 +95,10 @@
 
 .theme-light .leaderboard-file-name {
 	color: #333;
+}
+
+.theme-light .leaderboard-file-path {
+    color: var(--text-muted);
 }
 
 .theme-light .leaderboard-time {
@@ -86,9 +116,6 @@
 	color: #c5c5c5;
 }
 
-.theme-dark .leaderboard-modal-title {
-
-}
 
 .theme-dark .leaderboard-entry {
 	background-color: #424242;
@@ -101,6 +128,10 @@
 
 .theme-dark .leaderboard-time {
 	color: #81C784;
+}
+
+.theme-dark .leaderboard-file-path {
+    color: var(--text-muted);
 }
 
 .theme-dark .leaderboard-entry:hover {
