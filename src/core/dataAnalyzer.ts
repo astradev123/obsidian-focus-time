@@ -4,16 +4,12 @@ import {DailyReadDataManager} from "./dailyReadDataManager";
 
 export class DataAnalyzer {
 
-	private readonly plugin: Plugin;
 	private readonly app: App;
 	private readonly dataManager: PluginDataManager;
-	private readonly dailyReadDataManager: DailyReadDataManager;
 
 	constructor(plugin: Plugin, app: App, dataManager: PluginDataManager, dailyReadDataManager: DailyReadDataManager) {
-		this.plugin = plugin;
 		this.app = app;
 		this.dataManager = dataManager;
-		this.dailyReadDataManager = dailyReadDataManager;
 
 		// Change data reference when the file is renamed
 		plugin.registerEvent(this.app.vault.on('rename', (absFile, oldPath) => {
@@ -44,10 +40,17 @@ export class DataAnalyzer {
 			};
 		});
 
-		leaderboard.sort((a, b) => b.totalTime - a.totalTime)
+		const filteredLeaderboard = leaderboard.filter(item => {
+			const file = this.app.vault.getFileByPath(item.filePath);
+			if (!file) {
+				return false; // File was deleted
+			}
+			// Filter out files with less than 1 minute
+			return item.totalTime > 60 * 1000;
+		});
 
-		// Filter out less than 1 minutes
-		return leaderboard.filter(item => item.totalTime > 60 * 1000);
+		filteredLeaderboard.sort((a, b) => b.totalTime - a.totalTime);
+		return filteredLeaderboard;
 	}
 
 	private onFileRename(file: TFile, oldPath: string) {

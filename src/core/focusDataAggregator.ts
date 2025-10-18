@@ -77,6 +77,11 @@ export class FocusDataAggregator {
 				continue;
 			}
 			
+			const file = this.app.vault.getFileByPath(filePath);
+			if (!file) {
+				continue; // File was deleted
+			}
+			
 			totalDuration += record.duration;
 			notes.push({
 				filePath: filePath,
@@ -211,6 +216,7 @@ export class FocusDataAggregator {
 			if (dayStats && dayStats.totalDuration > 0) {
 				totalDuration += dayStats.totalDuration;
 				focusDays++;
+				// Only add notes that still exist (getDailyStats already filters deleted files)
 				dayStats.notes.forEach(note => noteSet.add(note.fileId));
 			}
 		}
