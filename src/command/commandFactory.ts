@@ -1,5 +1,5 @@
 import {App} from 'obsidian';
-import {LeaderboardModal} from "../view/display/modal/leaderboardModal";
+import {DashboardModal} from "../view/display/modal/dashboardModal";
 import FocusTimePlugin from "../main";
 export class CommandFactory {
 
@@ -16,9 +16,9 @@ export class CommandFactory {
 
 		this.plugin.addCommand({
 			id: 'open-leaderboard',
-			name: 'Open leaderboard',
+			name: 'Open dashboard',
 			callback: () => {
-				new LeaderboardModal(this.plugin, this.app).open();
+				new DashboardModal(this.plugin, this.app).open();
 			}
 		});
 

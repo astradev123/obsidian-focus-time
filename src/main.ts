@@ -7,6 +7,7 @@ import {PluginDataManager} from "./core/pluginDataManager";
 import {DailyReadDataManager} from "./core/dailyReadDataManager";
 import {DataAnalyzer} from "./core/dataAnalyzer";
 import {RibbonFactory} from "./view/display/ribbon/ribbonFactory";
+import {FocusDataAggregator} from "./core/focusDataAggregator";
 
 export default class FocusTimePlugin extends Plugin {
 	get dataAnalyzer(): DataAnalyzer {
@@ -17,10 +18,15 @@ export default class FocusTimePlugin extends Plugin {
 		return this._dataManager;
 	}
 
+	get focusDataAggregator(): FocusDataAggregator {
+		return this._focusDataAggregator;
+	}
+
 	private timeTracker: TimeTracker;
 	private _dataManager: PluginDataManager;
 	private dailyReadDataManager: DailyReadDataManager;
 	private _dataAnalyzer: DataAnalyzer;
+	private _focusDataAggregator: FocusDataAggregator;
 
 	async onload() {
 
@@ -45,6 +51,7 @@ export default class FocusTimePlugin extends Plugin {
 		this.setLanguage();
 		this.timeTracker = new TimeTracker(this, this.app, this._dataManager, this.dailyReadDataManager);
 		this._dataAnalyzer = new DataAnalyzer(this, this.app, this._dataManager, this.dailyReadDataManager);
+		this._focusDataAggregator = new FocusDataAggregator(this.app, this._dataManager, this.dailyReadDataManager);
 		this.addSettingTab(new FocusTimeSettingTab(this.app, this));
 		RibbonFactory.createLeaderboardRibbon(this, this.app);
 

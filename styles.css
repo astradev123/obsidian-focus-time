@@ -20,7 +20,7 @@
 	flex-direction: column;
 	gap: 12px;
 	padding: 10px;
-	max-height: 600px;
+	max-height: 630px;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
@@ -70,7 +70,7 @@
 
 .leaderboard-time {
 	font-weight: bold;
-	color: #4CAF50;
+	color: var(--text-accent);
     white-space: nowrap;
     flex: 0 0 auto;
 }
@@ -102,7 +102,7 @@
 }
 
 .theme-light .leaderboard-time {
-	color: #4CAF50;
+	color: var(--text-accent);
 }
 
 /*------------------- Day Mode Styling End ------------------ */
@@ -127,7 +127,7 @@
 }
 
 .theme-dark .leaderboard-time {
-	color: #81C784;
+	color: var(--text-accent);
 }
 
 .theme-dark .leaderboard-file-path {
@@ -139,3 +139,597 @@
 }
 
 /*------------------- Night Mode Styling End ------------------- */
+
+/*------------------- Modal Container Styling Begin ------------------- */
+
+.focus-time-modal-container {
+	display: flex;
+	height: 100%;
+	width: 100%;
+	gap: 0;
+}
+
+.focus-time-sidebar {
+	flex: 0 0 180px;
+	padding: 20px 10px;
+	border-right: 1px solid var(--background-modifier-border);
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.sidebar-title {
+	font-size: 18px;
+	font-weight: bold;
+	text-align: center;
+	margin-bottom: 10px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.sidebar-button {
+	padding: 10px 15px;
+	border: none;
+	border-radius: 8px;
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+	cursor: pointer;
+	font-size: 14px;
+	transition: all 0.2s ease;
+	text-align: left;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.sidebar-button-icon {
+	width: 18px;
+	height: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.sidebar-button-icon svg {
+	width: 18px;
+	height: 18px;
+}
+
+.sidebar-button:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.sidebar-button.active {
+	background-color: var(--interactive-accent);
+	color: white;
+}
+
+.focus-time-content {
+	flex: 1;
+	padding: 20px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.focus-time-content::-webkit-scrollbar {
+	display: none;
+}
+
+/*------------------- Modal Container Styling End ------------------- */
+
+/*------------------- Statistics View Styling Begin ------------------- */
+
+.statistics-view {
+	width: 100%;
+}
+
+.stats-header {
+	margin-bottom: 20px;
+}
+
+.stats-header h2 {
+	text-align: center;
+	font-size: 20px;
+	margin-bottom: 15px;
+	font-weight: bold;
+}
+
+.view-mode-selector {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	margin-bottom: 15px;
+}
+
+.view-mode-button {
+	padding: 8px 16px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+	cursor: pointer;
+	font-size: 14px;
+	transition: all 0.2s ease;
+}
+
+.view-mode-button:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.view-mode-button.active {
+	background-color: var(--interactive-accent);
+	color: white;
+	border-color: var(--interactive-accent);
+}
+
+.stats-content {
+	margin-top: 20px;
+}
+
+.stats-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 15px;
+	margin-bottom: 25px;
+}
+
+.stat-card {
+	padding: 20px;
+	border-radius: 10px;
+	background-color: var(--background-secondary);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+}
+
+.stat-icon {
+	width: 32px;
+	height: 32px;
+	color: var(--text-accent);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.stat-icon svg {
+	width: 32px;
+	height: 32px;
+}
+
+.stat-label {
+	font-size: 13px;
+	color: var(--text-muted);
+	margin-bottom: 10px;
+}
+
+.stat-value {
+	font-size: 24px;
+	font-weight: bold;
+	color: var(--text-normal);
+}
+
+.stats-no-data {
+	text-align: center;
+	padding: 40px;
+	font-size: 16px;
+	color: var(--text-muted);
+}
+
+.stats-loading {
+	text-align: center;
+	padding: 40px;
+	font-size: 16px;
+	color: var(--text-muted);
+}
+
+.stats-note-list {
+	margin-top: 25px;
+	max-height: 300px;
+	overflow-y: auto;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.stats-note-list::-webkit-scrollbar {
+	display: none;
+}
+
+.stats-note-list h3 {
+	font-size: 16px;
+	font-weight: bold;
+	margin-bottom: 15px;
+	color: var(--text-normal);
+}
+
+.stats-note-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px;
+	margin-bottom: 8px;
+	border-radius: 8px;
+	background-color: var(--background-secondary);
+	transition: all 0.2s ease;
+}
+
+.stats-note-clickable {
+	cursor: pointer;
+}
+
+.stats-note-clickable:hover {
+	transform: translateX(4px);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.stats-note-name {
+	font-size: 14px;
+	color: var(--text-normal);
+	flex: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.stats-note-time {
+	font-size: 14px;
+	font-weight: bold;
+	color: var(--text-accent);
+	white-space: nowrap;
+	margin-left: 10px;
+}
+
+.stats-chart-section {
+	margin-top: 30px;
+}
+
+.stats-chart-section h3 {
+	font-size: 16px;
+	font-weight: bold;
+	margin-bottom: 15px;
+	color: var(--text-normal);
+}
+
+/*------------------- Statistics View Styling End ------------------- */
+
+/*------------------- Date Navigator Styling Begin ------------------- */
+
+.date-navigator {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+	margin: 15px 0;
+}
+
+.date-nav-button {
+	padding: 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background-color: var(--background-secondary);
+	color: var(--text-normal);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+}
+
+.date-nav-button:hover:not(:disabled) {
+	background-color: var(--background-modifier-hover);
+}
+
+.date-nav-button:disabled {
+	opacity: 0.3;
+	cursor: not-allowed;
+}
+
+.date-nav-button svg {
+	width: 16px;
+	height: 16px;
+}
+
+.date-display {
+	min-width: 150px;
+	text-align: center;
+	padding: 8px 16px;
+	border-radius: 6px;
+	background-color: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+}
+
+.date-text {
+	font-size: 16px;
+	font-weight: 500;
+	color: var(--text-normal);
+}
+
+.date-today-button {
+	padding: 8px 16px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background-color: var(--interactive-accent);
+	color: white;
+	cursor: pointer;
+	font-size: 14px;
+	transition: all 0.2s ease;
+}
+
+.date-today-button:hover {
+	opacity: 0.9;
+}
+
+/*------------------- Date Navigator Styling End ------------------- */
+
+/*------------------- Bar Chart Styling Begin ------------------- */
+
+.bar-chart-container {
+	position: relative;
+	width: 100%;
+	padding: 20px;
+	background-color: var(--background-secondary);
+	border-radius: 10px;
+}
+
+.bar-chart {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	margin-left: 20px;
+	gap: 2px;
+	padding: 10px 30px 10px 10px;
+	position: relative;
+	width: 100%;
+}
+
+.bar-wrapper {
+	flex: 1 1 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	position: relative;
+	min-width: 0;
+	max-width: 40px;
+	height: 100%;
+}
+
+.bar-container {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.bar {
+	width: 100%;
+	background: linear-gradient(to top, var(--interactive-accent), var(--interactive-accent-hover));
+	border-radius: 4px 4px 0 0;
+	transition: all 0.3s ease;
+	cursor: pointer;
+	position: relative;
+	min-height: 2px;
+}
+
+.bar:hover {
+	opacity: 0.8;
+}
+
+.bar-clickable {
+	cursor: pointer;
+}
+
+.bar-clickable:hover {
+	opacity: 0.9;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.bar-empty {
+	background: var(--background-modifier-border) !important;
+	opacity: 0.3;
+	cursor: default !important;
+}
+
+.bar-value-tooltip {
+	position: absolute;
+	bottom: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	font-size: 11px;
+	color: var(--text-muted);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	pointer-events: none;
+	white-space: nowrap;
+}
+
+.bar-wrapper:hover .bar-value-tooltip {
+	opacity: 1;
+}
+
+.bar-label {
+	margin-top: 8px;
+	font-size: 12px;
+	color: var(--text-muted);
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+}
+
+.bar-chart-y-axis {
+	position: absolute;
+	left: 0;
+	top: 20px;
+	bottom: 40px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding-right: 5px;
+}
+
+.y-axis-label {
+	font-size: 11px;
+	margin-left: 8px;
+	color: var(--text-muted);
+}
+
+.bar-chart-empty {
+	text-align: center;
+	padding: 40px;
+	color: var(--text-muted);
+	font-size: 14px;
+}
+
+/*------------------- Bar Chart Styling End ------------------- */
+
+/*------------------- Theme Specific Overrides Begin ------------------- */
+
+.theme-light .stat-card {
+	background-color: #f9f9f9;
+}
+
+.theme-light .stat-value {
+	color: #333;
+}
+
+.theme-light .stats-note-item {
+	background-color: #f9f9f9;
+}
+
+.theme-light .stats-note-clickable:hover {
+	background-color: #e8f5e9;
+}
+
+.theme-dark .stat-card {
+	background-color: #2a2a2a;
+}
+
+.theme-dark .stat-value {
+	color: #e0e0e0;
+}
+
+.theme-dark .stats-note-item {
+	background-color: #2a2a2a;
+}
+
+.theme-dark .stats-note-clickable:hover {
+	background-color: #363636;
+}
+
+/*------------------- Theme Specific Overrides End ------------------- */
+
+/*------------------- Responsive & Mobile Styles Begin ------------------- */
+
+@media (max-width: 768px) {
+	.focus-time-modal-container {
+		position: relative;
+	}
+
+	.focus-time-sidebar {
+		position: fixed;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		z-index: 1000;
+		transform: translateX(-100%);
+		transition: transform 0.3s ease;
+		box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+		background-color: var(--background-primary);
+	}
+
+	.focus-time-sidebar.open {
+		transform: translateX(0);
+	}
+
+	.sidebar-overlay {
+		display: none;
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		background-color: rgba(0, 0, 0, 0.5);
+		z-index: 999;
+	}
+
+	.sidebar-overlay.open {
+		display: block;
+	}
+
+	.sidebar-toggle {
+		position: absolute;
+		left: 10px;
+		top: 10px;
+		z-index: 10;
+		padding: 8px 12px;
+		border: 1px solid var(--background-modifier-border);
+		border-radius: 6px;
+		background-color: var(--background-primary);
+		color: var(--text-normal);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 14px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.sidebar-toggle:hover {
+		background-color: var(--background-modifier-hover);
+	}
+
+	.sidebar-toggle-icon {
+		width: 18px;
+		height: 18px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.sidebar-toggle-icon svg {
+		width: 18px;
+		height: 18px;
+	}
+
+	.focus-time-content {
+		padding-top: 60px;
+	}
+
+	.bar-chart-container {
+		overflow-x: auto;
+		scrollbar-width: thin;
+	}
+
+	.bar-chart {
+		justify-content: flex-start;
+		width: max-content;
+		min-width: 100%;
+	}
+
+	.bar-wrapper {
+		flex: 0 0 auto;
+		min-width: 25px;
+		width: 25px;
+		max-width: 25px;
+	}
+}
+
+/* Desktop: Hide toggle button */
+@media (min-width: 769px) {
+	.sidebar-toggle {
+		display: none;
+	}
+
+	.sidebar-overlay {
+		display: none !important;
+	}
+}
+
+/*------------------- Responsive & Mobile Styles End ------------------- */
