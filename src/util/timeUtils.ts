@@ -12,6 +12,9 @@ export class TimeUtils {
 		const minutes = Math.floor(readMinutes % 60);
 
 		if (hours === 0) {
+			if (minutes === 0) {
+				return I18n.t("lessThanOneMinute");
+			}
 			return I18n.t("minutes", {minute: minutes.toFixed(0)});
 		}
 

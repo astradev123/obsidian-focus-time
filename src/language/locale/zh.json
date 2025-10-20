@@ -1,6 +1,7 @@
 {
 	"minutes": "{minute}分钟",
 	"hours_minutes": "{hour}小时 {minute}分钟",
+	"lessThanOneMinute": "< 1分钟",
 	"language": "语言",
 	"strictMode": "严格模式",
 	"strictModeDesc": "开启严格模式后，当窗口失去焦点时，计时将会暂停。",

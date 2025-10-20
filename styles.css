@@ -331,12 +331,26 @@
 	margin-top: 25px;
 	max-height: 300px;
 	overflow-y: auto;
-	scrollbar-width: none;
-	-ms-overflow-style: none;
+	scrollbar-width: thin;
+	-ms-overflow-style: auto;
 }
 
 .stats-note-list::-webkit-scrollbar {
-	display: none;
+	width: 6px;
+}
+
+.stats-note-list::-webkit-scrollbar-track {
+	background: var(--background-secondary);
+	border-radius: 3px;
+}
+
+.stats-note-list::-webkit-scrollbar-thumb {
+	background: var(--text-muted);
+	border-radius: 3px;
+}
+
+.stats-note-list::-webkit-scrollbar-thumb:hover {
+	background: var(--text-normal);
 }
 
 .stats-note-list h3 {
@@ -362,7 +376,6 @@
 }
 
 .stats-note-clickable:hover {
-	transform: translateX(4px);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 

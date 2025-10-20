@@ -57,8 +57,13 @@ export class DailyReadDataManager {
 	public async loadDailyData(date: string): Promise<Record<string, any>> {
 		const filePath = this.getFilePath(date);
 		if (await this.app.vault.adapter.exists(filePath)) {
-			const fileContent = await this.app.vault.adapter.read(filePath);
-			return JSON.parse(fileContent);
+			try {
+				const fileContent = await this.app.vault.adapter.read(filePath);
+				return JSON.parse(fileContent);
+			} catch (error) {
+				console.error(`Failed to parse JSON file ${filePath}:`, error);
+				return {};
+			}
 		}
 		return {};
 	}

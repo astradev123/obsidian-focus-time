@@ -171,13 +171,23 @@ export class FocusDataAggregator {
 		const yearlyData: Array<{year: number; totalDuration: number; focusDays: number; noteCount: number}> = [];
 
 		for (let year = startYear; year <= currentYear; year++) {
-			const stats = await this.getYearlyStats(year);
-			if (stats.totalDuration > 0 || year === currentYear) {
+			try {
+				const stats = await this.getYearlyStats(year);
+				if (stats.totalDuration > 0 || year === currentYear) {
+					yearlyData.push({
+						year,
+						totalDuration: stats.totalDuration,
+						focusDays: stats.focusDays,
+						noteCount: stats.noteCount
+					});
+				}
+			} catch (error) {
+				console.error(`Failed to get yearly stats for ${year}:`, error);
 				yearlyData.push({
 					year,
-					totalDuration: stats.totalDuration,
-					focusDays: stats.focusDays,
-					noteCount: stats.noteCount
+					totalDuration: 0,
+					focusDays: 0,
+					noteCount: 0
 				});
 			}
 		}
@@ -212,12 +222,17 @@ export class FocusDataAggregator {
 			const fileName = file.split('/').pop()?.replace('.json', '');
 			if (!fileName) continue;
 
-			const dayStats = await this.getDailyStats(fileName);
-			if (dayStats && dayStats.totalDuration > 0) {
-				totalDuration += dayStats.totalDuration;
-				focusDays++;
-				// Only add notes that still exist (getDailyStats already filters deleted files)
-				dayStats.notes.forEach(note => noteSet.add(note.fileId));
+			try {
+				const dayStats = await this.getDailyStats(fileName);
+				if (dayStats && dayStats.totalDuration > 0) {
+					totalDuration += dayStats.totalDuration;
+					focusDays++;
+					// Only add notes that still exist (getDailyStats already filters deleted files)
+					dayStats.notes.forEach(note => noteSet.add(note.fileId));
+				}
+			} catch (error) {
+				console.error(`Failed to process daily stats for ${fileName}:`, error);
+				continue;
 			}
 		}
 

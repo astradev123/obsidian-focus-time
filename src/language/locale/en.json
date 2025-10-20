@@ -1,6 +1,7 @@
 {
 	"minutes": "{minute}m",
 	"hours_minutes": "{hour}h {minute}m",
+	"lessThanOneMinute": "< 1m",
 	"language": "Language",
 	"strictMode": "Strict mode",
 	"strictModeDesc": "Timer will be suspend if the window lost focus while the strict mode activated.",
