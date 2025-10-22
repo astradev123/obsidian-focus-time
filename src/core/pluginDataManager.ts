@@ -10,7 +10,6 @@ export class PluginDataManager {
 
 	/**
 	 * Load all data.
-	 * @private
 	 */
 	public async loadData() {
 		const loadedData = await this.plugin.loadData();
@@ -32,6 +31,8 @@ export class PluginDataManager {
 	 * @param value
 	 */
 	public async put(category: string, key: string, value: any) {
+		await this.loadData();
+		
 		if (!this.data[category]) {
 			this.data[category] = {};
 		}
@@ -63,6 +64,8 @@ export class PluginDataManager {
 	 * @param key
 	 */
 	public async delete(category: string, key: string) {
+		await this.loadData();
+		
 		if (this.data[category]) {
 			delete this.data[category][key];
 			await this.saveData();
@@ -74,6 +77,8 @@ export class PluginDataManager {
 	 * @param category
 	 */
 	public async deleteCategory(category: string) {
+		await this.loadData();
+		
 		if (this.data[category]) {
 			delete this.data[category];
 			await this.saveData();

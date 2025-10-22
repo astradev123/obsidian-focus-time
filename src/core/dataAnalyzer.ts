@@ -53,15 +53,16 @@ export class DataAnalyzer {
 		return filteredLeaderboard;
 	}
 
-	private onFileRename(file: TFile, oldPath: string) {
+	private async onFileRename(file: TFile, oldPath: string) {
 		const readData = this.dataManager.get('readData', oldPath);
 		if (!readData) {
 			return;
 		}
 
 		readData.filePath = file.path;
-		this.dataManager.delete('readData', oldPath).finally();
-		this.dataManager.put('readData', file.path, readData).finally();
+		// Must await to avoid race condition between delete and put
+		await this.dataManager.delete('readData', oldPath);
+		await this.dataManager.put('readData', file.path, readData);
 	}
 
 }
