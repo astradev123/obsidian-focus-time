@@ -10,10 +10,10 @@ export class FocusTimeSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-	display(): void {
+	async display(): Promise<void> {
 		const {containerEl} = this;
 		containerEl.empty();
-
+		await this.plugin.dataManager.loadData();
 		this.addStrictModeSetting(containerEl);
 
 	}

@@ -27,6 +27,8 @@ export default class FocusTimePlugin extends Plugin {
 	private dailyReadDataManager: DailyReadDataManager;
 	private _dataAnalyzer: DataAnalyzer;
 	private _focusDataAggregator: FocusDataAggregator;
+	private dataFileWatchInterval: number | null = null;
+	private lastPluginDataCheck = 0;
 
 	async onload() {
 
@@ -35,12 +37,16 @@ export default class FocusTimePlugin extends Plugin {
 
 		this.dataManager.loadData().then(() => {
 			this.init();
+			this.setupFileWatcher();
 		});
 
 	}
 
 	onunload() {
 		this.timeTracker.unload();
+		if (this.dataFileWatchInterval !== null) {
+			window.clearInterval(this.dataFileWatchInterval);
+		}
 	}
 
 	/**
@@ -67,6 +73,35 @@ export default class FocusTimePlugin extends Plugin {
 	 */
 	private setLanguage() {
 		I18n.getInstance().setLanguage(I18n.autoDetectLanguage());
+	}
+
+	/**
+	 * Setup file watcher to detect external changes to data files
+	 * @private
+	 */
+	private setupFileWatcher() {
+		this.dataFileWatchInterval = window.setInterval(async () => {
+			await this.checkDataFileChanges();
+		}, 3000);
+	}
+
+	/**
+	 * Check if data files have been modified externally
+	 * Reload data to keep memory in sync with disk
+	 * @private
+	 */
+	private async checkDataFileChanges() {
+		try {
+			const pluginDataPath = `${this.app.vault.configDir}/plugins/focus-time/data.json`;
+			const pluginDataStat = await this.app.vault.adapter.stat(pluginDataPath);
+			
+			if (pluginDataStat && pluginDataStat.mtime > this.lastPluginDataCheck) {
+				if (this.lastPluginDataCheck > 0) {
+					await this._dataManager.loadData();
+				}
+				this.lastPluginDataCheck = pluginDataStat.mtime;
+			}
+		} catch (error) { /* empty */ }
 	}
 
 }

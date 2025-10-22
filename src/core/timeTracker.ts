@@ -55,13 +55,13 @@ export class TimeTracker {
 	/**
 	 * Handles file change event
 	 */
-	public handleFileChange() {
+	public async handleFileChange() {
 		const activeFile = this.app.workspace.getActiveFile();
 
 		const currentFile = Context.getCurrentFile();
 
 		if (currentFile && currentFile !== activeFile) {
-			this.incTotalReadCount(currentFile);
+			await this.incTotalReadCount(currentFile);
 		}
 
 		Context.setCurrentFile(activeFile);
@@ -88,20 +88,20 @@ export class TimeTracker {
 	/**
 	 * Refreshes the read time and saves it
 	 */
-	private refreshAndSave(refreshTime: number) {
+	private async refreshAndSave(refreshTime: number) {
 		const currentFile = Context.getCurrentFile();
 
 		if (!currentFile || this.needSuspendTimer()) {
 			return;
 		}
 
-		this.dailyReadDataManager.loadTodayData().then(data => {
-			const todayReadData = data["dailyReadData"]? data["dailyReadData"][this.getFileId(currentFile.path)] : undefined;
-			this.saveDailyReadData(currentFile, todayReadData ? todayReadData.duration + refreshTime : refreshTime);
-		});
-
+		const dailyData = await this.dailyReadDataManager.loadTodayData();
+		const todayReadData = dailyData["dailyReadData"]? dailyData["dailyReadData"][this.getFileId(currentFile.path)] : undefined;
+		await this.saveDailyReadData(currentFile, todayReadData ? todayReadData.duration + refreshTime : refreshTime);
+		await this.dataManager.loadData();
+	
 		const totalReadData = this.getTotalReadData(currentFile);
-		this.saveTotalReadData(
+		await this.saveTotalReadData(
 			currentFile,
 			totalReadData ? totalReadData.duration + refreshTime : refreshTime,
 			totalReadData ? totalReadData.openCount : 1
@@ -119,13 +119,13 @@ export class TimeTracker {
 	/**
 	 * Saves the read data
 	 */
-	public saveTotalReadData(
+	public async saveTotalReadData(
 		file: TFile,
 		duration: number,
 		openCount: number
 	) {
 		const readRecord: ReadRecord = this.buildReadData(file, duration, openCount, false);
-		this.dataManager.put("readData", readRecord.filePath, readRecord).finally();
+		await this.dataManager.put("readData", readRecord.filePath, readRecord);
 	}
 
 	/**
@@ -173,7 +173,9 @@ export class TimeTracker {
 	}
 
 
-	private incTotalReadCount(file: TFile) {
+	private async incTotalReadCount(file: TFile) {
+		await this.dataManager.loadData();
+		
 		const totalReadData = this.getTotalReadData(file);
 		const totalRecord = this.buildReadData(
 			file,
@@ -181,8 +183,9 @@ export class TimeTracker {
 			totalReadData ? totalReadData.openCount + 1 : 1,
 			false
 		);
-		this.saveTotalReadData(file, totalRecord.duration, totalRecord.openCount);
+		await this.saveTotalReadData(file, totalRecord.duration, totalRecord.openCount);
 	}
+	
 	/**
 	 * Gets the read data
 	 */

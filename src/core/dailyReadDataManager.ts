@@ -23,13 +23,13 @@ export class DailyReadDataManager {
 	/**
 	 * Save the daily reading data
 	 * @param category Category
-	 * @param date Date(Format：YYYY-MM-DD)
 	 * @param data Daily reading data
 	 */
 	public async saveTodayData(category: string, data: ReadRecord) {
 		const dateToday = TimeUtils.getDateToday();
 		const filePath = this.getFilePath(dateToday);
-		const existingData = await this.loadTodayData();
+		
+		const existingData = await this.loadDailyData(dateToday);
 
 		if (!existingData[category]) {
 			existingData[category] = {};
@@ -38,15 +38,16 @@ export class DailyReadDataManager {
 		existingData[category][`${data.fileId}`] = data;
 
 		const jsonContent = JSON.stringify(existingData, null, 2);
-		await this.saveFile(filePath, jsonContent);
+		await this.app.vault.adapter.write(filePath, jsonContent);
 	}
 
 	/**
 	 * Load today's reading data
-	 * @private
+	 * Always loads from disk to ensure data freshness
 	 */
 	public async loadTodayData(): Promise<Record<string, any>> {
-		return this.loadDailyData(TimeUtils.getDateToday());
+		const dateToday = TimeUtils.getDateToday();
+		return await this.loadDailyData(dateToday);
 	}
 
 	/**
@@ -75,14 +76,5 @@ export class DailyReadDataManager {
 	 */
 	private getFilePath(date: string): string {
 		return `${this.dataDir}/${date}.json`;
-	}
-
-	/**
-	 * Save file content
-	 * @param filePath
-	 * @param content
-	 */
-	private async saveFile(filePath: string, content: string) {
-		await this.app.vault.adapter.write(filePath, content);
 	}
 }
