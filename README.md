@@ -4,7 +4,7 @@ English | [简体中文](README_zh.md)
 
 The Focus Time Plugin automatically tracks the time you spend focused on your notes and provides comprehensive data analytics. With this tool, you can better review your focus journey, uncover "hidden gem notes" marked by time, and make your Obsidian note-taking more planned and rewarding!
 
-If you find this plugin useful, you can support me on [Afdian](https://afdian.com/a/astradev). Your encouragement is the driving force behind my continued development.
+If you find this plugin useful, you can support me on [Buy Me a Coffee](https://buymeacoffee.com/astradev123). Your encouragement is the driving force behind my continued development.
 
 ## Features Overview
 
