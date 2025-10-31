@@ -29,18 +29,18 @@ export function StatisticsView(props: StatisticsViewProps) {
 	const [viewMode, setViewMode] = React.useState<ViewMode>('day');
 	const [currentDate, setCurrentDate] = React.useState(new Date());
 	const [isInitialLoad, setIsInitialLoad] = React.useState(true);
+	const [isLoading, setIsLoading] = React.useState(false);
 	const [dailyStats, setDailyStats] = React.useState<DailyStats | null>(null);
 	const [monthlyStats, setMonthlyStats] = React.useState<MonthlyStats | null>(null);
 	const [yearlyStats, setYearlyStats] = React.useState<YearlyStats | null>(null);
 	const [totalStats, setTotalStats] = React.useState<TotalStats | null>(null);
 	const [recentYearsData, setRecentYearsData] = React.useState<Array<{year: number; totalDuration: number; focusDays: number; noteCount: number}>>([]);
-
-	// Load data when view mode or date changes
 	React.useEffect(() => {
 		loadData();
 	}, [viewMode, currentDate]);
 
 	const loadData = async () => {
+		setIsLoading(true);
 		try {
 			if (viewMode === 'day') {
 				const date = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
@@ -64,16 +64,33 @@ export function StatisticsView(props: StatisticsViewProps) {
 		} catch (error) {
 			console.error('Failed to load statistics:', error);
 		} finally {
+			setIsLoading(false);
 			if (isInitialLoad) {
 				setIsInitialLoad(false);
 			}
 		}
 	};
 
-	const renderDayView = () => {
-		if (!dailyStats || dailyStats.totalDuration === 0) {
-			return <div className="stats-no-data">{I18n.t('noDataForDate')}</div>;
+	// Helper function to render loading/empty states
+	const renderLoadingOrEmpty = <T extends { totalDuration: number }>(
+		stats: T | null,
+		emptyMessage: string
+	): { shouldReturn: boolean; element?: React.ReactElement } => {
+		if (isLoading && !stats) {
+			return { shouldReturn: true, element: <div className="stats-loading">{I18n.t('loading')}</div> };
 		}
+		if (!isLoading && (!stats || stats.totalDuration === 0)) {
+			return { shouldReturn: true, element: <div className="stats-no-data">{emptyMessage}</div> };
+		}
+		return { shouldReturn: false };
+	};
+
+	const renderDayView = () => {
+		const { shouldReturn, element } = renderLoadingOrEmpty(dailyStats, I18n.t('noDataForDate'));
+		if (shouldReturn) {
+			return element || null;
+		}
+		if (!dailyStats) return null;
 
 		return (
 			<div className="stats-content">
@@ -93,8 +110,13 @@ export function StatisticsView(props: StatisticsViewProps) {
 								onClick={() => handleNoteClick(note.filePath)}
 								title={note.filePath}
 							>
-								<div className="stats-note-name">
-									{index + 1}. {note.filePath.split('/').pop() || 'Unknown'}
+								<div className="stats-note-left">
+									<div className="stats-note-name">
+										{index + 1}. {note.filePath.split('/').pop() || 'Unknown'}
+									</div>
+									<div className="stats-note-path">
+										{note.filePath}
+									</div>
 								</div>
 								<div className="stats-note-time">
 									{TimeUtils.getFormattedReadingTime(note.duration)}
@@ -107,9 +129,12 @@ export function StatisticsView(props: StatisticsViewProps) {
 	};
 
 	const renderMonthView = () => {
-		if (!monthlyStats || monthlyStats.totalDuration === 0) {
-			return <div className="stats-no-data">{I18n.t('noDataForMonth')}</div>;
+		const { shouldReturn, element } = renderLoadingOrEmpty(monthlyStats, I18n.t('noDataForMonth'));
+		if (shouldReturn) {
+			return element || null;
 		}
+		
+		if (!monthlyStats) return null;
 
 		const daysInMonth = new Date(monthlyStats.year, monthlyStats.month, 0).getDate();
 		const dailyDataMap: { [key: number]: number } = {};
@@ -159,9 +184,12 @@ export function StatisticsView(props: StatisticsViewProps) {
 	};
 
 	const renderYearView = () => {
-		if (!yearlyStats || yearlyStats.totalDuration === 0) {
-			return <div className="stats-no-data">{I18n.t('noDataForYear')}</div>;
+		const { shouldReturn, element } = renderLoadingOrEmpty(yearlyStats, I18n.t('noDataForYear'));
+		if (shouldReturn) {
+			return element || null;
 		}
+		
+		if (!yearlyStats) return null;
 
 		const monthlyData: { [key: number]: number } = {};
 		for (let i = 1; i <= 12; i++) {
@@ -204,9 +232,13 @@ export function StatisticsView(props: StatisticsViewProps) {
 	};
 
 	const renderTotalView = () => {
-		if (!totalStats || totalStats.totalDuration === 0) {
-			return <div className="stats-no-data">{I18n.t('noDataAvailable')}</div>;
+		const { shouldReturn, element } = renderLoadingOrEmpty(totalStats, I18n.t('noDataAvailable'));
+		if (shouldReturn) {
+			return element || null;
 		}
+		
+		if (!totalStats) return null;
+
 		const currentYear = new Date().getFullYear();
 		const startYear = currentYear - 9;
 		const yearDataMap: { [key: number]: number } = {};

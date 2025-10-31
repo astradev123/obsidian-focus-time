@@ -41,6 +41,7 @@
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 	font-size: 16px;
 	transition: background-color 0.2s ease;
+	cursor: pointer;
 }
 
 .leaderboard-left {
@@ -90,7 +91,7 @@
 }
 
 .theme-light .leaderboard-entry:hover {
-	background-color: #e1f7e1;
+	background-color: var(--background-modifier-hover);
 }
 
 .theme-light .leaderboard-file-name {
@@ -118,7 +119,7 @@
 
 
 .theme-dark .leaderboard-entry {
-	background-color: #424242;
+	background-color: #2a2a2a;
 	color: #f1f1f1;
 }
 
@@ -135,7 +136,7 @@
 }
 
 .theme-dark .leaderboard-entry:hover {
-	background-color: #616161;
+	background-color: #363636;
 }
 
 /*------------------- Night Mode Styling End ------------------- */
@@ -379,13 +380,30 @@
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+.stats-note-left {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+	flex: 1;
+}
+
 .stats-note-name {
 	font-size: 14px;
+	font-weight: bold;
 	color: var(--text-normal);
-	flex: 1;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.stats-note-path {
+	font-size: 12px;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	opacity: 0.9;
 }
 
 .stats-note-time {
@@ -394,6 +412,7 @@
 	color: var(--text-accent);
 	white-space: nowrap;
 	margin-left: 10px;
+	flex: 0 0 auto;
 }
 
 .stats-chart-section {
@@ -617,7 +636,7 @@
 }
 
 .theme-light .stats-note-clickable:hover {
-	background-color: #e8f5e9;
+	background-color: var(--background-modifier-hover);
 }
 
 .theme-dark .stat-card {
