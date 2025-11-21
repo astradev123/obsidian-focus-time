@@ -15,6 +15,7 @@
 	"statistics": "Statistics",
 	"statisticsTitle": "Focus Statistics",
 	"viewDay": "Day",
+	"viewWeek": "Week",
 	"viewMonth": "Month",
 	"viewYear": "Year",
 	"viewTotal": "Total",
@@ -25,6 +26,7 @@
 	"totalFocusTime": "Total Focus Time",
 	"totalFocusDays": "Total Focus Days",
 	"noDataForDate": "No data for this date",
+	"noDataForWeek": "No data for this week",
 	"noDataForMonth": "No data for this month",
 	"noDataForYear": "No data for this year",
 	"noDataAvailable": "No data available",
@@ -36,5 +38,12 @@
 	"dailyDistribution": "Daily Focus Time Distribution",
 	"monthlyDistribution": "Monthly Focus Time Distribution",
 	"yearlyDistribution": "Yearly Focus Time Distribution",
-	"menu": "Menu"
+	"menu": "Menu",
+	"sunday": "Sun",
+	"monday": "Mon",
+	"tuesday": "Tue",
+	"wednesday": "Wed",
+	"thursday": "Thu",
+	"friday": "Fri",
+	"saturday": "Sat"
 }

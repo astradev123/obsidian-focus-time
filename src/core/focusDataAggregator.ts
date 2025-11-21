@@ -1,12 +1,12 @@
-import {App} from "obsidian";
-import {PluginDataManager} from "./pluginDataManager";
-import {DailyReadDataManager} from "./dailyReadDataManager";
+import { App } from "obsidian";
+import { PluginDataManager } from "./pluginDataManager";
+import { DailyReadDataManager } from "./dailyReadDataManager";
 
 export interface DailyStats {
 	date: string;
 	noteCount: number;
 	totalDuration: number;
-	notes: Array<{filePath: string; fileId: string; duration: number}>;
+	notes: Array<{ filePath: string; fileId: string; duration: number }>;
 }
 
 export interface MonthlyStats {
@@ -24,6 +24,15 @@ export interface YearlyStats {
 	totalDuration: number;
 	focusDays: number;
 	monthlyStats: MonthlyStats[];
+}
+
+export interface WeeklyStats {
+	startDate: string;
+	endDate: string;
+	noteCount: number;
+	totalDuration: number;
+	focusDays: number;
+	dailyStats: DailyStats[];
 }
 
 export interface TotalStats {
@@ -48,20 +57,20 @@ export class FocusDataAggregator {
 	 */
 	async getDailyStats(date: string): Promise<DailyStats | null> {
 		const dailyData = await this.dailyReadDataManager.loadDailyData(date);
-		
+
 		if (!dailyData || !dailyData.dailyReadData) {
 			return null;
 		}
 
 		const readData = dailyData.dailyReadData;
-		const notes: Array<{filePath: string; fileId: string; duration: number}> = [];
+		const notes: Array<{ filePath: string; fileId: string; duration: number }> = [];
 		let totalDuration = 0;
 
 		const totalReadData = this.dataManager.getCategory("readData");
 
 		for (const fileId in readData) {
 			const record = readData[fileId];
-			
+
 			let filePath = "";
 			if (totalReadData) {
 				for (const path in totalReadData) {
@@ -71,17 +80,17 @@ export class FocusDataAggregator {
 					}
 				}
 			}
-			
+
 			// Skip deleted files
 			if (!filePath) {
 				continue;
 			}
-			
+
 			const file = this.app.vault.getFileByPath(filePath);
 			if (!file) {
 				continue; // File was deleted
 			}
-			
+
 			totalDuration += record.duration;
 			notes.push({
 				filePath: filePath,
@@ -111,7 +120,7 @@ export class FocusDataAggregator {
 		for (let day = 1; day <= daysInMonth; day++) {
 			const date = `${year}-${month}-${day}`;
 			const dayStats = await this.getDailyStats(date);
-			
+
 			if (dayStats && dayStats.totalDuration > 0) {
 				dailyStats.push(dayStats);
 				totalDuration += dayStats.totalDuration;
@@ -131,6 +140,48 @@ export class FocusDataAggregator {
 	}
 
 	/**
+	 * Get statistics for a specific week
+	 */
+	async getWeeklyStats(date: Date): Promise<WeeklyStats> {
+		const startOfWeek = new Date(date);
+		const day = startOfWeek.getDay(); // 0 is Sunday
+		const diff = startOfWeek.getDate() - day; // Adjust to Sunday
+		startOfWeek.setDate(diff);
+
+		const dailyStats: DailyStats[] = [];
+		let totalDuration = 0;
+		let focusDays = 0;
+		const noteSet = new Set<string>();
+
+		const currentDay = new Date(startOfWeek);
+		for (let i = 0; i < 7; i++) {
+			const dateStr = `${currentDay.getFullYear()}-${currentDay.getMonth() + 1}-${currentDay.getDate()}`;
+			const dayStats = await this.getDailyStats(dateStr);
+
+			if (dayStats && dayStats.totalDuration > 0) {
+				dailyStats.push(dayStats);
+				totalDuration += dayStats.totalDuration;
+				focusDays++;
+				dayStats.notes.forEach(note => noteSet.add(note.fileId));
+			}
+
+			currentDay.setDate(currentDay.getDate() + 1);
+		}
+
+		const endDate = new Date(startOfWeek);
+		endDate.setDate(endDate.getDate() + 6);
+
+		return {
+			startDate: `${startOfWeek.getFullYear()}-${startOfWeek.getMonth() + 1}-${startOfWeek.getDate()}`,
+			endDate: `${endDate.getFullYear()}-${endDate.getMonth() + 1}-${endDate.getDate()}`,
+			noteCount: noteSet.size,
+			totalDuration,
+			focusDays,
+			dailyStats
+		};
+	}
+
+	/**
 	 * Get statistics for a specific year
 	 */
 	async getYearlyStats(year: number): Promise<YearlyStats> {
@@ -141,7 +192,7 @@ export class FocusDataAggregator {
 
 		for (let month = 1; month <= 12; month++) {
 			const monthStats = await this.getMonthlyStats(year, month);
-			
+
 			if (monthStats.totalDuration > 0) {
 				monthlyStats.push(monthStats);
 				totalDuration += monthStats.totalDuration;
@@ -165,10 +216,10 @@ export class FocusDataAggregator {
 	/**
 	 * Get statistics for recent years (last 10 years)
 	 */
-	async getRecentYearsStats(): Promise<Array<{year: number; totalDuration: number; focusDays: number; noteCount: number}>> {
+	async getRecentYearsStats(): Promise<Array<{ year: number; totalDuration: number; focusDays: number; noteCount: number }>> {
 		const currentYear = new Date().getFullYear();
 		const startYear = currentYear - 9; // Last 10 years
-		const yearlyData: Array<{year: number; totalDuration: number; focusDays: number; noteCount: number}> = [];
+		const yearlyData: Array<{ year: number; totalDuration: number; focusDays: number; noteCount: number }> = [];
 
 		for (let year = startYear; year <= currentYear; year++) {
 			try {
@@ -201,7 +252,7 @@ export class FocusDataAggregator {
 	async getTotalStats(): Promise<TotalStats> {
 		const dataDir = `${this.app.vault.configDir}/plugins/focus-time/data`;
 		let files: string[] = [];
-		
+
 		try {
 			files = await this.app.vault.adapter.list(dataDir).then(result => result.files);
 		} catch (e) {
@@ -218,7 +269,7 @@ export class FocusDataAggregator {
 
 		for (const file of files) {
 			if (!file.endsWith('.json')) continue;
-			
+
 			const fileName = file.split('/').pop()?.replace('.json', '');
 			if (!fileName) continue;
 

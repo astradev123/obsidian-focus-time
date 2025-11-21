@@ -27,16 +27,16 @@ export function BarChart(props: BarChartProps) {
 	// Determine the best unit based on max value
 	const nonZeroValues = dataInMinutes.filter(item => item.value > 0).map(item => item.value);
 	const maxMinutes = nonZeroValues.length > 0 ? Math.max(...nonZeroValues) : 1;
-	
+
 	const useHours = maxMinutes > 60;
 	const unit: TimeUnit = useHours ? 'hours' : 'minutes';
-	
+
 	// Convert to appropriate unit
 	const displayData = dataInMinutes.map(item => ({
 		label: item.label,
 		value: useHours ? item.value / 60 : item.value
 	}));
-	
+
 	const maxValue = useHours ? maxMinutes / 60 : maxMinutes;
 	const maxDisplayValue = Math.ceil(maxValue);
 
@@ -48,7 +48,7 @@ export function BarChart(props: BarChartProps) {
 					const displayValue = item.value < 0.1 ? item.value.toFixed(2) : item.value.toFixed(1);
 					const hasData = item.value > 0;
 					const unitLabel = unit === 'hours' ? 'h' : 'min';
-					
+
 					const handleClick = () => {
 						if (hasData && onBarClick) {
 							onBarClick(item.label);
@@ -64,13 +64,13 @@ export function BarChart(props: BarChartProps) {
 									</div>
 								)}
 								{hasData ? (
-									<div 
+									<div
 										className={`bar ${onBarClick ? 'bar-clickable' : ''}`}
 										style={{ height: `${barHeight}%` }}
 										title={`${item.label}: ${displayValue} ${unitLabel}`}
 									></div>
 								) : (
-									<div 
+									<div
 										className="bar bar-empty"
 										style={{ height: '2px' }}
 										title={`${item.label}: No data`}
