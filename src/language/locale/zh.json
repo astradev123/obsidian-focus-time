@@ -5,7 +5,8 @@
 	},
 	"command": {
 		"openDashboard": "打开专注时间仪表盘",
-		"toggleTracking": "暂停或继续专注计时"
+		"toggleTracking": "暂停或继续专注计时",
+		"rescanLegacy": "重新扫描旧版专注数据"
 	},
 	"common": {
 		"loading": "加载中…",
@@ -49,7 +50,25 @@
 			"fixed": "5 分钟",
 			"custom": "自定义",
 			"minutes": "空闲阈值（分钟）"
+		},
+		"data": {
+			"heading": "数据",
+			"folder": "数据目录",
+			"schema": "存储版本",
+			"events": "事件数",
+			"notes": "笔记数",
+			"legacyDays": "旧版天数",
+			"unmapped": "未映射时长",
+			"migrated": "迁移时间",
+			"rescan": "重新扫描旧数据",
+			"rescanDesc": "导入旧版本写入的日文件。"
 		}
+	},
+	"notice": {
+		"migrating": "正在迁移专注数据…",
+		"migrated": "专注数据迁移完成。",
+		"migrationFailed": "迁移失败。原始数据未被修改，请查看迁移报告。",
+		"rescan": "已导入 {count} 条旧版记录。"
 	},
 	"dashboard": {
 		"tabs": {

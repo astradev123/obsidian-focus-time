@@ -10,6 +10,7 @@ type ActivityCallback = () => void;
  */
 export class ActivityMonitor {
 	private lastInputAt = Date.now();
+	private lastEditAt = 0;
 	private lastNotifiedAt = 0;
 
 	constructor(
@@ -23,11 +24,18 @@ export class ActivityMonitor {
 		plugin.registerDomEvent(window, "wheel", handler, { capture: true, passive: true });
 		plugin.registerDomEvent(window, "touchstart", handler, { capture: true, passive: true });
 		plugin.registerDomEvent(document, "selectionchange", this.throttle(handler, 1000), { capture: true, passive: true });
-		plugin.registerEvent(plugin.app.workspace.on("editor-change", handler));
+		plugin.registerEvent(plugin.app.workspace.on("editor-change", () => {
+			this.lastEditAt = Date.now();
+			handler();
+		}));
 	}
 
 	public getLastInputAt(): number {
 		return this.lastInputAt;
+	}
+
+	public getLastEditAt(): number {
+		return this.lastEditAt;
 	}
 
 	public getMsSinceLastInput(now: number = Date.now()): number {

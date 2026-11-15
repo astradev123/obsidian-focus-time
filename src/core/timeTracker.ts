@@ -1,13 +1,12 @@
 import { App, Plugin, TFile } from "obsidian";
-import { ReadRecord } from "../interface/readRecord";
-import { PluginDataManager } from "./pluginDataManager";
-import { DailyReadDataManager } from "./dailyReadDataManager";
 import { SettingsStore } from "./settings";
 import { ActivityMonitor } from "./tracking/activityMonitor";
 import { computeAccrual, MAX_TICK_MULTIPLIER, splitAcrossMidnight } from "./tracking/trackingMath";
 import { PauseReason } from "./tracking/types";
 import { StatusBarManager } from "../view/display/statusBar/statusBarManager";
 import { StatusBarFactory } from "../view/display/statusBar/statusBarFactory";
+import { StorageService } from "./storage/storageService";
+import { newEventId } from "./storage/eventStore";
 
 export type { PauseReason };
 
@@ -15,6 +14,7 @@ type FlushReason = "timer" | "switch" | "idle" | "blur" | "manual" | "unload" | 
 
 const TICK_MS = 5000;
 const FLUSH_MS = 30_000;
+const PUBLISH_MS = 5 * 60 * 1000;
 const MAX_DELTA_MS = TICK_MS * MAX_TICK_MULTIPLIER;
 
 interface PendingBucket {
@@ -22,21 +22,20 @@ interface PendingBucket {
 	filePath: string;
 	date: string;
 	ms: number;
+	start: number;
+	end: number;
+	ses: string;
 }
 
 /**
- * Focus session engine (v0 storage).
+ * Focus session engine.
  *
- * Key differences from the old implementation:
- * - counts real elapsed time instead of adding a fixed 6 seconds per tick;
- * - stops at `last input + idle threshold`, not when idle is noticed;
- * - settles exactly when switching notes, and splits at local midnight;
- * - batches writes instead of rewriting `data.json` every 6 seconds.
+ * Counts real elapsed time, stops at `last input + idle threshold`, splits at
+ * midnight, and writes one session segment per flush to the event log.
  */
 export class TimeTracker {
 	private readonly app: App;
-	private readonly dataManager: PluginDataManager;
-	private readonly dailyManager: DailyReadDataManager;
+	private readonly storage: StorageService;
 	private readonly settings: SettingsStore;
 	private readonly statusBarManager: StatusBarManager;
 	private readonly activity: ActivityMonitor;
@@ -48,17 +47,16 @@ export class TimeTracker {
 	private manualPaused = false;
 	private windowFocused = true;
 	private documentVisible = true;
+	private sessionId = newEventId("ses");
 
 	constructor(
 		plugin: Plugin,
 		app: App,
-		dataManager: PluginDataManager,
-		dailyManager: DailyReadDataManager,
+		storage: StorageService,
 		settings: SettingsStore
 	) {
 		this.app = app;
-		this.dataManager = dataManager;
-		this.dailyManager = dailyManager;
+		this.storage = storage;
 		this.settings = settings;
 		this.statusBarManager = new StatusBarManager(plugin);
 		this.activity = new ActivityMonitor(plugin, () => this.onActivity());
@@ -68,6 +66,10 @@ export class TimeTracker {
 		this.currentFile = this.app.workspace.getActiveFile();
 		this.accruedUntil = Date.now();
 
+		if (this.currentFile) {
+			void this.storage.ensureNote(this.currentFile.path);
+		}
+
 		plugin.registerEvent(this.app.workspace.on("file-open", () => {
 			void this.handleFileChange();
 		}));
@@ -75,14 +77,14 @@ export class TimeTracker {
 		plugin.registerInterval(window.setInterval(() => {
 			void this.flush("timer");
 		}, FLUSH_MS));
+		plugin.registerInterval(window.setInterval(() => {
+			void this.storage.flush();
+		}, PUBLISH_MS));
 		plugin.registerDomEvent(window, "blur", () => this.onBlur());
 		plugin.registerDomEvent(window, "focus", () => this.onFocus());
 		plugin.registerDomEvent(document, "visibilitychange", () => this.onVisibilityChange());
 	}
 
-	/**
-	 * One tick: accrue elapsed time up to the idle cutoff, then reconcile state.
-	 */
 	private tick(): void {
 		const now = Date.now();
 
@@ -111,9 +113,6 @@ export class TimeTracker {
 		this.updateStatusBar();
 	}
 
-	/**
-	 * Accrue time from `accruedUntil` to `now`, respecting the idle cutoff.
-	 */
 	private settle(now: number): void {
 		if (!this.canTrack()) {
 			this.accruedUntil = now;
@@ -143,9 +142,6 @@ export class TimeTracker {
 		}
 	}
 
-	/**
-	 * Add a time range to the pending bucket, splitting at local midnight.
-	 */
 	private addPending(from: number, to: number): void {
 		const file = this.currentFile;
 		if (!file) {
@@ -162,17 +158,17 @@ export class TimeTracker {
 					file,
 					filePath: file.path,
 					date: segment.date,
-					ms: 0
+					ms: 0,
+					start: segment.from,
+					end: segment.to,
+					ses: this.sessionId
 				};
 			}
 			this.pending.ms += segment.ms;
+			this.pending.end = segment.to;
 		}
 	}
 
-	/**
-	 * Persist the pending bucket. The bucket is detached synchronously so a
-	 * concurrent tick cannot mutate it while the async write is in flight.
-	 */
 	private async flush(reason: FlushReason): Promise<void> {
 		const pending = this.pending;
 		this.pending = null;
@@ -181,9 +177,17 @@ export class TimeTracker {
 		}
 
 		try {
-			const noteId = await this.dataManager.ensureNote(pending.filePath);
-			await this.dailyManager.addDuration(pending.date, noteId, pending.ms);
-			await this.dataManager.addDuration(pending.filePath, noteId, pending.ms);
+			const noteId = await this.storage.ensureNote(pending.filePath);
+			await this.storage.recordSession({
+				ses: pending.ses,
+				note: noteId,
+				path: pending.filePath,
+				start: pending.start,
+				end: pending.end,
+				ms: pending.ms,
+				kind: this.activity.getLastEditAt() >= pending.start ? "edit" : "read",
+				idle: this.settings.getIdleMs() > 0 ? "guard" : "off"
+			});
 		} catch (error) {
 			console.error(`[focus-time] Failed to flush focus data (${reason})`, error);
 		}
@@ -200,9 +204,9 @@ export class TimeTracker {
 		this.accruedUntil = now;
 
 		if (active) {
-			await this.dataManager.ensureNote(active.path);
+			await this.storage.ensureNote(active.path);
 			if (!previous || previous.path !== active.path) {
-				await this.dataManager.incrementOpenCount(active.path);
+				this.sessionId = newEventId("ses");
 			}
 		}
 
@@ -218,6 +222,7 @@ export class TimeTracker {
 	private onActivity(): void {
 		if (this.pauseReason === "idle" && !this.manualPaused) {
 			this.pauseReason = null;
+			this.sessionId = newEventId("ses");
 			this.accruedUntil = Date.now();
 			this.updateStatusBar();
 		}
@@ -239,6 +244,7 @@ export class TimeTracker {
 		this.windowFocused = true;
 		if (this.pauseReason === "blur" && !this.manualPaused) {
 			this.pauseReason = null;
+			this.sessionId = newEventId("ses");
 		}
 		this.accruedUntil = Date.now();
 		this.updateStatusBar();
@@ -260,6 +266,7 @@ export class TimeTracker {
 			this.documentVisible = true;
 			if (!this.manualPaused) {
 				this.pauseReason = this.canTrack() ? null : "blur";
+				this.sessionId = newEventId("ses");
 			}
 			this.accruedUntil = now;
 		}
@@ -287,6 +294,7 @@ export class TimeTracker {
 		if (this.manualPaused) {
 			this.manualPaused = false;
 			this.pauseReason = this.canTrack() ? null : "blur";
+			this.sessionId = newEventId("ses");
 			this.accruedUntil = Date.now();
 		} else {
 			const now = Date.now();
@@ -299,8 +307,8 @@ export class TimeTracker {
 		this.updateStatusBar();
 	}
 
-	public getTotalReadData(file: TFile): ReadRecord | undefined {
-		return this.dataManager.get("readData", file.path) as ReadRecord | undefined;
+	public getTotalForCurrentFile(file: TFile): number {
+		return this.storage.getTotalForPath(file.path);
 	}
 
 	private updateStatusBar(): void {
@@ -310,8 +318,7 @@ export class TimeTracker {
 			return;
 		}
 
-		const record = this.getTotalReadData(file);
-		let total = record ? Number(record.duration) || 0 : 0;
+		let total = this.storage.getTotalForPath(file.path);
 		if (this.pending && this.pending.filePath === file.path) {
 			total += this.pending.ms;
 		}
@@ -328,6 +335,6 @@ export class TimeTracker {
 		this.settle(Date.now());
 		void this.flush("unload");
 		this.statusBarManager.remove();
-		void this.dataManager.flush();
+		void this.storage.flush();
 	}
 }

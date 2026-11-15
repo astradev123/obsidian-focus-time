@@ -1,115 +1,53 @@
 import { App, Plugin, TFile, TFolder } from "obsidian";
-import { PluginDataManager } from "./pluginDataManager";
-import { DailyReadDataManager } from "./dailyReadDataManager";
-import { ReadRecord } from "../interface/readRecord";
+import { StorageService } from "./storage/storageService";
+
+export interface LeaderboardItem {
+	fileRecord: { fileId: string; filePath: string; duration: number };
+	filePath: string;
+	totalTime: number;
+}
 
 export class DataAnalyzer {
-
 	private readonly app: App;
-	private readonly dataManager: PluginDataManager;
+	private readonly storage: StorageService;
 
-	constructor(plugin: Plugin, app: App, dataManager: PluginDataManager, dailyReadDataManager: DailyReadDataManager) {
+	constructor(plugin: Plugin, app: App, storage: StorageService) {
 		this.app = app;
-		this.dataManager = dataManager;
+		this.storage = storage;
 
-		// Change data reference when the file is renamed
-		plugin.registerEvent(this.app.vault.on('rename', (absFile, oldPath) => {
-			// Handle folder rename: update all files under the folder
+		plugin.registerEvent(this.app.vault.on("rename", (absFile, oldPath) => {
 			if (absFile instanceof TFolder) {
-				void this.onFolderRename(absFile, oldPath);
+				void this.storage.handleFolderRename(oldPath, absFile.path);
 				return;
 			}
-
-			// Handle file rename
 			if (absFile instanceof TFile) {
-				void this.onFileRename(absFile, oldPath);
-				return;
+				void this.storage.handleRename(oldPath, absFile.path);
 			}
 		}));
 	}
 
-	public analyzeLeaderboardTotal() {
-		const readData = this.dataManager.getCategory("readData") as Record<string, ReadRecord> | undefined;
+	public analyzeLeaderboardTotal(): LeaderboardItem[] | undefined {
+		const items: LeaderboardItem[] = [];
 
-		if (!readData) {
-			return;
-		}
-
-		const leaderboard = Object.keys(readData).map((path) => {
-			const fileRecord = readData[path];
-			return {
-				fileRecord,
-				filePath: fileRecord.filePath || path,
-				totalTime: Number(fileRecord.duration) || 0,
-			};
-		});
-
-		const filteredLeaderboard = leaderboard.filter(item => {
-			const file = this.app.vault.getFileByPath(item.filePath);
-			if (!file) {
-				return false; // File was deleted
+		for (const noteId of this.storage.index.getNoteIds()) {
+			const filePath = this.storage.getPath(noteId);
+			if (!filePath || !this.app.vault.getFileByPath(filePath)) {
+				continue;
 			}
-			// Filter out files with less than 1 minute
-			return item.totalTime > 60 * 1000;
-		});
 
-		filteredLeaderboard.sort((a, b) => b.totalTime - a.totalTime);
-		return filteredLeaderboard;
-	}
-
-	private async onFileRename(file: TFile, oldPath: string) {
-		const readData = this.dataManager.get('readData', oldPath) as ReadRecord | undefined;
-		if (!readData) {
-			return;
-		}
-
-		readData.filePath = file.path;
-		// Must await to avoid race condition between delete and put
-		await this.dataManager.delete('readData', oldPath);
-		await this.dataManager.put('readData', file.path, readData);
-	}
-
-	private async onFolderRename(folder: TFolder, oldPath: string) {
-		const readDataCategory = this.dataManager.getCategory("readData") as Record<string, ReadRecord> | undefined;
-
-		if (!readDataCategory) {
-			return;
-		}
-
-		const normalizedOldPath = oldPath.endsWith('/') ? oldPath.slice(0, -1) : oldPath;
-		const newPath = folder.path;
-
-		const filesToUpdate: Array<{oldPath: string, newPath: string, data: ReadRecord}> = [];
-
-		for (const storedPath in readDataCategory) {
-			if (storedPath === normalizedOldPath || storedPath.startsWith(normalizedOldPath + '/')) {
-				const fileData = readDataCategory[storedPath];
-				if (fileData && fileData.filePath) {
-					const relativePath = storedPath === normalizedOldPath
-						? ''
-						: storedPath.substring(normalizedOldPath.length + 1);
-
-					const newFilePath = relativePath === ''
-						? newPath
-						: `${newPath}/${relativePath}`;
-
-					const file = this.app.vault.getFileByPath(newFilePath);
-					if (file) {
-						filesToUpdate.push({
-							oldPath: storedPath,
-							newPath: newFilePath,
-							data: fileData
-						});
-					}
-				}
+			const totalTime = this.storage.index.getNoteTotal(noteId);
+			if (totalTime <= 60 * 1000) {
+				continue;
 			}
+
+			items.push({
+				fileRecord: {fileId: noteId, filePath, duration: totalTime},
+				filePath,
+				totalTime
+			});
 		}
 
-		for (const {oldPath: fileOldPath, newPath: fileNewPath, data} of filesToUpdate) {
-			data.filePath = fileNewPath;
-			await this.dataManager.delete('readData', fileOldPath);
-			await this.dataManager.put('readData', fileNewPath, data);
-		}
+		items.sort((a, b) => b.totalTime - a.totalTime);
+		return items;
 	}
-
 }

@@ -5,7 +5,8 @@
 	},
 	"command": {
 		"openDashboard": "Open Focus Time dashboard",
-		"toggleTracking": "Pause or resume focus tracking"
+		"toggleTracking": "Pause or resume focus tracking",
+		"rescanLegacy": "Rescan legacy focus data"
 	},
 	"common": {
 		"loading": "Loading…",
@@ -49,7 +50,25 @@
 			"fixed": "5 minutes",
 			"custom": "Custom",
 			"minutes": "Idle threshold (minutes)"
+		},
+		"data": {
+			"heading": "Data",
+			"folder": "Data folder",
+			"schema": "Schema version",
+			"events": "Events",
+			"notes": "Notes",
+			"legacyDays": "Legacy days",
+			"unmapped": "Unmapped time",
+			"migrated": "Migrated at",
+			"rescan": "Rescan legacy data",
+			"rescanDesc": "Import day files written by older versions."
 		}
+	},
+	"notice": {
+		"migrating": "Migrating focus data…",
+		"migrated": "Focus data migration complete.",
+		"migrationFailed": "Migration failed. Your original data is untouched; check the migration report.",
+		"rescan": "Imported {count} legacy record(s)."
 	},
 	"dashboard": {
 		"tabs": {

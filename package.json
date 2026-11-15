@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-focus-time",
-	"version": "1.3.1",
+	"version": "1.4.0",
 	"description": "Track the time you spend on each note and visualize your focus data.",
 	"main": "main.js",
 	"scripts": {

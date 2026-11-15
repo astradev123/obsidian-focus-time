@@ -1,4 +1,4 @@
-import {App} from 'obsidian';
+import {App, Notice} from 'obsidian';
 import {DashboardModal} from "../view/display/modal/dashboardModal";
 import FocusTimePlugin from "../main";
 import I18n from "../language/i18n";
@@ -28,6 +28,16 @@ export class CommandFactory {
 			name: I18n.t('command.toggleTracking'),
 			callback: () => {
 				this.plugin.toggleFocusTracking();
+			}
+		});
+
+		this.plugin.addCommand({
+			id: 'rescan-legacy-data',
+			name: I18n.t('command.rescanLegacy'),
+			callback: () => {
+				void this.plugin.rescanLegacy().then((imported) => {
+					new Notice(I18n.t('notice.rescan', {count: imported}));
+				});
 			}
 		});
 
