@@ -1,5 +1,5 @@
 import {App, Notice} from 'obsidian';
-import {DashboardModal} from "../view/display/modal/dashboardModal";
+import {openDashboard} from "../view/dashboard/FocusDashboardView";
 import FocusTimePlugin from "../main";
 import I18n from "../language/i18n";
 export class CommandFactory {
@@ -19,7 +19,7 @@ export class CommandFactory {
 			id: 'open-leaderboard',
 			name: I18n.t('command.openDashboard'),
 			callback: () => {
-				new DashboardModal(this.plugin, this.app).open();
+				void openDashboard(this.plugin);
 			}
 		});
 

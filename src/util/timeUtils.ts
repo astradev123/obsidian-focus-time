@@ -8,6 +8,9 @@ export class TimeUtils {
 	 * @param timeMilliseconds
 	 */
 	static getFormattedReadingTime(timeMilliseconds: number): string {
+		if (!Number.isFinite(timeMilliseconds) || timeMilliseconds <= 0) {
+			return I18n.t("time.zero");
+		}
 		const readMinutes = Math.max(0, timeMilliseconds) / 1000 / 60;
 		const hours = Math.floor(readMinutes / 60);
 		const minutes = Math.floor(readMinutes % 60);

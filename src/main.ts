@@ -11,6 +11,7 @@ import { FocusDataAggregator } from "./core/focusDataAggregator";
 import { SettingsStore } from "./core/settings";
 import { StorageService } from "./core/storage/storageService";
 import { resolveDeviceId } from "./core/storage/deviceId";
+import { FOCUS_DASHBOARD_VIEW, FocusDashboardView } from "./view/dashboard/FocusDashboardView";
 
 export default class FocusTimePlugin extends Plugin {
 	private _dataManager: PluginDataManager;
@@ -63,6 +64,9 @@ export default class FocusTimePlugin extends Plugin {
 			this._dataManager,
 			this.dailyReadDataManager
 		);
+
+		// Register before layout restore so a saved dashboard leaf can reopen.
+		this.registerView(FOCUS_DASHBOARD_VIEW, (leaf) => new FocusDashboardView(leaf, this));
 
 		this.app.workspace.onLayoutReady(() => {
 			void this.initializeStorageAndUi();

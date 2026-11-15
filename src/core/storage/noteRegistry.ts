@@ -56,10 +56,17 @@ export class NoteRegistry {
 		return id;
 	}
 
-	public async importEntries(entries: Array<{ id: string; path: string }>): Promise<void> {
+	public async importEntries(
+		entries: Array<{ id: string; path: string }>,
+		options: { preserveExisting?: boolean } = {}
+	): Promise<void> {
 		const now = Date.now();
 		for (const entry of entries) {
 			if (!entry.id || !entry.path) {
+				continue;
+			}
+			if (options.preserveExisting && this.data.byId[entry.id]) {
+				// The registry already knows a newer path (for example after a rename).
 				continue;
 			}
 			this.data.byId[entry.id] = { path: entry.path, createdAt: now, updatedAt: now };

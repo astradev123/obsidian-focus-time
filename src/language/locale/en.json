@@ -18,6 +18,7 @@
 		"next": "Next"
 	},
 	"time": {
+		"zero": "0 min",
 		"minutes": "{minute}m",
 		"hoursMinutes": "{hour}h {minute}m",
 		"lessThanOneMinute": "< 1m"
@@ -71,9 +72,20 @@
 		"rescan": "Imported {count} legacy record(s)."
 	},
 	"dashboard": {
+		"subtitle": "{sessions} sessions · {notes} notes",
+		"legend": {
+			"edit": "Editing",
+			"read": "Reading",
+			"legacy": "Legacy"
+		},
 		"tabs": {
 			"statistics": "Statistics",
-			"leaderboard": "Leaderboard"
+			"leaderboard": "Leaderboard",
+			"overview": "Overview",
+			"trends": "Trends",
+			"notes": "Notes",
+			"categories": "Categories",
+			"quality": "Quality"
 		},
 		"statistics": {
 			"title": "Focus statistics"
@@ -112,6 +124,54 @@
 			"title": "Focus time leaderboard",
 			"empty": "No data yet. Start reading now!",
 			"hint": "Only notes with more than 1 minute are counted."
+		},
+		"kpi": {
+			"total": "Total focus",
+			"sessions": "Sessions",
+			"avgSession": "Avg session",
+			"medianSession": "Median session",
+			"longestSession": "Longest session",
+			"switches": "Context switches",
+			"deepWork": "Deep work",
+			"activeDays": "Active days"
+		},
+		"sections": {
+			"trend": "Focus trend",
+			"calendar": "Last 12 weeks",
+			"hourly": "Time of day",
+			"sessionLength": "Session length",
+			"folders": "Folders",
+			"insights": "Insights",
+			"topNotes": "Top notes",
+			"quality": "Data quality"
+		},
+		"insight": {
+			"up": "Up {percent}% vs previous period",
+			"down": "Down {percent}% vs previous period",
+			"peak": "Peak focus: {weekday} around {hour}:00",
+			"streak": "{days}-day streak",
+			"deepWork": "{percent}% of focus time was deep work",
+			"legacy": "{days} days use legacy day-level data",
+			"none": "Track a few sessions to see insights"
+		},
+		"buckets": {
+			"lt5": "< 5 min",
+			"lt15": "5–15",
+			"lt30": "15–30",
+			"lt60": "30–60",
+			"gt60": "60+ min"
+		},
+		"quality": {
+			"schema": "Schema",
+			"events": "Events",
+			"sessions": "Sessions",
+			"notes": "Notes",
+			"legacyDays": "Legacy days",
+			"unmapped": "Unmapped time",
+			"migrated": "Migrated",
+			"folder": "Data folder",
+			"rescan": "Rescan legacy data",
+			"rescanDone": "Imported {count} record(s)"
 		}
 	},
 	"weekday": {

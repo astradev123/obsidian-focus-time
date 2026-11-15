@@ -18,6 +18,7 @@
 		"next": "下一个"
 	},
 	"time": {
+		"zero": "0 分钟",
 		"minutes": "{minute}分钟",
 		"hoursMinutes": "{hour}小时 {minute}分钟",
 		"lessThanOneMinute": "< 1分钟"
@@ -71,9 +72,20 @@
 		"rescan": "已导入 {count} 条旧版记录。"
 	},
 	"dashboard": {
+		"subtitle": "{sessions} 次会话 · {notes} 篇笔记",
+		"legend": {
+			"edit": "编辑",
+			"read": "阅读",
+			"legacy": "旧版"
+		},
 		"tabs": {
 			"statistics": "专注数据",
-			"leaderboard": "排行榜"
+			"leaderboard": "排行榜",
+			"overview": "概览",
+			"trends": "趋势",
+			"notes": "笔记",
+			"categories": "分类",
+			"quality": "质量"
 		},
 		"statistics": {
 			"title": "专注数据统计"
@@ -112,6 +124,54 @@
 			"title": "专注时长排行榜",
 			"empty": "暂无数据，快去阅读吧！",
 			"hint": "仅统计专注时长大于 1 分钟的笔记"
+		},
+		"kpi": {
+			"total": "专注总时长",
+			"sessions": "会话数",
+			"avgSession": "平均会话",
+			"medianSession": "中位会话",
+			"longestSession": "最长会话",
+			"switches": "上下文切换",
+			"deepWork": "深工作",
+			"activeDays": "活跃天数"
+		},
+		"sections": {
+			"trend": "专注趋势",
+			"calendar": "近 12 周",
+			"hourly": "时段分布",
+			"sessionLength": "会话长度",
+			"folders": "目录分布",
+			"insights": "洞察",
+			"topNotes": "笔记排行",
+			"quality": "数据质量"
+		},
+		"insight": {
+			"up": "较上一周期增长 {percent}%",
+			"down": "较上一周期下降 {percent}%",
+			"peak": "最专注：{weekday} {hour} 点左右",
+			"streak": "连续 {days} 天有专注记录",
+			"deepWork": "{percent}% 的专注时长属于深工作",
+			"legacy": "{days} 天使用旧版日粒度数据",
+			"none": "再记录几次会话就能看到洞察"
+		},
+		"buckets": {
+			"lt5": "< 5 分钟",
+			"lt15": "5–15",
+			"lt30": "15–30",
+			"lt60": "30–60",
+			"gt60": "60+ 分钟"
+		},
+		"quality": {
+			"schema": "存储版本",
+			"events": "事件数",
+			"sessions": "会话数",
+			"notes": "笔记数",
+			"legacyDays": "旧版天数",
+			"unmapped": "未映射时长",
+			"migrated": "迁移时间",
+			"folder": "数据目录",
+			"rescan": "重新扫描旧数据",
+			"rescanDone": "已导入 {count} 条记录"
 		}
 	},
 	"weekday": {

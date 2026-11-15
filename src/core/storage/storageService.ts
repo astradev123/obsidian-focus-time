@@ -48,6 +48,7 @@ export class StorageService {
 	private lastScan: LegacyScan | null = null;
 	private lastLocalWriteAt = 0;
 	private lastSeenMtime = 0;
+	private readonly listeners = new Set<() => void>();
 
 	constructor(
 		app: App,
@@ -198,7 +199,10 @@ export class StorageService {
 	 */
 	private async scanAndImport(): Promise<{ scan: LegacyScan; importedEvents: number }> {
 		const scan = await scanLegacy(this.dataManager, this.dailyManager);
-		await this.registry.importEntries(scan.notes.map((note) => ({id: note.id, path: note.path})));
+		await this.registry.importEntries(
+			scan.notes.map((note) => ({id: note.id, path: note.path})),
+			{preserveExisting: true}
+		);
 
 		const candidates = buildLegacyEvents(scan, this.deviceId);
 		const existing = await this.events.readAll();
@@ -223,7 +227,10 @@ export class StorageService {
 		const existingIds = new Set((await this.events.readAll()).map((event) => event.id));
 		const scan = await scanLegacy(this.dataManager, this.dailyManager);
 		this.lastScan = scan;
-		await this.registry.importEntries(scan.notes.map((note) => ({id: note.id, path: note.path})));
+		await this.registry.importEntries(
+			scan.notes.map((note) => ({id: note.id, path: note.path})),
+			{preserveExisting: true}
+		);
 
 		const candidates = buildLegacyEvents(scan, this.deviceId);
 		const toWrite = candidates.filter((event) => !existingIds.has(event.id));
@@ -258,6 +265,7 @@ export class StorageService {
 		if (this.lastScan) {
 			this.index.addUnmapped(this.lastScan.unmappedMs);
 		}
+		this.emitChange();
 	}
 
 	public async ensureNote(path: string): Promise<string> {
@@ -266,6 +274,23 @@ export class StorageService {
 		// that is not in the registry yet.
 		await this.registry.flush();
 		return noteId;
+	}
+
+	public onChange(listener: () => void): () => void {
+		this.listeners.add(listener);
+		return () => {
+			this.listeners.delete(listener);
+		};
+	}
+
+	private emitChange(): void {
+		for (const listener of Array.from(this.listeners)) {
+			try {
+				listener();
+			} catch (error) {
+				console.error("[focus-time] Storage listener failed", error);
+			}
+		}
 	}
 
 	public async needsMigration(): Promise<boolean> {
@@ -334,6 +359,7 @@ export class StorageService {
 		await this.events.record(event);
 		this.index.add(event);
 		this.lastLocalWriteAt = Date.now();
+		this.emitChange();
 	}
 
 	public async handleRename(oldPath: string, newPath: string): Promise<void> {
