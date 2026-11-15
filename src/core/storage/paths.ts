@@ -18,6 +18,10 @@ export function reportsPath(...parts: string[]): string {
 	return dataPath("reports", ...parts);
 }
 
+export function exportsPath(...parts: string[]): string {
+	return dataPath("exports", ...parts);
+}
+
 export function monthKey(ms: number): string {
 	const date = new Date(ms);
 	return `${date.getFullYear()}-${date.getMonth() + 1 < 10 ? "0" : ""}${date.getMonth() + 1}`;

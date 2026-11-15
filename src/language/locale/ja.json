@@ -1,0 +1,223 @@
+{
+	"app": {
+		"title": "フォーカスタイム",
+		"menu": "メニュー"
+	},
+	"command": {
+		"openDashboard": "フォーカスタイムのダッシュボードを開く",
+		"toggleTracking": "計測を一時停止・再開",
+		"rescanLegacy": "旧データを再スキャン",
+		"exportCsv": "セッションを CSV で書き出す",
+		"exportJson": "データを JSON で書き出す",
+		"exportMarkdown": "レポートを Markdown で書き出す",
+		"writeFrontmatter": "現在のノートに集中時間を書き込む"
+	},
+	"common": {
+		"loading": "読み込み中…",
+		"today": "今日",
+		"unknown": "不明",
+		"noData": "データがありません",
+		"fileNotFound": "ファイルが見つかりません",
+		"previous": "前へ",
+		"next": "次へ"
+	},
+	"time": {
+		"zero": "0分",
+		"minutes": "{minute}分",
+		"hoursMinutes": "{hour}時間 {minute}分",
+		"lessThanOneMinute": "1分未満"
+	},
+	"status": {
+		"focusing": "計測中",
+		"pausedIdle": "一時停止 · {minute}分入力なし",
+		"pausedBlur": "一時停止 · ウィンドウが非アクティブ",
+		"pausedManual": "一時停止",
+		"short": {
+			"idle": "アイドル",
+			"blur": "非アクティブ",
+			"manual": "一時停止"
+		}
+	},
+	"settings": {
+		"language": {
+			"name": "言語",
+			"desc": "既定では Obsidian の言語に従います。",
+			"auto": "Obsidian に従う"
+		},
+		"strictMode": {
+			"name": "厳格モード",
+			"desc": "ウィンドウがフォーカスを失うと計測を止めます。"
+		},
+		"idle": {
+			"name": "アイドル検出",
+			"desc": "入力がない状態が続くと計測を停止します。",
+			"off": "オフ",
+			"fixed": "5分",
+			"custom": "カスタム",
+			"perMode": "読書用の閾値を分ける",
+			"minutes": "編集の閾値（分）",
+			"readingMinutes": "読書の閾値（分）"
+		},
+		"goal": {
+			"name": "1日の目標",
+			"desc": "連続達成日数と進捗に使います。",
+			"minutes": "目標（分）"
+		},
+		"data": {
+			"heading": "データ",
+			"folder": "データフォルダー",
+			"schema": "スキーマ",
+			"events": "イベント",
+			"notes": "ノート",
+			"legacyDays": "旧データの日数",
+			"unmapped": "未対応の時間",
+			"migrated": "移行日時",
+			"rescan": "旧データを再スキャン",
+			"rescanDesc": "旧バージョンの日次ファイルを取り込みます。"
+		}
+	},
+	"notice": {
+		"migrating": "集中データを移行しています…",
+		"migrated": "集中データの移行が完了しました。",
+		"migrationFailed": "移行に失敗しました。元のデータは変更されていません。移行レポートを確認してください。",
+		"rescan": "旧データを {count} 件取り込みました。",
+		"exported": "{path} に書き出しました",
+		"frontmatterDone": "集中時間を frontmatter に書き込みました。",
+		"noActiveNote": "先に Markdown ノートを開いてください。"
+	},
+	"export": {
+		"title": "フォーカスタイム レポート",
+		"range": "期間",
+		"total": "合計集中時間",
+		"sessions": "セッション",
+		"avgSession": "平均セッション",
+		"deepWork": "深い作業",
+		"topNotes": "上位ノート",
+		"note": "ノート",
+		"time": "時間",
+		"noData": "データなし",
+		"generatedAt": "生成日時"
+	},
+	"embed": {
+		"title": "フォーカスタイム",
+		"total": "合計集中時間",
+		"sessions": "セッション",
+		"today": "今日",
+		"week": "今週",
+		"month": "今月",
+		"note": "このノート"
+	},
+	"dashboard": {
+		"subtitle": "{sessions} セッション · {notes} ノート",
+		"legend": {
+			"edit": "編集",
+			"read": "読書",
+			"legacy": "旧データ"
+		},
+		"tabs": {
+			"statistics": "統計",
+			"leaderboard": "ランキング",
+			"overview": "概要",
+			"trends": "推移",
+			"notes": "ノート",
+			"categories": "カテゴリ",
+			"quality": "品質"
+		},
+		"statistics": {
+			"title": "集中統計"
+		},
+		"views": {
+			"day": "日",
+			"week": "週",
+			"month": "月",
+			"year": "年",
+			"total": "合計"
+		},
+		"charts": {
+			"daily": "日別の集中時間",
+			"monthly": "月別の集中時間",
+			"yearly": "年別の集中時間"
+		},
+		"empty": {
+			"day": "この日のデータはありません",
+			"week": "今週のデータはありません",
+			"month": "今月のデータはありません",
+			"year": "今年のデータはありません",
+			"total": "まだデータがありません"
+		},
+		"notes": {
+			"title": "集中したノート"
+		},
+		"metrics": {
+			"focusNotes": "集中ノート数",
+			"focusTime": "集中時間",
+			"focusDays": "集中した日数",
+			"totalNotes": "総ノート数",
+			"totalFocusTime": "総集中時間",
+			"totalFocusDays": "総集中日数"
+		},
+		"leaderboard": {
+			"title": "集中時間ランキング",
+			"empty": "まだデータがありません。まず何かを読みましょう！",
+			"hint": "1分以上のノートのみ集計します。"
+		},
+		"kpi": {
+			"total": "合計集中時間",
+			"sessions": "セッション",
+			"avgSession": "平均セッション",
+			"medianSession": "中央値",
+			"longestSession": "最長セッション",
+			"switches": "コンテキスト切替",
+			"deepWork": "深い作業",
+			"activeDays": "アクティブ日数"
+		},
+		"sections": {
+			"trend": "集中の推移",
+			"calendar": "直近12週間",
+			"hourly": "時間帯",
+			"sessionLength": "セッション長",
+			"folders": "フォルダー",
+			"insights": "インサイト",
+			"topNotes": "上位ノート",
+			"quality": "データ品質"
+		},
+		"insight": {
+			"up": "前期間より {percent}% 増",
+			"down": "前期間より {percent}% 減",
+			"peak": "最も集中：{weekday} {hour}時ごろ",
+			"goal": "今日 {current} / {goal} 分",
+			"streak": "{days}日連続で達成",
+			"deepWork": "集中時間の {percent}% が深い作業",
+			"legacy": "{days}日は旧形式の日次データです",
+			"none": "数回記録するとインサイトが表示されます"
+		},
+		"buckets": {
+			"lt5": "5分未満",
+			"lt15": "5–15",
+			"lt30": "15–30",
+			"lt60": "30–60",
+			"gt60": "60分以上"
+		},
+		"quality": {
+			"schema": "スキーマ",
+			"events": "イベント",
+			"sessions": "セッション",
+			"notes": "ノート",
+			"legacyDays": "旧データの日数",
+			"unmapped": "未対応の時間",
+			"migrated": "移行日時",
+			"folder": "データフォルダー",
+			"rescan": "旧データを再スキャン",
+			"rescanDone": "{count} 件取り込みました"
+		}
+	},
+	"weekday": {
+		"sunday": "日",
+		"monday": "月",
+		"tuesday": "火",
+		"wednesday": "水",
+		"thursday": "木",
+		"friday": "金",
+		"saturday": "土"
+	}
+}

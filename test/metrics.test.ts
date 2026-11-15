@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FocusIndex } from "../src/core/storage/focusIndex";
 import { FocusEvent } from "../src/core/storage/types";
-import { getPeakHour, getRangeStats, getStreak, mergeSessions, sessionHistogram } from "../src/analytics/metrics";
+import { getGoalStreak, getPeakHour, getRangeStats, getStreak, mergeSessions, sessionHistogram } from "../src/analytics/metrics";
 import { previousRange } from "../src/analytics/period";
 
 function session(id: string, ses: string, note: string, start: number, ms: number, kind: "edit" | "read" = "read"): FocusEvent {
@@ -79,6 +79,8 @@ describe("analytics metrics", () => {
 		const {index} = buildIndex();
 		expect(getStreak(index, "2026-01-06")).toBe(2);
 		expect(getStreak(index, "2026-01-07")).toBe(0);
+		expect(getGoalStreak(index, 30 * 60_000, "2026-01-06")).toBe(2);
+		expect(getGoalStreak(index, 60 * 60_000, "2026-01-06")).toBe(0);
 	});
 
 	it("finds the peak hour", () => {

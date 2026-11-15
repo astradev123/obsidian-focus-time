@@ -1,6 +1,6 @@
 import { DateUtils } from "../../util/dateUtils";
 
-export type IdleMode = "off" | "fixed" | "custom";
+export type IdleMode = "off" | "fixed" | "custom" | "perMode";
 
 export const FIXED_IDLE_MINUTES = 5;
 export const MIN_IDLE_MINUTES = 1;
@@ -27,12 +27,22 @@ export interface DaySegment {
 	ms: number;
 }
 
-export function resolveIdleMs(mode: IdleMode, minutes: number): number {
+export function resolveIdleMs(
+	mode: IdleMode,
+	minutes: number,
+	readingMinutes: number = minutes,
+	reading = false
+): number {
 	if (mode === "off") {
 		return 0;
 	}
 	if (mode === "fixed") {
 		return FIXED_IDLE_MINUTES * 60 * 1000;
+	}
+	if (mode === "perMode") {
+		const value = reading ? readingMinutes : minutes;
+		const clamped = Math.min(MAX_IDLE_MINUTES, Math.max(MIN_IDLE_MINUTES, Math.round(Number.isFinite(value) ? value : FIXED_IDLE_MINUTES)));
+		return clamped * 60 * 1000;
 	}
 	const value = Number.isFinite(minutes) ? minutes : FIXED_IDLE_MINUTES;
 	const clamped = Math.min(MAX_IDLE_MINUTES, Math.max(MIN_IDLE_MINUTES, Math.round(value)));

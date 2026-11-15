@@ -12,6 +12,11 @@ import { SettingsStore } from "./core/settings";
 import { StorageService } from "./core/storage/storageService";
 import { resolveDeviceId } from "./core/storage/deviceId";
 import { FOCUS_DASHBOARD_VIEW, FocusDashboardView } from "./view/dashboard/FocusDashboardView";
+import { Exporter } from "./core/export/exporter";
+import { getRangeStats } from "./analytics/metrics";
+import { getRange, Period } from "./analytics/period";
+import { DateUtils } from "./util/dateUtils";
+import { TimeUtils } from "./util/timeUtils";
 
 export default class FocusTimePlugin extends Plugin {
 	private _dataManager: PluginDataManager;
@@ -19,6 +24,7 @@ export default class FocusTimePlugin extends Plugin {
 	private _dataAnalyzer: DataAnalyzer;
 	private _focusDataAggregator: FocusDataAggregator;
 	private _storage: StorageService;
+	private _exporter: Exporter;
 	private dailyReadDataManager: DailyReadDataManager;
 	private timeTracker: TimeTracker | null = null;
 	private settingTab: FocusTimeSettingTab | null = null;
@@ -41,6 +47,10 @@ export default class FocusTimePlugin extends Plugin {
 
 	get storage(): StorageService {
 		return this._storage;
+	}
+
+	get exporter(): Exporter {
+		return this._exporter;
 	}
 
 	async onload() {
@@ -160,11 +170,83 @@ export default class FocusTimePlugin extends Plugin {
 		);
 		this._dataAnalyzer = new DataAnalyzer(this, this.app, this._storage);
 		this._focusDataAggregator = new FocusDataAggregator(this.app, this._storage);
+		this._exporter = new Exporter(this._storage, this._storage.files);
+
+		this.registerMarkdownCodeBlockProcessor("focus-time", (source, el, ctx) => {
+			this.renderFocusBlock(source, el, ctx.sourcePath);
+		});
 
 		this.settingTab = new FocusTimeSettingTab(this.app, this);
 		this.addSettingTab(this.settingTab);
 
 		RibbonFactory.createLeaderboardRibbon(this, this.app);
 		new CommandFactory(this, this.app).create();
+	}
+
+	public async exportCsv(): Promise<void> {
+		const path = await this._exporter.exportCsv();
+		new Notice(I18n.t("notice.exported", {path}));
+	}
+
+	public async exportJson(): Promise<void> {
+		const path = await this._exporter.exportJson();
+		new Notice(I18n.t("notice.exported", {path}));
+	}
+
+	public async exportMarkdown(): Promise<void> {
+		const path = await this._exporter.exportMarkdown("week");
+		new Notice(I18n.t("notice.exported", {path}));
+	}
+
+	public async writeFrontmatter(): Promise<void> {
+		const file = this.app.workspace.getActiveFile();
+		if (!file || file.extension !== "md") {
+			new Notice(I18n.t("notice.noActiveNote"));
+			return;
+		}
+
+		const noteId = this._storage.registry.getId(file.path);
+		const total = noteId ? this._storage.index.getNoteTotal(noteId) : 0;
+		await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+			frontmatter.focus_total = Math.round(total / 60_000);
+			frontmatter.focus_updated = DateUtils.toLocalDate();
+		});
+		new Notice(I18n.t("notice.frontmatterDone"));
+	}
+
+	private renderFocusBlock(source: string, el: HTMLElement, sourcePath: string): void {
+		const mode = source.trim().toLowerCase() || "week";
+		let total = 0;
+		let sessions = 0;
+		let label = I18n.t("embed.week");
+
+		if (mode === "note") {
+			const noteId = this._storage.registry.getId(sourcePath);
+			total = noteId ? this._storage.index.getNoteTotal(noteId) : 0;
+			sessions = noteId ? this._storage.index.getNoteAggregate(noteId).sessions : 0;
+			label = I18n.t("embed.note");
+		} else if (mode === "total") {
+			total = this._storage.index.getTotalMs();
+			sessions = this._storage.index.getStats().sessions;
+			label = I18n.t("embed.total");
+		} else {
+			const period: Period = mode === "today" ? "day" : mode === "month" ? "month" : "week";
+			const stats = getRangeStats(
+				this._storage.index,
+				getRange(period, new Date()),
+				(noteId) => this._storage.getPath(noteId)
+			);
+			total = stats.totalMs;
+			sessions = stats.sessionCount;
+			label = I18n.t(period === "day" ? "embed.today" : period === "month" ? "embed.month" : "embed.week");
+		}
+
+		el.empty();
+		el.classList.add("ft-embed");
+		el.createDiv({cls: "ft-embed-title", text: I18n.t("embed.title")});
+		const row = el.createDiv({cls: "ft-embed-row"});
+		row.createSpan({cls: "ft-embed-label", text: I18n.t("embed.total")});
+		row.createSpan({cls: "ft-embed-value", text: TimeUtils.getFormattedReadingTime(total)});
+		el.createDiv({cls: "ft-embed-meta", text: `${label} · ${I18n.t("embed.sessions")}: ${sessions}`});
 	}
 }

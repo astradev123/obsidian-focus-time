@@ -62,7 +62,14 @@ describe("I18n", () => {
 
 	it("falls back from a region tag to the base language", () => {
 		I18n.getInstance().setLanguage("zh-TW");
-		expect(I18n.t("app.title")).toBe("专注时间仪表盘");
+		expect(I18n.t("app.title")).toBe("專注時間儀表板");
+	});
+
+	it("loads the Japanese and Korean locales", () => {
+		I18n.getInstance().setLanguage("ja");
+		expect(I18n.t("app.title")).toBe("フォーカスタイム");
+		I18n.getInstance().setLanguage("ko");
+		expect(I18n.t("app.title")).toBe("포커스 타임");
 	});
 
 	it("returns the key instead of throwing when a translation is missing", () => {

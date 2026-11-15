@@ -1,4 +1,4 @@
-import { App, Plugin, TFile } from "obsidian";
+import { App, FileView, MarkdownView, Plugin, TFile } from "obsidian";
 import { SettingsStore } from "./settings";
 import { ActivityMonitor } from "./tracking/activityMonitor";
 import { computeAccrual, MAX_TICK_MULTIPLIER, splitAcrossMidnight } from "./tracking/trackingMath";
@@ -48,6 +48,7 @@ export class TimeTracker {
 	private windowFocused = true;
 	private documentVisible = true;
 	private sessionId = newEventId("ses");
+	private changeQueue: Promise<void> = Promise.resolve();
 
 	constructor(
 		plugin: Plugin,
@@ -63,7 +64,7 @@ export class TimeTracker {
 
 		this.windowFocused = true;
 		this.documentVisible = document.visibilityState !== "hidden";
-		this.currentFile = this.app.workspace.getActiveFile();
+		this.currentFile = this.app.workspace.getActiveViewOfType(FileView)?.file ?? null;
 		this.accruedUntil = Date.now();
 
 		if (this.currentFile) {
@@ -71,6 +72,9 @@ export class TimeTracker {
 		}
 
 		plugin.registerEvent(this.app.workspace.on("file-open", () => {
+			void this.handleFileChange();
+		}));
+		plugin.registerEvent(this.app.workspace.on("active-leaf-change", () => {
 			void this.handleFileChange();
 		}));
 		plugin.registerInterval(window.setInterval(() => this.tick(), TICK_MS));
@@ -123,7 +127,7 @@ export class TimeTracker {
 			now,
 			this.accruedUntil,
 			this.activity.getLastInputAt(),
-			this.settings.getIdleMs(),
+			this.getIdleMs(),
 			MAX_DELTA_MS
 		);
 
@@ -186,20 +190,27 @@ export class TimeTracker {
 				end: pending.end,
 				ms: pending.ms,
 				kind: this.activity.getLastEditAt() >= pending.start ? "edit" : "read",
-				idle: this.settings.getIdleMs() > 0 ? "guard" : "off"
+				idle: this.getIdleMs() > 0 ? "guard" : "off"
 			});
 		} catch (error) {
 			console.error(`[focus-time] Failed to flush focus data (${reason})`, error);
 		}
 	}
 
-	public async handleFileChange(): Promise<void> {
+	public handleFileChange(): Promise<void> {
+		this.changeQueue = this.changeQueue
+			.catch(() => undefined)
+			.then(() => this.doHandleFileChange());
+		return this.changeQueue;
+	}
+
+	private async doHandleFileChange(): Promise<void> {
 		const now = Date.now();
 		this.settle(now);
 		await this.flush("switch");
 
 		const previous = this.currentFile;
-		const active = this.app.workspace.getActiveFile();
+		const active = this.app.workspace.getActiveViewOfType(FileView)?.file ?? null;
 		this.currentFile = active;
 		this.accruedUntil = now;
 
@@ -288,6 +299,21 @@ export class TimeTracker {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Reading mode and non-Markdown files use the reading idle threshold.
+	 */
+	private isReadingContext(): boolean {
+		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (view) {
+			return view.getMode() === "preview";
+		}
+		return !!this.currentFile && this.currentFile.extension !== "md";
+	}
+
+	private getIdleMs(): number {
+		return this.settings.getIdleMs(this.isReadingContext());
 	}
 
 	public toggleManualPause(): void {

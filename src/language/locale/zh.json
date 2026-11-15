@@ -6,7 +6,11 @@
 	"command": {
 		"openDashboard": "打开专注时间仪表盘",
 		"toggleTracking": "暂停或继续专注计时",
-		"rescanLegacy": "重新扫描旧版专注数据"
+		"rescanLegacy": "重新扫描旧版专注数据",
+		"exportCsv": "导出专注会话为 CSV",
+		"exportJson": "导出专注数据为 JSON",
+		"exportMarkdown": "导出专注报告为 Markdown",
+		"writeFrontmatter": "将专注时长写入当前笔记"
 	},
 	"common": {
 		"loading": "加载中…",
@@ -50,7 +54,14 @@
 			"off": "关闭",
 			"fixed": "5 分钟",
 			"custom": "自定义",
-			"minutes": "空闲阈值（分钟）"
+			"perMode": "阅读单独阈值",
+			"minutes": "编辑阈值（分钟）",
+			"readingMinutes": "阅读阈值（分钟）"
+		},
+		"goal": {
+			"name": "每日专注目标",
+			"desc": "用于连续达标天数和目标进度。",
+			"minutes": "目标时长（分钟）"
 		},
 		"data": {
 			"heading": "数据",
@@ -69,7 +80,32 @@
 		"migrating": "正在迁移专注数据…",
 		"migrated": "专注数据迁移完成。",
 		"migrationFailed": "迁移失败。原始数据未被修改，请查看迁移报告。",
-		"rescan": "已导入 {count} 条旧版记录。"
+		"rescan": "已导入 {count} 条旧版记录。",
+		"exported": "已导出到 {path}",
+		"frontmatterDone": "已将专注时长写入 frontmatter。",
+		"noActiveNote": "请先打开一篇 Markdown 笔记。"
+	},
+	"export": {
+		"title": "专注时间报告",
+		"range": "时间范围",
+		"total": "专注总时长",
+		"sessions": "会话数",
+		"avgSession": "平均会话",
+		"deepWork": "深工作",
+		"topNotes": "笔记排行",
+		"note": "笔记",
+		"time": "时长",
+		"noData": "暂无数据",
+		"generatedAt": "生成时间"
+	},
+	"embed": {
+		"title": "专注时间",
+		"total": "专注总时长",
+		"sessions": "会话数",
+		"today": "今天",
+		"week": "本周",
+		"month": "本月",
+		"note": "当前笔记"
 	},
 	"dashboard": {
 		"subtitle": "{sessions} 次会话 · {notes} 篇笔记",
@@ -149,7 +185,8 @@
 			"up": "较上一周期增长 {percent}%",
 			"down": "较上一周期下降 {percent}%",
 			"peak": "最专注：{weekday} {hour} 点左右",
-			"streak": "连续 {days} 天有专注记录",
+			"goal": "今日 {current} / {goal} 分钟",
+			"streak": "连续 {days} 天达标",
 			"deepWork": "{percent}% 的专注时长属于深工作",
 			"legacy": "{days} 天使用旧版日粒度数据",
 			"none": "再记录几次会话就能看到洞察"

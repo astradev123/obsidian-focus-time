@@ -8,12 +8,13 @@ If you find this plugin useful, you can support me on [Buy Me a Coffee](https://
 
 ## Features Overview
 
-- **Track Focus Time**: Automatically tracks the time spent focusing on each note (also supports tracking reading time for PDF files).
-- **Smart Data Analytics**: Brand new Dashboard interface with day/month/year/total view focus time analysis.
-- **Interactive Charts**: Intuitive bar charts with drill-down navigation (total→year→month→day).
-- **Focus Time Leaderboard**: View the top 10 notes ranked by total focus time.
-- **Responsive Design**: Perfect adaptation for desktop and mobile with consistent user experience.
-- **Theme Support**: Adapts seamlessly to both light and dark modes.
+- **Accurate tracking**: idle detection with separate reading thresholds, midnight splitting, sleep-safe timing, and exact settlement on note switches.
+- **Local-first event log**: append-only monthly shards per device, stored in `_focus_time/` inside your vault. No database, no write conflicts.
+- **Automatic migration**: existing `data.json` and day files are backed up, imported and verified; original files are never modified.
+- **Analytics dashboard**: overview, trends, notes, folders and data quality, with calendar heatmaps, time-of-day grids, session histograms and rule-based insights.
+- **Exports**: CSV sessions, full JSON backup, and a Markdown report.
+- **Inline stats**: embed a `focus-time` code block in any note.
+- **Languages**: English, 简体中文, 繁體中文, 日本語, 한국어; follows Obsidian's language by default.
 
 ## Key Features
 
@@ -32,6 +33,27 @@ If you find this plugin useful, you can support me on [Buy Me a Coffee](https://
 ### 📱 Responsive Interface
 - **Desktop**: Left-right sidebar layout with fixed sidebar display
 - **Mobile**: Collapsible sidebar with gesture support
+
+## Data storage
+
+Focus Time keeps its data inside your vault, under `_focus_time/`:
+
+- `events/YYYY-MM.<device>.jsonl` — append-only session events. Each device writes its own shard, so two devices never write the same file.
+- `notes.json` — stable note ids and their current paths.
+- `meta.json` — schema version and migration state.
+- `archive/` — a read-only copy of the previous `data.json` and day files, created before migration.
+- `reports/` — migration reports.
+- `exports/` — CSV / JSON / Markdown exports.
+
+The legacy `data.json` and `data/*.json` files are only read during migration and are never deleted.
+
+## Commands
+
+- Open the Focus Time dashboard
+- Pause or resume focus tracking
+- Rescan legacy focus data
+- Export sessions as CSV, data as JSON, or a report as Markdown
+- Write focus totals to the current note's frontmatter
 
 ## Installation Instructions
 

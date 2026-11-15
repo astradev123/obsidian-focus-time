@@ -168,11 +168,23 @@ export function getRangeStats(
 }
 
 export function getStreak(index: FocusIndex, anchorDate: string): number {
-	const active = new Set(index.getActiveDays().filter((date) => index.getDayTotal(date) > 0));
+	return getGoalStreak(index, 0, anchorDate);
+}
+
+/**
+ * Consecutive days whose total meets the daily goal.
+ * A zero goal falls back to any tracked day.
+ */
+export function getGoalStreak(index: FocusIndex, goalMs: number, anchorDate: string): number {
 	let cursor = anchorDate;
 	let streak = 0;
 
-	while (active.has(cursor) && streak < 3650) {
+	while (streak < 3650) {
+		const total = index.getDayTotal(cursor);
+		const meetsGoal = goalMs > 0 ? total >= goalMs : total > 0;
+		if (!meetsGoal) {
+			break;
+		}
 		streak++;
 		const parts = DateUtils.parseKey(cursor);
 		if (!parts) {

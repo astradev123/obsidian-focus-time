@@ -26,6 +26,12 @@ describe("resolveIdleMs", () => {
 		expect(resolveIdleMs("custom", 0)).toBe(60 * 1000);
 		expect(resolveIdleMs("custom", 9999)).toBe(120 * 60 * 1000);
 	});
+
+	it("uses separate editing and reading thresholds", () => {
+		expect(resolveIdleMs("perMode", 5, 10, false)).toBe(5 * 60 * 1000);
+		expect(resolveIdleMs("perMode", 5, 10, true)).toBe(10 * 60 * 1000);
+		expect(resolveIdleMs("perMode", 5, 999, true)).toBe(120 * 60 * 1000);
+	});
 });
 
 describe("computeAccrual", () => {

@@ -28,6 +28,7 @@ export class FocusDashboardView extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
+		this.contentEl.empty();
 		this.contentEl.classList.add("ft-dashboard-host");
 		this.root = createRoot(this.contentEl);
 		this.render();

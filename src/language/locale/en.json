@@ -6,7 +6,11 @@
 	"command": {
 		"openDashboard": "Open Focus Time dashboard",
 		"toggleTracking": "Pause or resume focus tracking",
-		"rescanLegacy": "Rescan legacy focus data"
+		"rescanLegacy": "Rescan legacy focus data",
+		"exportCsv": "Export focus sessions as CSV",
+		"exportJson": "Export focus data as JSON",
+		"exportMarkdown": "Export a focus report as Markdown",
+		"writeFrontmatter": "Write focus totals to the current note"
 	},
 	"common": {
 		"loading": "Loading…",
@@ -50,7 +54,14 @@
 			"off": "Off",
 			"fixed": "5 minutes",
 			"custom": "Custom",
-			"minutes": "Idle threshold (minutes)"
+			"perMode": "Separate reading threshold",
+			"minutes": "Editing threshold (minutes)",
+			"readingMinutes": "Reading threshold (minutes)"
+		},
+		"goal": {
+			"name": "Daily focus goal",
+			"desc": "Used for streaks and goal progress.",
+			"minutes": "Goal (minutes)"
 		},
 		"data": {
 			"heading": "Data",
@@ -69,7 +80,32 @@
 		"migrating": "Migrating focus data…",
 		"migrated": "Focus data migration complete.",
 		"migrationFailed": "Migration failed. Your original data is untouched; check the migration report.",
-		"rescan": "Imported {count} legacy record(s)."
+		"rescan": "Imported {count} legacy record(s).",
+		"exported": "Exported to {path}",
+		"frontmatterDone": "Focus totals written to frontmatter.",
+		"noActiveNote": "Open a Markdown note first."
+	},
+	"export": {
+		"title": "Focus Time report",
+		"range": "Range",
+		"total": "Total focus",
+		"sessions": "Sessions",
+		"avgSession": "Average session",
+		"deepWork": "Deep work",
+		"topNotes": "Top notes",
+		"note": "Note",
+		"time": "Time",
+		"noData": "No data",
+		"generatedAt": "Generated at"
+	},
+	"embed": {
+		"title": "Focus Time",
+		"total": "Total focus",
+		"sessions": "Sessions",
+		"today": "Today",
+		"week": "This week",
+		"month": "This month",
+		"note": "This note"
 	},
 	"dashboard": {
 		"subtitle": "{sessions} sessions · {notes} notes",
@@ -149,7 +185,8 @@
 			"up": "Up {percent}% vs previous period",
 			"down": "Down {percent}% vs previous period",
 			"peak": "Peak focus: {weekday} around {hour}:00",
-			"streak": "{days}-day streak",
+			"goal": "Today {current} / {goal} min of your goal",
+			"streak": "{days}-day goal streak",
 			"deepWork": "{percent}% of focus time was deep work",
 			"legacy": "{days} days use legacy day-level data",
 			"none": "Track a few sessions to see insights"

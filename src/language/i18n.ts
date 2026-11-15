@@ -1,6 +1,9 @@
 import { moment } from "obsidian";
 import en from "./locale/en.json";
 import zh from "./locale/zh.json";
+import zhTW from "./locale/zh-TW.json";
+import ja from "./locale/ja.json";
+import ko from "./locale/ko.json";
 import {
 	buildLocaleChain,
 	FlatTranslations,
@@ -11,7 +14,7 @@ import {
 	resolvePluralKey
 } from "./i18nCore";
 
-const rawTranslations: Record<string, unknown> = { en, zh };
+const rawTranslations: Record<string, unknown> = { en, zh, "zh-TW": zhTW, ja, ko };
 
 const translations: Record<string, FlatTranslations> = {};
 for (const locale of Object.keys(rawTranslations)) {
@@ -106,7 +109,14 @@ class I18n {
 	}
 
 	private lookup(key: string): string | undefined {
-		for (const locale of buildLocaleChain(this.language)) {
+		const chain = [this.language, ...buildLocaleChain(this.language)];
+		const visited = new Set<string>();
+
+		for (const locale of chain) {
+			if (visited.has(locale)) {
+				continue;
+			}
+			visited.add(locale);
 			const table = translations[locale];
 			if (!table) {
 				continue;

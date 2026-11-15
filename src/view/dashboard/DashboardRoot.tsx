@@ -5,7 +5,7 @@ import I18n from "../../language/i18n";
 import { DateUtils } from "../../util/dateUtils";
 import { TimeUtils } from "../../util/timeUtils";
 import { Period, getRange, previousRange } from "../../analytics/period";
-import { getPeakHour, getRangeStats, getStreak, sessionHistogram } from "../../analytics/metrics";
+import { getPeakHour, getRangeStats, getGoalStreak, sessionHistogram } from "../../analytics/metrics";
 import { DateNavigator } from "../components/DateNavigator";
 import {
 	CalendarHeatmap,
@@ -91,7 +91,10 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin }) {
 	const range = getRange(period, anchor);
 	const stats = getRangeStats(plugin.storage.index, range, (noteId) => plugin.storage.getPath(noteId));
 	const prev = getRangeStats(plugin.storage.index, previousRange(range), (noteId) => plugin.storage.getPath(noteId));
-	const streak = getStreak(plugin.storage.index, DateUtils.toLocalDate());
+	const goalMs = plugin.settingsManager.getGoalMs();
+	const today = DateUtils.toLocalDate();
+	const todayMs = plugin.storage.index.getDayTotal(today);
+	const streak = getGoalStreak(plugin.storage.index, goalMs, today);
 	const totalDelta = delta(stats.totalMs, prev.totalMs);
 	const sessionDelta = delta(stats.sessionCount, prev.sessionCount);
 	const avgDelta = delta(stats.avgSessionMs, prev.avgSessionMs);
@@ -105,6 +108,13 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin }) {
 		});
 	}
 	const peak = getPeakHour(stats.hourMatrix);
+	if (goalMs > 0) {
+		insights.push({
+			key: "dashboard.insight.goal",
+			params: {current: Math.round(todayMs / 60_000), goal: Math.round(goalMs / 60_000)},
+			tone: todayMs >= goalMs ? "up" : "neutral"
+		});
+	}
 	if (peak) {
 		insights.push({
 			key: "dashboard.insight.peak",
