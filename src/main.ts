@@ -1,15 +1,24 @@
-import {Plugin} from 'obsidian';
-import {FocusTimeSettingTab} from "./setting/focusTimeSettingTab";
-import {CommandFactory} from "./command/commandFactory";
+import { Plugin } from 'obsidian';
+import { FocusTimeSettingTab } from "./setting/focusTimeSettingTab";
+import { CommandFactory } from "./command/commandFactory";
 import I18n from "./language/i18n";
-import {TimeTracker} from "./core/timeTracker";
-import {PluginDataManager} from "./core/pluginDataManager";
-import {DailyReadDataManager} from "./core/dailyReadDataManager";
-import {DataAnalyzer} from "./core/dataAnalyzer";
-import {RibbonFactory} from "./view/display/ribbon/ribbonFactory";
-import {FocusDataAggregator} from "./core/focusDataAggregator";
+import { TimeTracker } from "./core/timeTracker";
+import { PluginDataManager } from "./core/pluginDataManager";
+import { DailyReadDataManager } from "./core/dailyReadDataManager";
+import { DataAnalyzer } from "./core/dataAnalyzer";
+import { RibbonFactory } from "./view/display/ribbon/ribbonFactory";
+import { FocusDataAggregator } from "./core/focusDataAggregator";
+import { SettingsStore } from "./core/settings";
 
 export default class FocusTimePlugin extends Plugin {
+	private _dataManager: PluginDataManager;
+	private _settingsManager: SettingsStore;
+	private _dataAnalyzer: DataAnalyzer;
+	private _focusDataAggregator: FocusDataAggregator;
+	private dailyReadDataManager: DailyReadDataManager;
+	private timeTracker: TimeTracker | null = null;
+	private settingTab: FocusTimeSettingTab | null = null;
+
 	get dataAnalyzer(): DataAnalyzer {
 		return this._dataAnalyzer;
 	}
@@ -18,91 +27,76 @@ export default class FocusTimePlugin extends Plugin {
 		return this._dataManager;
 	}
 
+	get settingsManager(): SettingsStore {
+		return this._settingsManager;
+	}
+
 	get focusDataAggregator(): FocusDataAggregator {
 		return this._focusDataAggregator;
 	}
 
-	private timeTracker: TimeTracker;
-	private _dataManager: PluginDataManager;
-	private dailyReadDataManager: DailyReadDataManager;
-	private _dataAnalyzer: DataAnalyzer;
-	private _focusDataAggregator: FocusDataAggregator;
-	private dataFileWatchInterval: number | null = null;
-	private lastPluginDataCheck = 0;
-
 	async onload() {
-
 		this._dataManager = new PluginDataManager(this);
-		this.dailyReadDataManager = new DailyReadDataManager(this.app);
+		await this._dataManager.loadData();
 
-		this.dataManager.loadData().then(() => {
-			this.init();
-			this.setupFileWatcher();
-		});
+		this._settingsManager = new SettingsStore(this._dataManager);
+		await this._settingsManager.load();
+		this.applyLanguagePreference();
 
+		// Repair legacy fields once, before any new data is written.
+		await this._dataManager.normalizeLegacyData(this.app);
+
+		// Wait for the workspace so the active file and leaf APIs are ready.
+		this.app.workspace.onLayoutReady(() => this.init());
 	}
 
 	onunload() {
-		this.timeTracker.unload();
-		if (this.dataFileWatchInterval !== null) {
-			window.clearInterval(this.dataFileWatchInterval);
+		this.timeTracker?.unload();
+		if (this._dataManager) {
+			void this._dataManager.flush();
 		}
 	}
 
 	/**
-	 * Initialize the plugin
-	 * @private
+	 * Obsidian calls this when `data.json` changed outside this instance
+	 * (another device, a sync client, or a manual edit). Replaces the old
+	 * 3-second `stat()` polling loop.
 	 */
+	async onExternalSettingsChange() {
+		if (!this._dataManager || !this._settingsManager) {
+			return;
+		}
+		await this._dataManager.mergeFromDisk();
+		await this._settingsManager.load();
+		this.applyLanguagePreference();
+		this.settingTab?.display();
+	}
+
+	public applyLanguagePreference() {
+		const preference = this._settingsManager.get().language;
+		I18n.getInstance().setLanguage(preference === "auto" ? I18n.autoDetectLanguage() : preference);
+	}
+
+	public toggleFocusTracking() {
+		this.timeTracker?.toggleManualPause();
+	}
+
 	private init() {
-		this.setLanguage();
-		this.timeTracker = new TimeTracker(this, this.app, this._dataManager, this.dailyReadDataManager);
+		this.dailyReadDataManager = new DailyReadDataManager(this);
+		this.timeTracker = new TimeTracker(
+			this,
+			this.app,
+			this._dataManager,
+			this.dailyReadDataManager,
+			this._settingsManager
+		);
 		this._dataAnalyzer = new DataAnalyzer(this, this.app, this._dataManager, this.dailyReadDataManager);
 		this._focusDataAggregator = new FocusDataAggregator(this.app, this._dataManager, this.dailyReadDataManager);
-		this.addSettingTab(new FocusTimeSettingTab(this.app, this));
+
+		this.settingTab = new FocusTimeSettingTab(this.app, this);
+		this.addSettingTab(this.settingTab);
+
 		RibbonFactory.createLeaderboardRibbon(this, this.app);
-
-		// Init commands
-		const commandFactory = new CommandFactory(this, this.app);
-		commandFactory.create();
-
+		new CommandFactory(this, this.app).create();
 	}
-
-	/**
-	 * Set the language of the plugin
-	 * @private
-	 */
-	private setLanguage() {
-		I18n.getInstance().setLanguage(I18n.autoDetectLanguage());
-	}
-
-	/**
-	 * Setup file watcher to detect external changes to data files
-	 * @private
-	 */
-	private setupFileWatcher() {
-		this.dataFileWatchInterval = window.setInterval(async () => {
-			await this.checkDataFileChanges();
-		}, 3000);
-	}
-
-	/**
-	 * Check if data files have been modified externally
-	 * Reload data to keep memory in sync with disk
-	 * @private
-	 */
-	private async checkDataFileChanges() {
-		try {
-			const pluginDataPath = `${this.app.vault.configDir}/plugins/focus-time/data.json`;
-			const pluginDataStat = await this.app.vault.adapter.stat(pluginDataPath);
-			
-			if (pluginDataStat && pluginDataStat.mtime > this.lastPluginDataCheck) {
-				if (this.lastPluginDataCheck > 0) {
-					await this._dataManager.loadData();
-				}
-				this.lastPluginDataCheck = pluginDataStat.mtime;
-			}
-		} catch (error) { /* empty */ }
-	}
-
 }
-

@@ -5,6 +5,7 @@ import { TimeUtils } from "../../util/timeUtils";
 import { DateNavigator } from "./DateNavigator";
 import { BarChart, BarChartData } from "./BarChart";
 import { DailyStats, MonthlyStats, YearlyStats, TotalStats, WeeklyStats } from "../../core/focusDataAggregator";
+import { DateUtils } from "../../util/dateUtils";
 import { setIcon, TFile, normalizePath } from "obsidian";
 
 type ViewMode = 'day' | 'week' | 'month' | 'year' | 'total';
@@ -44,7 +45,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 		setIsLoading(true);
 		try {
 			if (viewMode === 'day') {
-				const date = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
+				const date = DateUtils.toLocalDate(currentDate);
 				const stats = await plugin.focusDataAggregator.getDailyStats(date);
 				setDailyStats(stats);
 			} else if (viewMode === 'week') {
@@ -81,7 +82,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 		emptyMessage: string
 	): { shouldReturn: boolean; element?: React.ReactElement } => {
 		if (isLoading && !stats) {
-			return { shouldReturn: true, element: <div className="stats-loading">{I18n.t('loading')}</div> };
+			return { shouldReturn: true, element: <div className="stats-loading">{I18n.t('common.loading')}</div> };
 		}
 		if (!isLoading && (!stats || stats.totalDuration === 0)) {
 			return { shouldReturn: true, element: <div className="stats-no-data">{emptyMessage}</div> };
@@ -90,7 +91,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 	};
 
 	const renderDayView = () => {
-		const { shouldReturn, element } = renderLoadingOrEmpty(dailyStats, I18n.t('noDataForDate'));
+		const { shouldReturn, element } = renderLoadingOrEmpty(dailyStats, I18n.t('dashboard.empty.day'));
 		if (shouldReturn) {
 			return element || null;
 		}
@@ -99,12 +100,12 @@ export function StatisticsView(props: StatisticsViewProps) {
 		return (
 			<div className="stats-content">
 				<div className="stats-cards">
-					<StatCard icon="book-open" label={I18n.t('focusNoteCount')} value={String(dailyStats.noteCount)} />
-					<StatCard icon="timer" label={I18n.t('focusTime')} value={TimeUtils.getFormattedReadingTime(dailyStats.totalDuration)} />
+					<StatCard icon="book-open" label={I18n.t('dashboard.metrics.focusNotes')} value={String(dailyStats.noteCount)} />
+					<StatCard icon="timer" label={I18n.t('dashboard.metrics.focusTime')} value={TimeUtils.getFormattedReadingTime(dailyStats.totalDuration)} />
 				</div>
 
 				<div className="stats-note-list">
-					<h3>{I18n.t('focusNotes')}</h3>
+					<h3>{I18n.t('dashboard.notes.title')}</h3>
 					{dailyStats.notes
 						.sort((a, b) => b.duration - a.duration)
 						.map((note, index) => (
@@ -116,7 +117,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 							>
 								<div className="stats-note-left">
 									<div className="stats-note-name">
-										{index + 1}. {note.filePath.split('/').pop() || 'Unknown'}
+										{index + 1}. {note.filePath.split('/').pop() || I18n.t('common.unknown')}
 									</div>
 									<div className="stats-note-path">
 										{note.filePath}
@@ -135,7 +136,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 
 
 	const renderWeekView = () => {
-		const { shouldReturn, element } = renderLoadingOrEmpty(weeklyStats, I18n.t('noDataForWeek'));
+		const { shouldReturn, element } = renderLoadingOrEmpty(weeklyStats, I18n.t('dashboard.empty.week'));
 		if (shouldReturn) {
 			return element || null;
 		}
@@ -150,14 +151,17 @@ export function StatisticsView(props: StatisticsViewProps) {
 		}
 
 		weeklyStats.dailyStats.forEach(dayStats => {
-			const date = new Date(dayStats.date);
+			const parts = DateUtils.parseKey(dayStats.date);
+			const date = parts ? DateUtils.toDate(parts) : new Date(dayStats.date);
 			const day = date.getDay();
 			dailyDataMap[day] = dayStats.totalDuration;
 		});
 
 		const chartData: BarChartData[] = [];
 
-		const startOfWeek = new Date(weeklyStats.startDate);
+		const startOfWeek = DateUtils.parseKey(weeklyStats.startDate)
+			? DateUtils.toDate(DateUtils.parseKey(weeklyStats.startDate)!)
+			: new Date(weeklyStats.startDate);
 		const currentDay = new Date(startOfWeek);
 
 		const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -165,7 +169,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 		for (let i = 0; i < 7; i++) {
 			const dayIndex = currentDay.getDay();
 			chartData.push({
-				label: I18n.t(dayKeys[dayIndex]),
+				label: I18n.t(`weekday.${dayKeys[dayIndex]}`),
 				value: dailyDataMap[dayIndex]
 			});
 			currentDay.setDate(currentDay.getDate() + 1);
@@ -174,13 +178,13 @@ export function StatisticsView(props: StatisticsViewProps) {
 		return (
 			<div className="stats-content">
 				<div className="stats-cards">
-					<StatCard icon="book-open" label={I18n.t('focusNoteCount')} value={String(weeklyStats.noteCount)} />
-					<StatCard icon="timer" label={I18n.t('focusTime')} value={TimeUtils.getFormattedReadingTime(weeklyStats.totalDuration)} />
-					<StatCard icon="calendar-days" label={I18n.t('focusDays')} value={String(weeklyStats.focusDays)} />
+					<StatCard icon="book-open" label={I18n.t('dashboard.metrics.focusNotes')} value={String(weeklyStats.noteCount)} />
+					<StatCard icon="timer" label={I18n.t('dashboard.metrics.focusTime')} value={TimeUtils.getFormattedReadingTime(weeklyStats.totalDuration)} />
+					<StatCard icon="calendar-days" label={I18n.t('dashboard.metrics.focusDays')} value={String(weeklyStats.focusDays)} />
 				</div>
 
 				<div className="stats-chart-section">
-					<h3>{I18n.t('dailyDistribution')}</h3>
+					<h3>{I18n.t('dashboard.charts.daily')}</h3>
 					<BarChart
 						data={chartData}
 						height={250}
@@ -191,7 +195,9 @@ export function StatisticsView(props: StatisticsViewProps) {
 							// Since the chart data is generated in order from startOfWeek, we can just find the index.
 							const index = chartData.findIndex(d => d.label === label);
 							if (index !== -1) {
-								const targetDate = new Date(weeklyStats.startDate);
+								const parts = DateUtils.parseKey(weeklyStats.startDate);
+								const baseDate = parts ? DateUtils.toDate(parts) : new Date(weeklyStats.startDate);
+								const targetDate = new Date(baseDate);
 								targetDate.setDate(targetDate.getDate() + index);
 								setCurrentDate(new Date(targetDate));
 								setViewMode('day');
@@ -201,7 +207,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 				</div>
 
 				<div className="stats-note-list">
-					<h3>{I18n.t('focusNotes')}</h3>
+					<h3>{I18n.t('dashboard.notes.title')}</h3>
 					{weeklyStats.dailyStats
 						.flatMap(day => day.notes)
 						.reduce((acc, note) => {
@@ -223,7 +229,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 							>
 								<div className="stats-note-left">
 									<div className="stats-note-name">
-										{index + 1}. {note.filePath.split('/').pop() || 'Unknown'}
+										{index + 1}. {note.filePath.split('/').pop() || I18n.t('common.unknown')}
 									</div>
 									<div className="stats-note-path">
 										{note.filePath}
@@ -240,7 +246,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 	};
 
 	const renderMonthView = () => {
-		const { shouldReturn, element } = renderLoadingOrEmpty(monthlyStats, I18n.t('noDataForMonth'));
+		const { shouldReturn, element } = renderLoadingOrEmpty(monthlyStats, I18n.t('dashboard.empty.month'));
 		if (shouldReturn) {
 			return element || null;
 		}
@@ -255,9 +261,11 @@ export function StatisticsView(props: StatisticsViewProps) {
 		}
 
 		monthlyStats.dailyStats.forEach(dayStats => {
-			const dateParts = dayStats.date.split('-');
-			const day = parseInt(dateParts[2]);
-			dailyDataMap[day] = dayStats.totalDuration;
+			const parts = DateUtils.parseKey(dayStats.date);
+			if (!parts) {
+				return;
+			}
+			dailyDataMap[parts.day] = dayStats.totalDuration;
 		});
 
 		const chartData: BarChartData[] = [];
@@ -271,13 +279,13 @@ export function StatisticsView(props: StatisticsViewProps) {
 		return (
 			<div className="stats-content">
 				<div className="stats-cards">
-					<StatCard icon="book-open" label={I18n.t('focusNoteCount')} value={String(monthlyStats.noteCount)} />
-					<StatCard icon="timer" label={I18n.t('focusTime')} value={TimeUtils.getFormattedReadingTime(monthlyStats.totalDuration)} />
-					<StatCard icon="calendar-days" label={I18n.t('focusDays')} value={String(monthlyStats.focusDays)} />
+					<StatCard icon="book-open" label={I18n.t('dashboard.metrics.focusNotes')} value={String(monthlyStats.noteCount)} />
+					<StatCard icon="timer" label={I18n.t('dashboard.metrics.focusTime')} value={TimeUtils.getFormattedReadingTime(monthlyStats.totalDuration)} />
+					<StatCard icon="calendar-days" label={I18n.t('dashboard.metrics.focusDays')} value={String(monthlyStats.focusDays)} />
 				</div>
 
 				<div className="stats-chart-section">
-					<h3>{I18n.t('dailyDistribution')}</h3>
+					<h3>{I18n.t('dashboard.charts.daily')}</h3>
 					<BarChart
 						data={chartData}
 						height={250}
@@ -295,7 +303,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 	};
 
 	const renderYearView = () => {
-		const { shouldReturn, element } = renderLoadingOrEmpty(yearlyStats, I18n.t('noDataForYear'));
+		const { shouldReturn, element } = renderLoadingOrEmpty(yearlyStats, I18n.t('dashboard.empty.year'));
 		if (shouldReturn) {
 			return element || null;
 		}
@@ -319,13 +327,13 @@ export function StatisticsView(props: StatisticsViewProps) {
 		return (
 			<div className="stats-content">
 				<div className="stats-cards">
-					<StatCard icon="book-open" label={I18n.t('focusNoteCount')} value={String(yearlyStats.noteCount)} />
-					<StatCard icon="timer" label={I18n.t('focusTime')} value={TimeUtils.getFormattedReadingTime(yearlyStats.totalDuration)} />
-					<StatCard icon="calendar-days" label={I18n.t('focusDays')} value={String(yearlyStats.focusDays)} />
+					<StatCard icon="book-open" label={I18n.t('dashboard.metrics.focusNotes')} value={String(yearlyStats.noteCount)} />
+					<StatCard icon="timer" label={I18n.t('dashboard.metrics.focusTime')} value={TimeUtils.getFormattedReadingTime(yearlyStats.totalDuration)} />
+					<StatCard icon="calendar-days" label={I18n.t('dashboard.metrics.focusDays')} value={String(yearlyStats.focusDays)} />
 				</div>
 
 				<div className="stats-chart-section">
-					<h3>{I18n.t('monthlyDistribution')}</h3>
+					<h3>{I18n.t('dashboard.charts.monthly')}</h3>
 					<BarChart
 						data={chartData}
 						height={250}
@@ -343,7 +351,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 	};
 
 	const renderTotalView = () => {
-		const { shouldReturn, element } = renderLoadingOrEmpty(totalStats, I18n.t('noDataAvailable'));
+		const { shouldReturn, element } = renderLoadingOrEmpty(totalStats, I18n.t('dashboard.empty.total'));
 		if (shouldReturn) {
 			return element || null;
 		}
@@ -373,14 +381,14 @@ export function StatisticsView(props: StatisticsViewProps) {
 		return (
 			<div className="stats-content">
 				<div className="stats-cards">
-					<StatCard icon="book-open" label={I18n.t('totalNoteCount')} value={String(totalStats.noteCount)} />
-					<StatCard icon="timer" label={I18n.t('totalFocusTime')} value={TimeUtils.getFormattedReadingTime(totalStats.totalDuration)} />
-					<StatCard icon="calendar-days" label={I18n.t('totalFocusDays')} value={String(totalStats.focusDays)} />
+					<StatCard icon="book-open" label={I18n.t('dashboard.metrics.totalNotes')} value={String(totalStats.noteCount)} />
+					<StatCard icon="timer" label={I18n.t('dashboard.metrics.totalFocusTime')} value={TimeUtils.getFormattedReadingTime(totalStats.totalDuration)} />
+					<StatCard icon="calendar-days" label={I18n.t('dashboard.metrics.totalFocusDays')} value={String(totalStats.focusDays)} />
 				</div>
 
 				{yearChartData.length > 0 && (
 					<div className="stats-chart-section">
-						<h3>{I18n.t('yearlyDistribution')}</h3>
+						<h3>{I18n.t('dashboard.charts.yearly')}</h3>
 						<BarChart
 							data={yearChartData}
 							height={250}
@@ -419,38 +427,38 @@ export function StatisticsView(props: StatisticsViewProps) {
 	return (
 		<div className="statistics-view">
 			<div className="stats-header">
-				<h2>{I18n.t('statisticsTitle')}</h2>
+				<h2>{I18n.t('dashboard.statistics.title')}</h2>
 
 				<div className="view-mode-selector">
 					<button
 						className={`view-mode-button ${viewMode === 'day' ? 'active' : ''}`}
 						onClick={() => setViewMode('day')}
 					>
-						{I18n.t('viewDay')}
+						{I18n.t('dashboard.views.day')}
 					</button>
 					<button
 						className={`view-mode-button ${viewMode === 'week' ? 'active' : ''}`}
 						onClick={() => setViewMode('week')}
 					>
-						{I18n.t('viewWeek')}
+						{I18n.t('dashboard.views.week')}
 					</button>
 					<button
 						className={`view-mode-button ${viewMode === 'month' ? 'active' : ''}`}
 						onClick={() => setViewMode('month')}
 					>
-						{I18n.t('viewMonth')}
+						{I18n.t('dashboard.views.month')}
 					</button>
 					<button
 						className={`view-mode-button ${viewMode === 'year' ? 'active' : ''}`}
 						onClick={() => setViewMode('year')}
 					>
-						{I18n.t('viewYear')}
+						{I18n.t('dashboard.views.year')}
 					</button>
 					<button
 						className={`view-mode-button ${viewMode === 'total' ? 'active' : ''}`}
 						onClick={() => setViewMode('total')}
 					>
-						{I18n.t('viewTotal')}
+						{I18n.t('dashboard.views.total')}
 					</button>
 				</div>
 
@@ -464,7 +472,7 @@ export function StatisticsView(props: StatisticsViewProps) {
 			</div>
 
 			{isInitialLoad ? (
-				<div className="stats-loading">{I18n.t('loading')}</div>
+				<div className="stats-loading">{I18n.t('common.loading')}</div>
 			) : (
 				<div>
 					{viewMode === 'day' && renderDayView()}

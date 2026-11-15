@@ -35,7 +35,7 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; onSelect: (fileP
 
     function SidebarButton(props: { icon: string; label: string; active: boolean; onClick: () => void }) {
         const iconRef = React.useRef<HTMLSpanElement>(null);
-        
+
         React.useEffect(() => {
             if (iconRef.current) {
                 setIcon(iconRef.current, props.icon);
@@ -43,7 +43,7 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; onSelect: (fileP
         }, [props.icon]);
 
         return (
-            <button 
+            <button
                 className={`sidebar-button ${props.active ? 'active' : ''}`}
                 onClick={props.onClick}
             >
@@ -57,29 +57,29 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; onSelect: (fileP
         <div className="focus-time-modal-container">
             <button className="sidebar-toggle" onClick={toggleSidebar}>
                 <span className="sidebar-toggle-icon" ref={toggleIconRef}></span>
-                <span>{I18n.t('menu')}</span>
+                <span>{I18n.t('app.menu')}</span>
             </button>
-            <div 
+            <div
                 className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
                 onClick={closeSidebar}
                 ref={overlayRef}
             ></div>
             <div className={`focus-time-sidebar ${sidebarOpen ? 'open' : ''}`}>
-                <h2 className="sidebar-title">{I18n.t('focusTimeTitle')}</h2>
-                <SidebarButton 
-                    icon="bar-chart-3" 
-                    label={I18n.t('statistics')} 
-                    active={viewType === 'statistics'} 
-                    onClick={() => handleViewChange('statistics')} 
+                <h2 className="sidebar-title">{I18n.t('app.title')}</h2>
+                <SidebarButton
+                    icon="bar-chart-3"
+                    label={I18n.t('dashboard.tabs.statistics')}
+                    active={viewType === 'statistics'}
+                    onClick={() => handleViewChange('statistics')}
                 />
-                <SidebarButton 
-                    icon="trophy" 
-                    label={I18n.t('leaderboard')} 
-                    active={viewType === 'leaderboard'} 
-                    onClick={() => handleViewChange('leaderboard')} 
+                <SidebarButton
+                    icon="trophy"
+                    label={I18n.t('dashboard.tabs.leaderboard')}
+                    active={viewType === 'leaderboard'}
+                    onClick={() => handleViewChange('leaderboard')}
                 />
             </div>
-            
+
             <div className="focus-time-content">
                 {viewType === 'statistics' && <StatisticsView plugin={plugin} onSelect={onSelect} />}
                 {viewType === 'leaderboard' && <LeaderboardView plugin={plugin} onSelect={onSelect} />}
@@ -95,16 +95,16 @@ function LeaderboardView(props: { plugin: FocusTimePlugin; onSelect: (filePath: 
     if (!leaderboardData || leaderboardData.length === 0) {
         return (
             <div>
-                <h2 className="leaderboard-modal-title">{I18n.t('leaderboardTitle')}</h2>
-                <p className="leaderboard-no-data">{I18n.t('leaderboardNoData')}</p>
-                <p className="leaderboard-no-data">{I18n.t('leaderboardNoData2')}</p>
+                <h2 className="leaderboard-modal-title">{I18n.t('dashboard.leaderboard.title')}</h2>
+                <p className="leaderboard-no-data">{I18n.t('dashboard.leaderboard.empty')}</p>
+                <p className="leaderboard-no-data">{I18n.t('dashboard.leaderboard.hint')}</p>
             </div>
         );
     }
 
     return (
         <div>
-            <h2 className="leaderboard-modal-title">{I18n.t('leaderboardTitle')}</h2>
+            <h2 className="leaderboard-modal-title">{I18n.t('dashboard.leaderboard.title')}</h2>
             <div className="leaderboard-container">
                 {leaderboardData.map((item: any, index: number) => {
                     const formattedReadTime = TimeUtils.getFormattedReadingTime(item.totalTime);

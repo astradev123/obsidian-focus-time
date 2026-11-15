@@ -1,210 +1,333 @@
-import {App, TFile} from "obsidian";
-import {ReadRecord} from "../interface/readRecord";
-import {RecordUtils} from "../util/recordUtils";
-import {PluginDataManager} from "./pluginDataManager";
-import {StatusBarManager} from "../view/display/statusBar/statusBarManager";
-import {StatusBarFactory} from "../view/display/statusBar/statusBarFactory";
-import {DailyReadDataManager} from "./dailyReadDataManager";
-import FocusTimePlugin from "../main";
-import {Context} from "../context/context";
+import { App, Plugin, TFile } from "obsidian";
+import { ReadRecord } from "../interface/readRecord";
+import { PluginDataManager } from "./pluginDataManager";
+import { DailyReadDataManager } from "./dailyReadDataManager";
+import { SettingsStore } from "./settings";
+import { ActivityMonitor } from "./tracking/activityMonitor";
+import { computeAccrual, MAX_TICK_MULTIPLIER, splitAcrossMidnight } from "./tracking/trackingMath";
+import { PauseReason } from "./tracking/types";
+import { StatusBarManager } from "../view/display/statusBar/statusBarManager";
+import { StatusBarFactory } from "../view/display/statusBar/statusBarFactory";
 
+export type { PauseReason };
+
+type FlushReason = "timer" | "switch" | "idle" | "blur" | "manual" | "unload" | "bucket-change";
+
+const TICK_MS = 5000;
+const FLUSH_MS = 30_000;
+const MAX_DELTA_MS = TICK_MS * MAX_TICK_MULTIPLIER;
+
+interface PendingBucket {
+	file: TFile;
+	filePath: string;
+	date: string;
+	ms: number;
+}
+
+/**
+ * Focus session engine (v0 storage).
+ *
+ * Key differences from the old implementation:
+ * - counts real elapsed time instead of adding a fixed 6 seconds per tick;
+ * - stops at `last input + idle threshold`, not when idle is noticed;
+ * - settles exactly when switching notes, and splits at local midnight;
+ * - batches writes instead of rewriting `data.json` every 6 seconds.
+ */
 export class TimeTracker {
-
 	private readonly app: App;
 	private readonly dataManager: PluginDataManager;
+	private readonly dailyManager: DailyReadDataManager;
+	private readonly settings: SettingsStore;
 	private readonly statusBarManager: StatusBarManager;
-	private readonly dailyReadDataManager: DailyReadDataManager;
-	private globalRefreshTime: number = 1000 * 6;
-	private windowFocus: boolean = true;
+	private readonly activity: ActivityMonitor;
 
-	constructor(plugin: FocusTimePlugin, app: App, dataManager: PluginDataManager, dailyReadDataManager: DailyReadDataManager) {
+	private currentFile: TFile | null = null;
+	private accruedUntil = Date.now();
+	private pending: PendingBucket | null = null;
+	private pauseReason: PauseReason | null = null;
+	private manualPaused = false;
+	private windowFocused = true;
+	private documentVisible = true;
+
+	constructor(
+		plugin: Plugin,
+		app: App,
+		dataManager: PluginDataManager,
+		dailyManager: DailyReadDataManager,
+		settings: SettingsStore
+	) {
 		this.app = app;
 		this.dataManager = dataManager;
-		this.dailyReadDataManager = dailyReadDataManager;
+		this.dailyManager = dailyManager;
+		this.settings = settings;
 		this.statusBarManager = new StatusBarManager(plugin);
+		this.activity = new ActivityMonitor(plugin, () => this.onActivity());
 
-		plugin.registerEvent(this.app.workspace.on("file-open", () => this.handleFileChange()));
-		plugin.registerInterval(window.setInterval(() => this.handleRefresh(), this.globalRefreshTime));
+		this.windowFocused = true;
+		this.documentVisible = document.visibilityState !== "hidden";
+		this.currentFile = this.app.workspace.getActiveFile();
+		this.accruedUntil = Date.now();
 
-		window.addEventListener("focus", () => this.handleWindowFocus());
-		window.addEventListener("blur", () => this.handleWindowBlur());
+		plugin.registerEvent(this.app.workspace.on("file-open", () => {
+			void this.handleFileChange();
+		}));
+		plugin.registerInterval(window.setInterval(() => this.tick(), TICK_MS));
+		plugin.registerInterval(window.setInterval(() => {
+			void this.flush("timer");
+		}, FLUSH_MS));
+		plugin.registerDomEvent(window, "blur", () => this.onBlur());
+		plugin.registerDomEvent(window, "focus", () => this.onFocus());
+		plugin.registerDomEvent(document, "visibilitychange", () => this.onVisibilityChange());
 	}
 
 	/**
-	 * Set up the refresh timer
+	 * One tick: accrue elapsed time up to the idle cutoff, then reconcile state.
 	 */
-	private handleRefresh() {
-		this.refreshAndSave(this.globalRefreshTime);
-		this.updateStatusBar();
-	}
+	private tick(): void {
+		const now = Date.now();
 
-	/**
-	 * Updates the status bar with the current file's read time
-	 */
-	private updateStatusBar() {
-		const currentFile = Context.getCurrentFile();
-
-		if (currentFile) {
-			const readData = this.getTotalReadData(currentFile);
-			StatusBarFactory.createIconTextStatusBar(this.statusBarManager, readData?.duration ?? 0);
-		} else {
-			this.statusBarManager.remove();
+		if (!this.currentFile) {
+			this.updateStatusBar();
+			return;
 		}
-	}
-
-	/**
-	 * Handles file change event
-	 */
-	public async handleFileChange() {
-		const activeFile = this.app.workspace.getActiveFile();
-
-		const currentFile = Context.getCurrentFile();
-
-		if (currentFile && currentFile !== activeFile) {
-			await this.incTotalReadCount(currentFile);
-		}
-
-		Context.setCurrentFile(activeFile);
-
-		this.updateStatusBar();
-	}
-
-	/**
-	 * Handles window focus event
-	 * @private
-	 */
-	private handleWindowFocus() {
-		this.windowFocus = true;
-	}
-
-	/**
-	 * Handles window blur event
-	 * @private
-	 */
-	private handleWindowBlur() {
-		this.windowFocus = false;
-	}
-
-	/**
-	 * Refreshes the read time and saves it
-	 */
-	private async refreshAndSave(refreshTime: number) {
-		const currentFile = Context.getCurrentFile();
-
-		if (!currentFile || this.needSuspendTimer()) {
+		if (!this.canTrack()) {
+			this.accruedUntil = now;
+			if (!this.manualPaused && (!this.documentVisible || !this.windowFocused)) {
+				this.pauseReason = "blur";
+			}
+			this.updateStatusBar();
 			return;
 		}
 
-		const dailyData = await this.dailyReadDataManager.loadTodayData();
-		const todayReadData = dailyData["dailyReadData"]? dailyData["dailyReadData"][this.getFileId(currentFile.path)] : undefined;
-		await this.saveDailyReadData(currentFile, todayReadData ? todayReadData.duration + refreshTime : refreshTime);
-		await this.dataManager.loadData();
-	
-		const totalReadData = this.getTotalReadData(currentFile);
-		await this.saveTotalReadData(
-			currentFile,
-			totalReadData ? totalReadData.duration + refreshTime : refreshTime,
-			totalReadData ? totalReadData.openCount : 1
+		if (this.pauseReason === "blur") {
+			this.pauseReason = null;
+		}
+
+		this.settle(now);
+
+		if (this.pauseReason === "idle") {
+			void this.flush("idle");
+		}
+		this.updateStatusBar();
+	}
+
+	/**
+	 * Accrue time from `accruedUntil` to `now`, respecting the idle cutoff.
+	 */
+	private settle(now: number): void {
+		if (!this.canTrack()) {
+			this.accruedUntil = now;
+			return;
+		}
+
+		const result = computeAccrual(
+			now,
+			this.accruedUntil,
+			this.activity.getLastInputAt(),
+			this.settings.getIdleMs(),
+			MAX_DELTA_MS
 		);
-	}
 
-	public saveDailyReadData(
-		file: TFile,
-		duration: number
-	) {
-		const readRecord: ReadRecord = this.buildReadData(file, duration, 0, true);
-		this.dailyReadDataManager.saveTodayData("dailyReadData", readRecord).finally();
+		if (result.clockWentBackwards) {
+			this.accruedUntil = now;
+			return;
+		}
+
+		if (result.countedMs > 0) {
+			this.addPending(result.from, result.to);
+		}
+		this.accruedUntil = result.to;
+
+		if (result.idleReached) {
+			this.pauseReason = "idle";
+		}
 	}
 
 	/**
-	 * Saves the read data
+	 * Add a time range to the pending bucket, splitting at local midnight.
 	 */
-	public async saveTotalReadData(
-		file: TFile,
-		duration: number,
-		openCount: number
-	) {
-		const readRecord: ReadRecord = this.buildReadData(file, duration, openCount, false);
-		await this.dataManager.put("readData", readRecord.filePath, readRecord);
+	private addPending(from: number, to: number): void {
+		const file = this.currentFile;
+		if (!file) {
+			return;
+		}
+
+		for (const segment of splitAcrossMidnight(from, to)) {
+			if (segment.ms <= 0) {
+				continue;
+			}
+			if (!this.pending || this.pending.filePath !== file.path || this.pending.date !== segment.date) {
+				void this.flush("bucket-change");
+				this.pending = {
+					file,
+					filePath: file.path,
+					date: segment.date,
+					ms: 0
+				};
+			}
+			this.pending.ms += segment.ms;
+		}
 	}
 
 	/**
-	 * Builds the read data
-	 * @param file
-	 * @param duration
-	 * @param openCount
-	 * @param isDailyData Daily read data only need id and duration
-	 * @private
+	 * Persist the pending bucket. The bucket is detached synchronously so a
+	 * concurrent tick cannot mutate it while the async write is in flight.
 	 */
-	private buildReadData(file: TFile, duration: number, openCount: number, isDailyData: boolean): ReadRecord {
-		if(isDailyData) {
-			return {
-				filePath: "",
-				openCount: 0,
-				fileId: this.getFileId(file.path),
-				duration: duration
-			};
+	private async flush(reason: FlushReason): Promise<void> {
+		const pending = this.pending;
+		this.pending = null;
+		if (!pending || pending.ms <= 0) {
+			return;
 		}
 
-		return {
-			fileId: this.getOrCreateFileId(file.path),
-			filePath: file.path,
-			duration: duration,
-			openCount: openCount
-		};
+		try {
+			const noteId = await this.dataManager.ensureNote(pending.filePath);
+			await this.dailyManager.addDuration(pending.date, noteId, pending.ms);
+			await this.dataManager.addDuration(pending.filePath, noteId, pending.ms);
+		} catch (error) {
+			console.error(`[focus-time] Failed to flush focus data (${reason})`, error);
+		}
 	}
 
-	private getOrCreateFileId(filePath: string) {
-		const readData = this.dataManager.get("readData", filePath);
-		if (readData && readData.fileId) {
-			return readData.fileId;
+	public async handleFileChange(): Promise<void> {
+		const now = Date.now();
+		this.settle(now);
+		await this.flush("switch");
+
+		const previous = this.currentFile;
+		const active = this.app.workspace.getActiveFile();
+		this.currentFile = active;
+		this.accruedUntil = now;
+
+		if (active) {
+			await this.dataManager.ensureNote(active.path);
+			if (!previous || previous.path !== active.path) {
+				await this.dataManager.incrementOpenCount(active.path);
+			}
 		}
 
-		return Date.now().toString();
-	}
-
-	private getFileId(filePath: string) {
-		const readData = this.dataManager.get("readData", filePath);
-		if (readData && readData.fileId) {
-			return readData.fileId;
+		if (this.manualPaused) {
+			this.pauseReason = "manual";
+		} else if (this.canTrack()) {
+			this.pauseReason = null;
 		}
 
-		return undefined;
+		this.updateStatusBar();
 	}
 
-
-	private async incTotalReadCount(file: TFile) {
-		await this.dataManager.loadData();
-		
-		const totalReadData = this.getTotalReadData(file);
-		const totalRecord = this.buildReadData(
-			file,
-			totalReadData ? totalReadData.duration : 0,
-			totalReadData ? totalReadData.openCount + 1 : 1,
-			false
-		);
-		await this.saveTotalReadData(file, totalRecord.duration, totalRecord.openCount);
+	private onActivity(): void {
+		if (this.pauseReason === "idle" && !this.manualPaused) {
+			this.pauseReason = null;
+			this.accruedUntil = Date.now();
+			this.updateStatusBar();
+		}
 	}
-	
-	/**
-	 * Gets the read data
-	 */
+
+	private onBlur(): void {
+		const now = Date.now();
+		this.settle(now);
+		void this.flush("blur");
+		this.windowFocused = false;
+		if (!this.manualPaused) {
+			this.pauseReason = "blur";
+		}
+		this.accruedUntil = now;
+		this.updateStatusBar();
+	}
+
+	private onFocus(): void {
+		this.windowFocused = true;
+		if (this.pauseReason === "blur" && !this.manualPaused) {
+			this.pauseReason = null;
+		}
+		this.accruedUntil = Date.now();
+		this.updateStatusBar();
+	}
+
+	private onVisibilityChange(): void {
+		const hidden = document.visibilityState === "hidden";
+		const now = Date.now();
+
+		if (hidden) {
+			this.settle(now);
+			void this.flush("blur");
+			this.documentVisible = false;
+			if (!this.manualPaused) {
+				this.pauseReason = "blur";
+			}
+			this.accruedUntil = now;
+		} else {
+			this.documentVisible = true;
+			if (!this.manualPaused) {
+				this.pauseReason = this.canTrack() ? null : "blur";
+			}
+			this.accruedUntil = now;
+		}
+
+		this.updateStatusBar();
+	}
+
+	private canTrack(): boolean {
+		if (!this.currentFile) {
+			return false;
+		}
+		if (this.manualPaused) {
+			return false;
+		}
+		if (!this.documentVisible) {
+			return false;
+		}
+		if (this.settings.get().strictMode && !this.windowFocused) {
+			return false;
+		}
+		return true;
+	}
+
+	public toggleManualPause(): void {
+		if (this.manualPaused) {
+			this.manualPaused = false;
+			this.pauseReason = this.canTrack() ? null : "blur";
+			this.accruedUntil = Date.now();
+		} else {
+			const now = Date.now();
+			this.settle(now);
+			void this.flush("manual");
+			this.manualPaused = true;
+			this.pauseReason = "manual";
+			this.accruedUntil = now;
+		}
+		this.updateStatusBar();
+	}
+
 	public getTotalReadData(file: TFile): ReadRecord | undefined {
-		return this.dataManager.get("readData", RecordUtils.generateFileId(file));
+		return this.dataManager.get("readData", file.path) as ReadRecord | undefined;
 	}
 
-	/**
-	 * Unloads the time tracker
-	 */
-	public unload() {
+	private updateStatusBar(): void {
+		const file = this.currentFile;
+		if (!file) {
+			this.statusBarManager.remove();
+			return;
+		}
+
+		const record = this.getTotalReadData(file);
+		let total = record ? Number(record.duration) || 0 : 0;
+		if (this.pending && this.pending.filePath === file.path) {
+			total += this.pending.ms;
+		}
+
+		StatusBarFactory.createIconTextStatusBar(
+			this.statusBarManager,
+			total,
+			this.pauseReason,
+			this.settings.get().idleMinutes
+		);
+	}
+
+	public unload(): void {
+		this.settle(Date.now());
+		void this.flush("unload");
 		this.statusBarManager.remove();
-	}
-
-	private isStrictMode() {
-		return this.dataManager.get('settings', 'strictMode') ?? true;
-	}
-
-	private needSuspendTimer() {
-		return this.isStrictMode() && !this.windowFocus;
+		void this.dataManager.flush();
 	}
 }

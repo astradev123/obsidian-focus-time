@@ -1,49 +1,107 @@
 {
-	"minutes": "{minute}分钟",
-	"hours_minutes": "{hour}小时 {minute}分钟",
-	"lessThanOneMinute": "< 1分钟",
-	"language": "语言",
-	"strictMode": "严格模式",
-	"strictModeDesc": "开启严格模式后，当窗口失去焦点时，计时将会暂停。",
-	"leaderboardTitle": "专注时长排行榜",
-	"leaderboardNoData": "暂无数据，快去阅读吧！",
-	"leaderboardNoData2": "仅统计专注时长大于1分钟的笔记",
-	"openLeaderboardModal": "打开专注时间仪表盘",
-	"fileNotFound": "文件不存在",
-	"focusTimeTitle": "专注时间仪表盘",
-	"leaderboard": "排行榜",
-	"statistics": "专注数据",
-	"statisticsTitle": "专注数据统计",
-	"viewDay": "日",
-	"viewWeek": "周",
-	"viewMonth": "月",
-	"viewYear": "年",
-	"viewTotal": "总",
-	"focusNoteCount": "专注笔记数",
-	"focusTime": "专注时间",
-	"focusDays": "专注天数",
-	"totalNoteCount": "总笔记数",
-	"totalFocusTime": "总专注时间",
-	"totalFocusDays": "总专注天数",
-	"noDataForDate": "该日期无数据",
-	"noDataForWeek": "本周无数据",
-	"noDataForMonth": "该月无数据",
-	"noDataForYear": "该年份暂无数据",
-	"noDataAvailable": "暂无数据",
-	"loading": "加载中...",
-	"today": "今天",
-	"datePrevious": "上一个",
-	"dateNext": "下一个",
-	"focusNotes": "专注笔记列表",
-	"dailyDistribution": "每日专注时长分布",
-	"monthlyDistribution": "每月专注时长分布",
-	"yearlyDistribution": "年度专注时长分布",
-	"menu": "菜单",
-	"sunday": "周日",
-	"monday": "周一",
-	"tuesday": "周二",
-	"wednesday": "周三",
-	"thursday": "周四",
-	"friday": "周五",
-	"saturday": "周六"
+	"app": {
+		"title": "专注时间仪表盘",
+		"menu": "菜单"
+	},
+	"command": {
+		"openDashboard": "打开专注时间仪表盘",
+		"toggleTracking": "暂停或继续专注计时"
+	},
+	"common": {
+		"loading": "加载中…",
+		"today": "今天",
+		"unknown": "未知",
+		"noData": "暂无数据",
+		"fileNotFound": "文件不存在",
+		"previous": "上一个",
+		"next": "下一个"
+	},
+	"time": {
+		"minutes": "{minute}分钟",
+		"hoursMinutes": "{hour}小时 {minute}分钟",
+		"lessThanOneMinute": "< 1分钟"
+	},
+	"status": {
+		"focusing": "专注中",
+		"pausedIdle": "已暂停 · {minute} 分钟无操作",
+		"pausedBlur": "已暂停 · 窗口失焦",
+		"pausedManual": "已暂停",
+		"short": {
+			"idle": "空闲",
+			"blur": "失焦",
+			"manual": "暂停"
+		}
+	},
+	"settings": {
+		"language": {
+			"name": "语言",
+			"desc": "默认跟随 Obsidian 的界面语言。",
+			"auto": "跟随 Obsidian"
+		},
+		"strictMode": {
+			"name": "严格模式",
+			"desc": "窗口失去焦点时暂停计时。"
+		},
+		"idle": {
+			"name": "空闲检测",
+			"desc": "超过设定时间没有输入时停止计时。",
+			"off": "关闭",
+			"fixed": "5 分钟",
+			"custom": "自定义",
+			"minutes": "空闲阈值（分钟）"
+		}
+	},
+	"dashboard": {
+		"tabs": {
+			"statistics": "专注数据",
+			"leaderboard": "排行榜"
+		},
+		"statistics": {
+			"title": "专注数据统计"
+		},
+		"views": {
+			"day": "日",
+			"week": "周",
+			"month": "月",
+			"year": "年",
+			"total": "总"
+		},
+		"charts": {
+			"daily": "每日专注时长分布",
+			"monthly": "每月专注时长分布",
+			"yearly": "年度专注时长分布"
+		},
+		"empty": {
+			"day": "该日期无数据",
+			"week": "本周无数据",
+			"month": "该月无数据",
+			"year": "该年份暂无数据",
+			"total": "暂无数据"
+		},
+		"notes": {
+			"title": "专注笔记列表"
+		},
+		"metrics": {
+			"focusNotes": "专注笔记数",
+			"focusTime": "专注时间",
+			"focusDays": "专注天数",
+			"totalNotes": "总笔记数",
+			"totalFocusTime": "总专注时间",
+			"totalFocusDays": "总专注天数"
+		},
+		"leaderboard": {
+			"title": "专注时长排行榜",
+			"empty": "暂无数据，快去阅读吧！",
+			"hint": "仅统计专注时长大于 1 分钟的笔记"
+		}
+	},
+	"weekday": {
+		"sunday": "周日",
+		"monday": "周一",
+		"tuesday": "周二",
+		"wednesday": "周三",
+		"thursday": "周四",
+		"friday": "周五",
+		"saturday": "周六"
+	}
 }

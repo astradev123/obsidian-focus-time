@@ -1,3 +1,5 @@
+import I18n from "../../language/i18n";
+
 export interface BarChartData {
 	label: string;
 	value: number; // in milliseconds
@@ -16,7 +18,7 @@ export function BarChart(props: BarChartProps) {
 	const { data, height = 200, onBarClick } = props;
 
 	if (!data || data.length === 0) {
-		return <div className="bar-chart-empty">No data available</div>;
+		return <div className="bar-chart-empty">{I18n.t('common.noData')}</div>;
 	}
 
 	const dataInMinutes = data.map(item => ({
@@ -73,7 +75,7 @@ export function BarChart(props: BarChartProps) {
 									<div
 										className="bar bar-empty"
 										style={{ height: '2px' }}
-										title={`${item.label}: No data`}
+										title={`${item.label}: ${I18n.t('common.noData')}`}
 									></div>
 								)}
 							</div>

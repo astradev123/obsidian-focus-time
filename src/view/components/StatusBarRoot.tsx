@@ -1,8 +1,14 @@
 import * as React from 'react';
 import { setIcon } from 'obsidian';
 
-export function StatusBarRoot(props: { icon?: string; text: string }) {
-    const { icon, text } = props;
+interface StatusBarRootProps {
+    icon?: string;
+    text: string;
+    title?: string;
+}
+
+export function StatusBarRoot(props: StatusBarRootProps) {
+    const { icon, text, title } = props;
     const iconRef = React.useRef<HTMLSpanElement | null>(null);
     React.useEffect(() => {
         if (icon && iconRef.current) {
@@ -10,11 +16,9 @@ export function StatusBarRoot(props: { icon?: string; text: string }) {
         }
     }, [icon]);
     return (
-        <span className="reading-time-text" title={text}>
+        <span className="reading-time-text" title={title ?? text}>
             {icon ? <span ref={iconRef} aria-hidden /> : null}
             <span>{text}</span>
         </span>
     );
 }
-
-

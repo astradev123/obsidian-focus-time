@@ -1,49 +1,107 @@
 {
-	"minutes": "{minute}m",
-	"hours_minutes": "{hour}h {minute}m",
-	"lessThanOneMinute": "< 1m",
-	"language": "Language",
-	"strictMode": "Strict mode",
-	"strictModeDesc": "Timer will be suspend if the window lost focus while the strict mode activated.",
-	"leaderboardTitle": "Focus Time Leaderboard",
-	"leaderboardNoData": "No data available, start reading now!",
-	"leaderboardNoData2": "Only notes with focus time greater than 1 minute are counted",
-	"openLeaderboardModal": "Open Focus Time Dashboard",
-	"fileNotFound": "File not found",
-	"focusTimeTitle": "Focus Time Dashboard",
-	"leaderboard": "Leaderboard",
-	"statistics": "Statistics",
-	"statisticsTitle": "Focus Statistics",
-	"viewDay": "Day",
-	"viewWeek": "Week",
-	"viewMonth": "Month",
-	"viewYear": "Year",
-	"viewTotal": "Total",
-	"focusNoteCount": "Focus Note Count",
-	"focusTime": "Focus Time",
-	"focusDays": "Focus Days",
-	"totalNoteCount": "Total Notes",
-	"totalFocusTime": "Total Focus Time",
-	"totalFocusDays": "Total Focus Days",
-	"noDataForDate": "No data for this date",
-	"noDataForWeek": "No data for this week",
-	"noDataForMonth": "No data for this month",
-	"noDataForYear": "No data for this year",
-	"noDataAvailable": "No data available",
-	"loading": "Loading...",
-	"today": "Today",
-	"datePrevious": "Previous",
-	"dateNext": "Next",
-	"focusNotes": "Focus Notes",
-	"dailyDistribution": "Daily Focus Time Distribution",
-	"monthlyDistribution": "Monthly Focus Time Distribution",
-	"yearlyDistribution": "Yearly Focus Time Distribution",
-	"menu": "Menu",
-	"sunday": "Sun",
-	"monday": "Mon",
-	"tuesday": "Tue",
-	"wednesday": "Wed",
-	"thursday": "Thu",
-	"friday": "Fri",
-	"saturday": "Sat"
+	"app": {
+		"title": "Focus Time",
+		"menu": "Menu"
+	},
+	"command": {
+		"openDashboard": "Open Focus Time dashboard",
+		"toggleTracking": "Pause or resume focus tracking"
+	},
+	"common": {
+		"loading": "Loading…",
+		"today": "Today",
+		"unknown": "Unknown",
+		"noData": "No data available",
+		"fileNotFound": "File not found",
+		"previous": "Previous",
+		"next": "Next"
+	},
+	"time": {
+		"minutes": "{minute}m",
+		"hoursMinutes": "{hour}h {minute}m",
+		"lessThanOneMinute": "< 1m"
+	},
+	"status": {
+		"focusing": "Focusing",
+		"pausedIdle": "Paused · no input for {minute} min",
+		"pausedBlur": "Paused · window not focused",
+		"pausedManual": "Paused",
+		"short": {
+			"idle": "idle",
+			"blur": "unfocused",
+			"manual": "paused"
+		}
+	},
+	"settings": {
+		"language": {
+			"name": "Language",
+			"desc": "Follows Obsidian's language by default.",
+			"auto": "Follow Obsidian"
+		},
+		"strictMode": {
+			"name": "Strict mode",
+			"desc": "Pause tracking when the window loses focus."
+		},
+		"idle": {
+			"name": "Idle detection",
+			"desc": "Stop counting after a period without input.",
+			"off": "Off",
+			"fixed": "5 minutes",
+			"custom": "Custom",
+			"minutes": "Idle threshold (minutes)"
+		}
+	},
+	"dashboard": {
+		"tabs": {
+			"statistics": "Statistics",
+			"leaderboard": "Leaderboard"
+		},
+		"statistics": {
+			"title": "Focus statistics"
+		},
+		"views": {
+			"day": "Day",
+			"week": "Week",
+			"month": "Month",
+			"year": "Year",
+			"total": "Total"
+		},
+		"charts": {
+			"daily": "Daily focus distribution",
+			"monthly": "Monthly focus distribution",
+			"yearly": "Yearly focus distribution"
+		},
+		"empty": {
+			"day": "No data for this date",
+			"week": "No data this week",
+			"month": "No data this month",
+			"year": "No data this year",
+			"total": "No data yet"
+		},
+		"notes": {
+			"title": "Focus notes"
+		},
+		"metrics": {
+			"focusNotes": "Focus notes",
+			"focusTime": "Focus time",
+			"focusDays": "Focus days",
+			"totalNotes": "Total notes",
+			"totalFocusTime": "Total focus time",
+			"totalFocusDays": "Total focus days"
+		},
+		"leaderboard": {
+			"title": "Focus time leaderboard",
+			"empty": "No data yet. Start reading now!",
+			"hint": "Only notes with more than 1 minute are counted."
+		}
+	},
+	"weekday": {
+		"sunday": "Sun",
+		"monday": "Mon",
+		"tuesday": "Tue",
+		"wednesday": "Wed",
+		"thursday": "Thu",
+		"friday": "Fri",
+		"saturday": "Sat"
+	}
 }

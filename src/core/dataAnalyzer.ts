@@ -1,6 +1,7 @@
-import {App, Plugin, TFile, TFolder} from "obsidian";
-import {PluginDataManager} from "./pluginDataManager";
-import {DailyReadDataManager} from "./dailyReadDataManager";
+import { App, Plugin, TFile, TFolder } from "obsidian";
+import { PluginDataManager } from "./pluginDataManager";
+import { DailyReadDataManager } from "./dailyReadDataManager";
+import { ReadRecord } from "../interface/readRecord";
 
 export class DataAnalyzer {
 
@@ -15,34 +16,31 @@ export class DataAnalyzer {
 		plugin.registerEvent(this.app.vault.on('rename', (absFile, oldPath) => {
 			// Handle folder rename: update all files under the folder
 			if (absFile instanceof TFolder) {
-				this.onFolderRename(absFile, oldPath);
+				void this.onFolderRename(absFile, oldPath);
 				return;
 			}
-			
+
 			// Handle file rename
 			if (absFile instanceof TFile) {
-				this.onFileRename(absFile, oldPath);
+				void this.onFileRename(absFile, oldPath);
 				return;
 			}
 		}));
 	}
 
 	public analyzeLeaderboardTotal() {
-
-		const readData = this.dataManager.getCategory("readData");
+		const readData = this.dataManager.getCategory("readData") as Record<string, ReadRecord> | undefined;
 
 		if (!readData) {
 			return;
 		}
 
-		const leaderboard = Object.keys(readData).map(fileId => {
-			const fileRecord = readData[fileId];
-			const totalTime = fileRecord.duration;
-			const filePath = readData[fileId].filePath;
+		const leaderboard = Object.keys(readData).map((path) => {
+			const fileRecord = readData[path];
 			return {
 				fileRecord,
-				filePath,
-				totalTime,
+				filePath: fileRecord.filePath || path,
+				totalTime: Number(fileRecord.duration) || 0,
 			};
 		});
 
@@ -60,7 +58,7 @@ export class DataAnalyzer {
 	}
 
 	private async onFileRename(file: TFile, oldPath: string) {
-		const readData = this.dataManager.get('readData', oldPath);
+		const readData = this.dataManager.get('readData', oldPath) as ReadRecord | undefined;
 		if (!readData) {
 			return;
 		}
@@ -72,30 +70,29 @@ export class DataAnalyzer {
 	}
 
 	private async onFolderRename(folder: TFolder, oldPath: string) {
-		await this.dataManager.loadData();
-		const readDataCategory = this.dataManager.getCategory("readData");
-		
+		const readDataCategory = this.dataManager.getCategory("readData") as Record<string, ReadRecord> | undefined;
+
 		if (!readDataCategory) {
 			return;
 		}
 
 		const normalizedOldPath = oldPath.endsWith('/') ? oldPath.slice(0, -1) : oldPath;
 		const newPath = folder.path;
-		
-		const filesToUpdate: Array<{oldPath: string, newPath: string, data: any}> = [];
-		
+
+		const filesToUpdate: Array<{oldPath: string, newPath: string, data: ReadRecord}> = [];
+
 		for (const storedPath in readDataCategory) {
 			if (storedPath === normalizedOldPath || storedPath.startsWith(normalizedOldPath + '/')) {
 				const fileData = readDataCategory[storedPath];
 				if (fileData && fileData.filePath) {
-					const relativePath = storedPath === normalizedOldPath 
-						? '' 
+					const relativePath = storedPath === normalizedOldPath
+						? ''
 						: storedPath.substring(normalizedOldPath.length + 1);
-					
-					const newFilePath = relativePath === '' 
-						? newPath 
+
+					const newFilePath = relativePath === ''
+						? newPath
 						: `${newPath}/${relativePath}`;
-					
+
 					const file = this.app.vault.getFileByPath(newFilePath);
 					if (file) {
 						filesToUpdate.push({

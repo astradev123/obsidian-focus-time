@@ -18,11 +18,11 @@ export class StatusBarManager {
     /**
      * Render status bar with React
      */
-    render(text: string, icon?: string) {
+    render(text: string, icon?: string, title?: string) {
         if (!this.root) {
             this.root = createRoot(this.statusBar);
         }
-        this.root.render(React.createElement(StatusBarRoot, { text, icon }));
+        this.root.render(React.createElement(StatusBarRoot, { text, icon, title }));
     }
 
 	/**

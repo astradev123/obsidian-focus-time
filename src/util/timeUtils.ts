@@ -1,4 +1,5 @@
 import I18n from "../language/i18n";
+import { DateUtils } from "./dateUtils";
 
 export class TimeUtils {
 
@@ -7,28 +8,32 @@ export class TimeUtils {
 	 * @param timeMilliseconds
 	 */
 	static getFormattedReadingTime(timeMilliseconds: number): string {
-		const readMinutes = timeMilliseconds / 1000 / 60;
+		const readMinutes = Math.max(0, timeMilliseconds) / 1000 / 60;
 		const hours = Math.floor(readMinutes / 60);
 		const minutes = Math.floor(readMinutes % 60);
 
 		if (hours === 0) {
 			if (minutes === 0) {
-				return I18n.t("lessThanOneMinute");
+				return I18n.t("time.lessThanOneMinute");
 			}
-			return I18n.t("minutes", {minute: minutes.toFixed(0)});
+			return I18n.t("time.minutes", {minute: minutes.toFixed(0)});
 		}
 
-		return I18n.t("hours_minutes", {hour: hours, minute: minutes.toFixed(0)});
+		return I18n.t("time.hoursMinutes", {hour: hours, minute: minutes.toFixed(0)});
+	}
+
+	static formatNumber(value: number): string {
+		try {
+			return new Intl.NumberFormat(I18n.getInstance().getLanguage()).format(value);
+		} catch {
+			return String(value);
+		}
 	}
 
 	/**
-	 * Returns the current date in the format of YYYY-MM-DD
+	 * Local date in `YYYY-MM-DD` format.
 	 */
 	static getDateToday() {
-		const today = new Date();
-		const year = today.getFullYear();
-		const month = today.getMonth() + 1;
-		const day = today.getDate();
-		return `${year}-${month}-${day}`;
+		return DateUtils.toLocalDate();
 	}
 }
