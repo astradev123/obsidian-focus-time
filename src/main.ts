@@ -133,12 +133,16 @@ export default class FocusTimePlugin extends Plugin {
 			if (migrating) {
 				new Notice(I18n.t("notice.migrated"));
 			}
+			// A dashboard tab restored before storage was ready missed the first
+			// index update; notify it now.
+			this._storage.notifyChanged();
 		} catch (error) {
 			console.error("[focus-time] Storage initialization failed", error);
 			new Notice(I18n.t("notice.migrationFailed"));
 		}
 
 		this.init();
+		this.settingTab?.display();
 
 		this.registerInterval(window.setInterval(() => {
 			void this.checkExternalEvents();

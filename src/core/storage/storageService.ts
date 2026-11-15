@@ -285,6 +285,10 @@ export class StorageService {
 		};
 	}
 
+	public notifyChanged(): void {
+		this.emitChange();
+	}
+
 	private emitChange(): void {
 		for (const listener of Array.from(this.listeners)) {
 			try {
