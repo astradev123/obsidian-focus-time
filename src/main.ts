@@ -61,9 +61,6 @@ export default class FocusTimePlugin extends Plugin {
 		await this._settingsManager.load();
 		this.applyLanguagePreference();
 
-		// Repair legacy v0 fields once, before the migration reads them.
-		await this._dataManager.normalizeLegacyData(this.app);
-
 		this.dailyReadDataManager = new DailyReadDataManager(this);
 		const pluginDir = this.manifest.dir ?? `${this.app.vault.configDir}/plugins/${this.manifest.id}`;
 		const deviceId = resolveDeviceId(this.app.vault.getName());

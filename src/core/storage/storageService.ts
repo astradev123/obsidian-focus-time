@@ -51,7 +51,7 @@ export class StorageService {
 	private readonly listeners = new Set<() => void>();
 
 	constructor(
-		app: App,
+		private readonly app: App,
 		private readonly pluginDir: string,
 		private readonly deviceId: string,
 		private readonly dataManager: PluginDataManager,
@@ -135,6 +135,8 @@ export class StorageService {
 
 		try {
 			await this.backupV0(backupDir);
+			// Normalize only after the original files have been copied.
+			await this.dataManager.normalizeLegacyData(this.app);
 			const scanResult = await this.scanAndImport();
 			this.lastScan = scanResult.scan;
 			importedEvents = scanResult.importedEvents;

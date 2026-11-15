@@ -106,4 +106,19 @@ describe("FocusIndex", () => {
 
 		expect(index.getNoteTotal("n1")).toBe(0);
 	});
+
+	it("treats legacy totals as a max baseline, not an additive series", () => {
+		const start = new Date(2026, 0, 5, 10, 0, 0).getTime();
+		const index = new FocusIndex();
+		const base = {v: 1 as const, dev: "dev1", at: start, type: "legacyTotal" as const, note: "n1", src: "v0-readData" as const};
+
+		index.rebuild([
+			{...base, id: "l1", ms: 5_000},
+			{...base, id: "l2", ms: 3_000}
+		]);
+		expect(index.getNoteTotal("n1")).toBe(5_000);
+
+		index.add({...base, id: "l3", ms: 8_000});
+		expect(index.getNoteTotal("n1")).toBe(8_000);
+	});
 });

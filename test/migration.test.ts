@@ -36,7 +36,8 @@ function setup() {
 	const plugin = {app, manifest: {id: "focus-time", dir: PLUGIN_DIR}} as unknown as Plugin;
 	const dailyManager = new DailyReadDataManager(plugin);
 	const dataManager = {
-		getCategory: (category: string) => (category === "readData" ? readData : undefined)
+		getCategory: (category: string) => (category === "readData" ? readData : undefined),
+		normalizeLegacyData: async () => ({convertedIds: 0, repairedDuplicates: 0, repairedRecords: 0})
 	} as unknown as PluginDataManager;
 
 	const storage = new StorageService(app as never, PLUGIN_DIR, "dev1", dataManager, dailyManager);

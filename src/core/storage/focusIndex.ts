@@ -26,6 +26,7 @@ export class FocusIndex {
 	private readonly noteFirstAt = new Map<string, number>();
 	private readonly noteLastAt = new Map<string, number>();
 	private readonly legacyDates = new Set<string>();
+	private readonly legacyBaseline = new Map<string, number>();
 	private readonly sessions: SessionEvent[] = [];
 	private legacyDayMs = 0;
 	private legacyTotalMs = 0;
@@ -40,6 +41,7 @@ export class FocusIndex {
 		this.noteFirstAt.clear();
 		this.noteLastAt.clear();
 		this.legacyDates.clear();
+		this.legacyBaseline.clear();
 		this.sessions.length = 0;
 		this.legacyDayMs = 0;
 		this.legacyTotalMs = 0;
@@ -64,10 +66,17 @@ export class FocusIndex {
 			case "legacyDay":
 				this.addLegacyDay(event.date, event.note, event.ms);
 				break;
-			case "legacyTotal":
-				this.legacyTotalMs += event.ms;
-				this.addNoteTotal(event.note, event.ms);
+			case "legacyTotal": {
+				// Undated legacy totals are a baseline, not an additive series:
+				// repeated imports of the same note must not double count.
+				const previous = this.legacyBaseline.get(event.note) ?? 0;
+				if (event.ms > previous) {
+					this.legacyBaseline.set(event.note, event.ms);
+					this.legacyTotalMs += event.ms - previous;
+					this.addNoteTotal(event.note, event.ms - previous);
+				}
 				break;
+			}
 			case "adjust":
 				this.adjustMs += event.ms;
 				this.addNoteTotal(event.note, event.ms);
