@@ -77,6 +77,23 @@ describe("PluginDataManager", () => {
 		expect(manager.getPathByFileId(fileId)).toBe("notes/new.md");
 	});
 
+	it("reuses a legacy id field instead of creating a new one", async () => {
+		const {manager} = createManager({
+			readData: {
+				"legacy.md": {id: "1700000000000", duration: 5000, openCount: 2}
+			}
+		});
+		await manager.loadData();
+
+		const fileId = await manager.ensureNote("legacy.md");
+
+		expect(fileId).toBe("1700000000000");
+		const record = manager.get("readData", "legacy.md") as { fileId: string; id?: string; duration: number };
+		expect(record.fileId).toBe("1700000000000");
+		expect(record.id).toBeUndefined();
+		expect(record.duration).toBe(5000);
+	});
+
 	it("merges remote totals without lowering local durations", async () => {
 		const {plugin, manager} = createManager({
 			readData: {

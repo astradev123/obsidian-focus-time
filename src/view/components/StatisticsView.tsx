@@ -159,9 +159,8 @@ export function StatisticsView(props: StatisticsViewProps) {
 
 		const chartData: BarChartData[] = [];
 
-		const startOfWeek = DateUtils.parseKey(weeklyStats.startDate)
-			? DateUtils.toDate(DateUtils.parseKey(weeklyStats.startDate)!)
-			: new Date(weeklyStats.startDate);
+		const weekParts = DateUtils.parseKey(weeklyStats.startDate);
+		const startOfWeek = weekParts ? DateUtils.toDate(weekParts) : new Date(weeklyStats.startDate);
 		const currentDay = new Date(startOfWeek);
 
 		const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];

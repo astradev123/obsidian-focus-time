@@ -165,8 +165,22 @@ export class PluginDataManager {
 	public async ensureNote(filePath: string): Promise<string> {
 		await this.loadData();
 		const existing = this.get("readData", filePath) as ReadRecordLike | undefined;
-		if (existing && existing.fileId) {
-			return existing.fileId;
+		const legacyId = existing
+			? existing.fileId || (typeof existing.id === "string" && existing.id.length > 0 ? existing.id : undefined)
+			: undefined;
+
+		if (legacyId) {
+			if (!existing?.fileId) {
+				const {id: _legacyId, ...rest} = existing as ReadRecordLike;
+				await this.put("readData", filePath, {
+					...rest,
+					fileId: legacyId,
+					filePath: existing?.filePath || filePath,
+					duration: Number(existing?.duration) || 0,
+					openCount: Number(existing?.openCount) || 0
+				});
+			}
+			return legacyId;
 		}
 
 		const fileId = this.generateNoteId();
@@ -196,9 +210,12 @@ export class PluginDataManager {
 			return;
 		}
 
-		record.fileId = record.fileId || fileId;
+		record.fileId = record.fileId || (typeof record.id === "string" ? record.id : fileId);
 		record.filePath = record.filePath || filePath;
 		record.duration = (Number(record.duration) || 0) + ms;
+		if (record.id !== undefined) {
+			delete record.id;
+		}
 		this.rebuildIndex();
 		await this.markDirty(false);
 	}
