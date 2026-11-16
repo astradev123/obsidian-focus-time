@@ -169,9 +169,22 @@ function buildTrendEntries(stats: RangeStats): TrendEntry[] {
 		const month = date.slice(0, 7);
 		months.set(month, (months.get(month) ?? 0) + (totals.get(date) ?? 0));
 	}
-	return Array.from(months.entries()).map(([month, ms]) => ({
+	const monthEntries = Array.from(months.entries());
+
+	if (monthEntries.length > 60) {
+		const years = new Map<string, number>();
+		for (const [month, ms] of monthEntries) {
+			const year = month.slice(0, 4);
+			years.set(year, (years.get(year) ?? 0) + ms);
+		}
+		return Array.from(years.entries()).map(([year, ms]) => ({key: year, label: year, ms}));
+	}
+
+	const multiYear = stats.range.from.slice(0, 4) !== stats.range.to.slice(0, 4);
+	const monthFormat = new Intl.DateTimeFormat(I18n.getInstance().getLanguage(), {month: "short"});
+	return monthEntries.map(([month, ms]) => ({
 		key: month,
-		label: new Intl.DateTimeFormat(I18n.getInstance().getLanguage(), {month: "short"}).format(new Date(`${month}-01T00:00:00`)),
+		label: multiYear ? `${month.slice(2, 4)}/${month.slice(5, 7)}` : monthFormat.format(new Date(`${month}-01T00:00:00`)),
 		ms
 	}));
 }

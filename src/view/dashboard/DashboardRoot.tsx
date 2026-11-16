@@ -92,10 +92,10 @@ function delta(current: number, previous: number): {text: string; tone: "up" | "
 	return {text: `${percent > 0 ? "+" : ""}${percent}%`, tone: percent > 0 ? "up" : "down"};
 }
 
-export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab }) {
+export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab; initialPeriod?: Period }) {
 	const {plugin} = props;
 	const [tab, setTab] = React.useState<Tab>(props.initialTab ?? "overview");
-	const [period, setPeriod] = React.useState<Period>("week");
+	const [period, setPeriod] = React.useState<Period>(props.initialPeriod ?? "week");
 	const [anchor, setAnchor] = React.useState(new Date());
 	const [categoryFilter, setCategoryFilter] = React.useState<string | null>(null);
 	const [, setTick] = React.useState(0);
@@ -109,16 +109,19 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab
 		};
 	}, [plugin]);
 
-	const range = getRange(period, anchor);
+	const firstActive = plugin.storage.index.getActiveDays()[0];
+	const range = getRange(period, anchor, firstActive);
 	const stats = getRangeStats(plugin.storage.index, range, (noteId) => plugin.storage.getPath(noteId));
-	const prev = getRangeStats(plugin.storage.index, previousRange(range), (noteId) => plugin.storage.getPath(noteId));
+	const prev = period === "total"
+		? null
+		: getRangeStats(plugin.storage.index, previousRange(range), (noteId) => plugin.storage.getPath(noteId));
 	const goalMs = plugin.settingsManager.getGoalMs();
 	const today = DateUtils.toLocalDate();
 	const todayMs = plugin.storage.index.getDayTotal(today);
 	const streak = getGoalStreak(plugin.storage.index, goalMs, today);
-	const totalDelta = delta(stats.totalMs, prev.totalMs);
-	const sessionDelta = delta(stats.sessionCount, prev.sessionCount);
-	const avgDelta = delta(stats.avgSessionMs, prev.avgSessionMs);
+	const totalDelta = prev ? delta(stats.totalMs, prev.totalMs) : undefined;
+	const sessionDelta = prev ? delta(stats.sessionCount, prev.sessionCount) : undefined;
+	const avgDelta = prev ? delta(stats.avgSessionMs, prev.avgSessionMs) : undefined;
 	const goalPercent = goalMs > 0 ? Math.min(100, (todayMs / goalMs) * 100) : 0;
 	const showHelp = plugin.settingsManager.get().showHelpIcons;
 	const subtitle = I18n.t("dashboard.subtitle", {sessions: stats.sessionCount, notes: stats.noteCount});
@@ -227,7 +230,7 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab
 						</div>
 						<div className="ft-controls">
 							<div className="ft-period-tabs" role="tablist">
-								{(["day", "week", "month", "year"] as Period[]).map((item) => (
+								{(["day", "week", "month", "year", "total"] as Period[]).map((item) => (
 									<div
 										key={item}
 										className={`ft-period-tab ${period === item ? "is-active" : ""}`}
@@ -241,7 +244,11 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab
 									</div>
 								))}
 							</div>
-							<DateNavigator viewType={period} currentDate={anchor} onDateChange={setAnchor} />
+							{period === "total" ? (
+								<span className="ft-total-range">{range.from} — {range.to}</span>
+							) : (
+								<DateNavigator viewType={period} currentDate={anchor} onDateChange={setAnchor} />
+							)}
 						</div>
 					</header>
 

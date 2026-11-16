@@ -1,13 +1,19 @@
 import { DateUtils } from "../util/dateUtils";
 
-export type Period = "day" | "week" | "month" | "year";
+export type Period = "day" | "week" | "month" | "year" | "total";
 
 export interface DateRange {
 	from: string;
 	to: string;
 }
 
-export function getRange(period: Period, anchor: Date): DateRange {
+export function getRange(period: Period, anchor: Date, firstDate?: string): DateRange {
+	if (period === "total") {
+		return {
+			from: firstDate ?? DateUtils.toLocalDate(anchor),
+			to: DateUtils.toLocalDate(anchor)
+		};
+	}
 	if (period === "day") {
 		const date = DateUtils.toLocalDate(anchor);
 		return {from: date, to: date};
@@ -28,6 +34,9 @@ export function getRange(period: Period, anchor: Date): DateRange {
 
 export function shiftPeriod(period: Period, anchor: Date, delta: number): Date {
 	const next = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate());
+	if (period === "total") {
+		return next;
+	}
 	if (period === "day") {
 		next.setDate(next.getDate() + delta);
 	} else if (period === "week") {
@@ -64,7 +73,7 @@ export function eachDate(range: DateRange): string[] {
 	const dates: string[] = [];
 	let cursor = DateUtils.toDate(from);
 	const end = DateUtils.toDate(to);
-	while (cursor.getTime() <= end.getTime() && dates.length < 400) {
+	while (cursor.getTime() <= end.getTime() && dates.length < 20_000) {
 		dates.push(DateUtils.toLocalDate(cursor));
 		cursor = DateUtils.addDays(cursor, 1);
 	}

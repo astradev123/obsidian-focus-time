@@ -353,6 +353,18 @@
 	font-size: 12px;
 }
 
+.ft-total-range {
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	background: var(--background-secondary);
+	color: var(--text-muted);
+	font-size: 12px;
+	white-space: nowrap;
+}
+
 .ft-content {
 	display: flex;
 	flex-direction: column;
