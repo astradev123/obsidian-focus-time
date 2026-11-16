@@ -7,6 +7,26 @@ import I18n from "../../language/i18n";
 
 export const FOCUS_DASHBOARD_VIEW = "focus-time-dashboard";
 
+class DashboardErrorBoundary extends React.Component<{children: React.ReactNode}, {error: Error | null}> {
+	state: {error: Error | null} = {error: null};
+
+	static getDerivedStateFromError(error: Error) {
+		return {error};
+	}
+
+	render() {
+		if (this.state.error) {
+			return (
+				<div className="ft-error">
+					<strong>{I18n.t("dashboard.error")}</strong>
+					<pre>{this.state.error.message}</pre>
+				</div>
+			);
+		}
+		return this.props.children;
+	}
+}
+
 export class FocusDashboardView extends ItemView {
 	private root: Root | null = null;
 	private unsubscribe: (() => void) | null = null;
@@ -47,7 +67,13 @@ export class FocusDashboardView extends ItemView {
 	}
 
 	private render(): void {
-		this.root?.render(React.createElement(DashboardRoot, {plugin: this.plugin}));
+		this.root?.render(
+			React.createElement(
+				DashboardErrorBoundary,
+				null,
+				React.createElement(DashboardRoot, {plugin: this.plugin})
+			)
+		);
 	}
 }
 

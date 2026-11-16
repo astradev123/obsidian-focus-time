@@ -11,7 +11,7 @@ If you find this plugin useful, you can support me on [Buy Me a Coffee](https://
 - **Accurate tracking**: idle detection with separate reading thresholds, midnight splitting, sleep-safe timing, and exact settlement on note switches.
 - **Local-first event log**: append-only monthly shards per device, stored in `_focus_time/` inside your vault. No database, no write conflicts.
 - **Automatic migration**: existing `data.json` and day files are backed up, imported and verified; original files are never modified.
-- **Analytics dashboard**: overview, trends, notes, folders and data quality, with calendar heatmaps, time-of-day grids, session histograms and rule-based insights.
+- **Analytics dashboard**: overview, trends, notes and folders, with calendar heatmaps, time-of-day grids, session histograms and rule-based insights.
 - **Exports**: CSV sessions, full JSON backup, and a Markdown report.
 - **Inline stats**: embed a `focus-time` code block in any note.
 - **Languages**: English, 简体中文, 繁體中文, 日本語, 한국어; follows Obsidian's language by default.

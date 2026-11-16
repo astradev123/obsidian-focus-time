@@ -146,7 +146,9 @@
 			"total": "暂无数据"
 		},
 		"notes": {
-			"title": "专注笔记列表"
+			"title": "专注笔记列表",
+			"desc": "点击笔记可打开",
+			"filterDesc": "分类：{category}"
 		},
 		"metrics": {
 			"focusNotes": "专注笔记数",
@@ -209,7 +211,29 @@
 			"folder": "数据目录",
 			"rescan": "重新扫描旧数据",
 			"rescanDone": "已导入 {count} 条记录"
-		}
+		},
+		"categories": {
+			"root": "根目录",
+			"other": "其他",
+			"desc": "按一级目录汇总",
+			"summary": "{count} 个分类 · 最多：{top}",
+			"byNotes": "按笔记数",
+			"noteCount": "{count} 篇"
+		},
+		"calendar": {
+			"less": "少",
+			"more": "多",
+			"total": "12 周合计",
+			"activeDays": "{days} 天有记录"
+		},
+		"sidebar": {
+			"today": "今日专注",
+			"goal": "{current} / {goal} 分钟"
+		},
+		"seeAll": "查看全部",
+		"error": "仪表盘渲染失败",
+		"filter": "筛选",
+		"clearFilter": "清除筛选"
 	},
 	"weekday": {
 		"sunday": "周日",

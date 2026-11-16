@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FocusIndex } from "../src/core/storage/focusIndex";
 import { FocusEvent } from "../src/core/storage/types";
-import { getGoalStreak, getPeakHour, getRangeStats, getStreak, mergeSessions, sessionHistogram } from "../src/analytics/metrics";
+import { getGoalStreak, getPeakHour, getRangeStats, getStreak, mergeSessions, sessionHistogram, categoryForPath, ROOT_CATEGORY, OTHER_CATEGORY } from "../src/analytics/metrics";
 import { previousRange } from "../src/analytics/period";
 
 function session(id: string, ses: string, note: string, start: number, ms: number, kind: "edit" | "read" = "read"): FocusEvent {
@@ -60,6 +60,8 @@ describe("analytics metrics", () => {
 		expect(stats.noteTotals.get("n2")).toBe(20 * 60_000);
 		expect(stats.folderTotals.get("Work")).toBe(55 * 60_000);
 		expect(stats.folderTotals.get("Books")).toBe(20 * 60_000);
+		expect(stats.folderNoteCounts.get("Work")).toBe(1);
+		expect(stats.folderNoteCounts.get("Books")).toBe(1);
 		expect(stats.legacyDays).toBe(1);
 		expect(stats.deepWorkMs).toBe(40 * 60_000);
 		expect(stats.switchCount).toBe(0);
@@ -101,5 +103,14 @@ describe("analytics metrics", () => {
 
 	it("calculates the previous range", () => {
 		expect(previousRange({from: "2026-01-05", to: "2026-01-06"})).toEqual({from: "2026-01-03", to: "2026-01-04"});
+	});
+
+	it("maps paths to clean top-level categories", () => {
+		expect(categoryForPath("工作/量化交易/复盘.md")).toBe("工作");
+		expect(categoryForPath("  工作/a.md")).toBe("工作");
+		expect(categoryForPath("/学习/b.md")).toBe("学习");
+		expect(categoryForPath("root.md")).toBe(ROOT_CATEGORY);
+		expect(categoryForPath("file:///tmp/page.html")).toBe(OTHER_CATEGORY);
+		expect(categoryForPath("https://example.com")).toBe(OTHER_CATEGORY);
 	});
 });

@@ -1,8 +1,7 @@
-import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting } from "obsidian";
 import FocusTimePlugin from "../main";
 import I18n from "../language/i18n";
 import { IdleMode } from "../core/tracking/trackingMath";
-import { TimeUtils } from "../util/timeUtils";
 
 export class FocusTimeSettingTab extends PluginSettingTab {
 	plugin: FocusTimePlugin;
@@ -20,7 +19,6 @@ export class FocusTimeSettingTab extends PluginSettingTab {
 		this.addStrictModeSetting(containerEl);
 		this.addIdleSetting(containerEl);
 		this.addGoalSetting(containerEl);
-		this.addDataSetting(containerEl);
 	}
 
 	private addLanguageSetting(containerEl: HTMLElement) {
@@ -123,53 +121,4 @@ export class FocusTimeSettingTab extends PluginSettingTab {
 			);
 	}
 
-	private addDataSetting(containerEl: HTMLElement) {
-		const stats = this.plugin.storage.getStats();
-		const locale = I18n.getInstance().getLanguage();
-
-		new Setting(containerEl)
-			.setName(I18n.t("settings.data.heading"))
-			.setHeading();
-
-		new Setting(containerEl)
-			.setName(I18n.t("settings.data.folder"))
-			.setDesc(stats.dataFolder);
-
-		new Setting(containerEl)
-			.setName(I18n.t("settings.data.schema"))
-			.setDesc(String(stats.schemaVersion));
-
-		new Setting(containerEl)
-			.setName(I18n.t("settings.data.events"))
-			.setDesc(String(stats.events));
-
-		new Setting(containerEl)
-			.setName(I18n.t("settings.data.notes"))
-			.setDesc(`${stats.notes} / ${stats.registeredNotes}`);
-
-		new Setting(containerEl)
-			.setName(I18n.t("settings.data.legacyDays"))
-			.setDesc(String(stats.legacyDays));
-
-		new Setting(containerEl)
-			.setName(I18n.t("settings.data.unmapped"))
-			.setDesc(TimeUtils.getFormattedReadingTime(stats.unmappedMs));
-
-		new Setting(containerEl)
-			.setName(I18n.t("settings.data.migrated"))
-			.setDesc(stats.migratedAt ? new Date(stats.migratedAt).toLocaleString(locale) : "—");
-
-		new Setting(containerEl)
-			.setName(I18n.t("settings.data.rescan"))
-			.setDesc(I18n.t("settings.data.rescanDesc"))
-			.addButton((button) =>
-				button
-					.setButtonText(I18n.t("settings.data.rescan"))
-					.onClick(async () => {
-						const imported = await this.plugin.rescanLegacy();
-						new Notice(I18n.t("notice.rescan", {count: imported}));
-						this.display();
-					})
-			);
-	}
 }

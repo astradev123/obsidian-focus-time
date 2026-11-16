@@ -146,7 +146,9 @@
 			"total": "아직 데이터가 없습니다"
 		},
 		"notes": {
-			"title": "집중한 노트"
+			"title": "집중한 노트",
+			"desc": "클릭하면 노트가 열립니다",
+			"filterDesc": "분류: {category}"
 		},
 		"metrics": {
 			"focusNotes": "집중 노트 수",
@@ -209,7 +211,29 @@
 			"folder": "데이터 폴더",
 			"rescan": "이전 데이터 다시 스캔",
 			"rescanDone": "{count}건을 가져왔습니다"
-		}
+		},
+		"categories": {
+			"root": "루트",
+			"other": "기타",
+			"desc": "최상위 폴더 기준",
+			"summary": "{count}개 분류 · 최다: {top}",
+			"byNotes": "노트 수",
+			"noteCount": "{count}개"
+		},
+		"calendar": {
+			"less": "적음",
+			"more": "많음",
+			"total": "12주 합계",
+			"activeDays": "{days}일 기록"
+		},
+		"sidebar": {
+			"today": "오늘",
+			"goal": "{current} / {goal}분"
+		},
+		"seeAll": "전체 보기",
+		"error": "대시보드를 렌더링하지 못했습니다",
+		"filter": "필터",
+		"clearFilter": "필터 지우기"
 	},
 	"weekday": {
 		"sunday": "일",

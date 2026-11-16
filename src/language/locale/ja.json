@@ -146,7 +146,9 @@
 			"total": "まだデータがありません"
 		},
 		"notes": {
-			"title": "集中したノート"
+			"title": "集中したノート",
+			"desc": "クリックでノートを開く",
+			"filterDesc": "カテゴリ：{category}"
 		},
 		"metrics": {
 			"focusNotes": "集中ノート数",
@@ -209,7 +211,29 @@
 			"folder": "データフォルダー",
 			"rescan": "旧データを再スキャン",
 			"rescanDone": "{count} 件取り込みました"
-		}
+		},
+		"categories": {
+			"root": "ルート",
+			"other": "その他",
+			"desc": "トップフォルダーで集計",
+			"summary": "{count} カテゴリ · 最多：{top}",
+			"byNotes": "ノート数",
+			"noteCount": "{count} 件"
+		},
+		"calendar": {
+			"less": "少",
+			"more": "多",
+			"total": "12週間の合計",
+			"activeDays": "{days}日記録"
+		},
+		"sidebar": {
+			"today": "今日",
+			"goal": "{current} / {goal} 分"
+		},
+		"seeAll": "すべて表示",
+		"error": "ダッシュボードの描画に失敗しました",
+		"filter": "フィルター",
+		"clearFilter": "フィルターを解除"
 	},
 	"weekday": {
 		"sunday": "日",

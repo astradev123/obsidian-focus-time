@@ -146,7 +146,9 @@
 			"total": "No data yet"
 		},
 		"notes": {
-			"title": "Focus notes"
+			"title": "Focus notes",
+			"desc": "Click a note to open it",
+			"filterDesc": "Category: {category}"
 		},
 		"metrics": {
 			"focusNotes": "Focus notes",
@@ -209,7 +211,29 @@
 			"folder": "Data folder",
 			"rescan": "Rescan legacy data",
 			"rescanDone": "Imported {count} record(s)"
-		}
+		},
+		"categories": {
+			"root": "Root",
+			"other": "Other",
+			"desc": "Grouped by top-level folder",
+			"summary": "{count} categories · top: {top}",
+			"byNotes": "By note count",
+			"noteCount": "{count} notes"
+		},
+		"calendar": {
+			"less": "Less",
+			"more": "More",
+			"total": "12-week total",
+			"activeDays": "{days} active days"
+		},
+		"sidebar": {
+			"today": "Today",
+			"goal": "{current} / {goal} min"
+		},
+		"seeAll": "View all",
+		"error": "The dashboard failed to render",
+		"filter": "Filter",
+		"clearFilter": "Clear filter"
 	},
 	"weekday": {
 		"sunday": "Sun",

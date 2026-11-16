@@ -38,10 +38,45 @@ export interface RangeStats {
 	dayKinds: Map<string, DayKinds>;
 	noteTotals: Map<string, number>;
 	folderTotals: Map<string, number>;
+	folderNoteCounts: Map<string, number>;
 	legacyDays: number;
 }
 
 const DEEP_WORK_MS = 25 * 60 * 1000;
+
+export const ROOT_CATEGORY = "__root__";
+export const OTHER_CATEGORY = "__other__";
+
+/**
+ * Group notes by their top-level folder. Root notes and imported web clips get
+ * stable, human readable buckets instead of raw `file:` paths.
+ */
+export function categoryForPath(path: string): string {
+	let cleaned = path.replace(/\\/g, "/").trim();
+	try {
+		cleaned = decodeURIComponent(cleaned);
+	} catch {
+		// Keep the raw path when it contains a stray percent sign.
+	}
+	cleaned = cleaned.replace(/^\/+/, "").split(/[?#]/)[0];
+	if (!cleaned) {
+		return ROOT_CATEGORY;
+	}
+	if (/^(file|https?):/i.test(cleaned)) {
+		return OTHER_CATEGORY;
+	}
+	if (!cleaned.includes("/")) {
+		return ROOT_CATEGORY;
+	}
+	const top = cleaned.split("/")[0].trim();
+	if (!top) {
+		return ROOT_CATEGORY;
+	}
+	if (top.length > 24 || /[\u0000-\u001f\u007f]/.test(top)) {
+		return OTHER_CATEGORY;
+	}
+	return top;
+}
 
 export function mergeSessions(events: SessionEvent[]): SessionSummary[] {
 	const merged = new Map<string, SessionSummary>();
@@ -78,6 +113,7 @@ export function getRangeStats(
 	const dayKinds = new Map<string, DayKinds>();
 	const noteTotals = new Map<string, number>();
 	const folderTotals = new Map<string, number>();
+	const folderNoteCounts = new Map<string, number>();
 	const hourMatrix = Array.from({length: 7}, () => new Array<number>(24).fill(0));
 	const noteSet = new Set<string>();
 	let totalMs = 0;
@@ -140,9 +176,9 @@ export function getRangeStats(
 
 	for (const [noteId, ms] of noteTotals) {
 		const path = getPath(noteId) ?? "";
-		const folder = path.includes("/") ? path.split("/")[0] : "";
-		const key = folder || "";
-		folderTotals.set(key, (folderTotals.get(key) ?? 0) + ms);
+		const category = categoryForPath(path);
+		folderTotals.set(category, (folderTotals.get(category) ?? 0) + ms);
+		folderNoteCounts.set(category, (folderNoteCounts.get(category) ?? 0) + 1);
 	}
 
 	return {
@@ -163,6 +199,7 @@ export function getRangeStats(
 		dayKinds,
 		noteTotals,
 		folderTotals,
+		folderNoteCounts,
 		legacyDays
 	};
 }

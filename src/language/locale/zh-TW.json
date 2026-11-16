@@ -146,7 +146,9 @@
 			"total": "暫無資料"
 		},
 		"notes": {
-			"title": "專注筆記"
+			"title": "專注筆記",
+			"desc": "點擊筆記可開啟",
+			"filterDesc": "分類：{category}"
 		},
 		"metrics": {
 			"focusNotes": "專注筆記數",
@@ -209,7 +211,29 @@
 			"folder": "資料目錄",
 			"rescan": "重新掃描舊資料",
 			"rescanDone": "已匯入 {count} 筆記錄"
-		}
+		},
+		"categories": {
+			"root": "根目錄",
+			"other": "其他",
+			"desc": "依一級目錄彙總",
+			"summary": "{count} 個分類 · 最多：{top}",
+			"byNotes": "依筆記數",
+			"noteCount": "{count} 篇"
+		},
+		"calendar": {
+			"less": "少",
+			"more": "多",
+			"total": "12 週合計",
+			"activeDays": "{days} 天有記錄"
+		},
+		"sidebar": {
+			"today": "今日專注",
+			"goal": "{current} / {goal} 分鐘"
+		},
+		"seeAll": "查看全部",
+		"error": "儀表盤渲染失敗",
+		"filter": "篩選",
+		"clearFilter": "清除篩選"
 	},
 	"weekday": {
 		"sunday": "週日",

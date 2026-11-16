@@ -1,61 +1,76 @@
 import * as React from "react";
-import { Notice, setIcon, TFile } from "obsidian";
+import { TFile } from "obsidian";
 import FocusTimePlugin from "../../main";
 import I18n from "../../language/i18n";
 import { DateUtils } from "../../util/dateUtils";
 import { TimeUtils } from "../../util/timeUtils";
 import { Period, getRange, previousRange } from "../../analytics/period";
-import { getPeakHour, getRangeStats, getGoalStreak, sessionHistogram } from "../../analytics/metrics";
+import { getGoalStreak, getPeakHour, getRangeStats, sessionHistogram } from "../../analytics/metrics";
 import { DateNavigator } from "../components/DateNavigator";
 import {
 	CalendarHeatmap,
+	categoryLabel,
 	FolderBars,
 	HourHeatmap,
+	Icon,
 	InsightItem,
 	InsightList,
 	KpiCard,
 	NoteBars,
 	SessionHistogram,
-	TrendBars,
-	TrendLegend
+	TrendBars
 } from "./charts";
 
-type Tab = "overview" | "trends" | "notes" | "categories" | "quality";
+type Tab = "overview" | "trends" | "notes" | "categories";
 
 const TAB_ICONS: Array<{id: Tab; icon: string; label: string}> = [
 	{id: "overview", icon: "layout-dashboard", label: "dashboard.tabs.overview"},
 	{id: "trends", icon: "trending-up", label: "dashboard.tabs.trends"},
 	{id: "notes", icon: "files", label: "dashboard.tabs.notes"},
-	{id: "categories", icon: "folder", label: "dashboard.tabs.categories"},
-	{id: "quality", icon: "database", label: "dashboard.tabs.quality"}
+	{id: "categories", icon: "folder", label: "dashboard.tabs.categories"}
 ];
 
 const WEEKDAY_KEYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
-function NavButton(props: { id: Tab; icon: string; label: string; active: boolean; onClick: () => void }) {
-	const iconRef = React.useRef<HTMLSpanElement | null>(null);
-	React.useEffect(() => {
-		if (iconRef.current) {
-			setIcon(iconRef.current, props.icon);
-		}
-	}, [props.icon]);
+function activate(event: React.KeyboardEvent, action: () => void): void {
+	if (event.key === "Enter" || event.key === " ") {
+		event.preventDefault();
+		action();
+	}
+}
 
+function NavButton(props: { id: Tab; icon: string; label: string; active: boolean; onClick: () => void }) {
 	return (
-		<button type="button" className={`ft-nav-button ${props.active ? "is-active" : ""}`} onClick={props.onClick}>
-			<span className="ft-nav-icon" ref={iconRef} aria-hidden />
+		<div
+			className={`ft-nav-button ${props.active ? "is-active" : ""}`}
+			role="button"
+			tabIndex={0}
+			onClick={props.onClick}
+			onKeyDown={(event) => activate(event, props.onClick)}
+		>
+			<Icon name={props.icon} className="ft-nav-icon" />
 			<span>{I18n.t(props.label)}</span>
-		</button>
+		</div>
 	);
 }
 
-function Panel(props: { title: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
+function Panel(props: {
+	title: string;
+	desc?: string;
+	action?: React.ReactNode;
+	children: React.ReactNode;
+	className?: string;
+}) {
 	return (
-		<section className={`ft-panel ${props.className ?? ""}`}>
-			<header className="ft-panel-head">
-				<h3>{props.title}</h3>
+		<section className={`ft-card ${props.className ?? ""}`}>
+			<header className="ft-card-head">
+				<div>
+					<h2>{props.title}</h2>
+					{props.desc ? <p>{props.desc}</p> : null}
+				</div>
 				{props.action}
 			</header>
-			{props.children}
+			<div className="ft-card-body">{props.children}</div>
 		</section>
 	);
 }
@@ -71,13 +86,13 @@ function delta(current: number, previous: number): {text: string; tone: "up" | "
 	return {text: `${percent > 0 ? "+" : ""}${percent}%`, tone: percent > 0 ? "up" : "down"};
 }
 
-export function DashboardRoot(props: { plugin: FocusTimePlugin }) {
+export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab }) {
 	const {plugin} = props;
-	const [tab, setTab] = React.useState<Tab>("overview");
+	const [tab, setTab] = React.useState<Tab>(props.initialTab ?? "overview");
 	const [period, setPeriod] = React.useState<Period>("week");
 	const [anchor, setAnchor] = React.useState(new Date());
+	const [categoryFilter, setCategoryFilter] = React.useState<string | null>(null);
 	const [, setTick] = React.useState(0);
-	const [busy, setBusy] = React.useState(false);
 
 	React.useEffect(() => {
 		const offStorage = plugin.storage.onChange(() => setTick((value) => value + 1));
@@ -98,6 +113,15 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin }) {
 	const totalDelta = delta(stats.totalMs, prev.totalMs);
 	const sessionDelta = delta(stats.sessionCount, prev.sessionCount);
 	const avgDelta = delta(stats.avgSessionMs, prev.avgSessionMs);
+	const goalPercent = goalMs > 0 ? Math.min(100, (todayMs / goalMs) * 100) : 0;
+	const subtitle = I18n.t("dashboard.subtitle", {sessions: stats.sessionCount, notes: stats.noteCount});
+	const categoryEntries = Array.from(stats.folderTotals.entries()).sort((a, b) => b[1] - a[1]);
+	const categoryDesc = categoryEntries.length > 0
+		? I18n.t("dashboard.categories.summary", {
+			count: categoryEntries.length,
+			top: categoryLabel(categoryEntries[0][0])
+		})
+		: I18n.t("dashboard.categories.desc");
 
 	const insights: InsightItem[] = [];
 	if (totalDelta) {
@@ -107,7 +131,6 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin }) {
 			tone: totalDelta.tone === "down" ? "down" : "up"
 		});
 	}
-	const peak = getPeakHour(stats.hourMatrix);
 	if (goalMs > 0) {
 		insights.push({
 			key: "dashboard.insight.goal",
@@ -115,6 +138,7 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin }) {
 			tone: todayMs >= goalMs ? "up" : "neutral"
 		});
 	}
+	const peak = getPeakHour(stats.hourMatrix);
 	if (peak) {
 		insights.push({
 			key: "dashboard.insight.peak",
@@ -132,9 +156,6 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin }) {
 			tone: "neutral"
 		});
 	}
-	if (stats.legacyDays > 0) {
-		insights.push({key: "dashboard.insight.legacy", params: {days: stats.legacyDays}, tone: "warning"});
-	}
 
 	const openNote = (path: string) => {
 		const file = plugin.app.vault.getFileByPath(path);
@@ -143,24 +164,25 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin }) {
 		}
 	};
 
-	const onRescan = async () => {
-		setBusy(true);
-		try {
-			const imported = await plugin.rescanLegacy();
-			new Notice(I18n.t("dashboard.quality.rescanDone", {count: imported}));
-			setTick((value) => value + 1);
-		} finally {
-			setBusy(false);
+	const selectDay = (date: string) => {
+		const parts = DateUtils.parseKey(date);
+		if (parts) {
+			setAnchor(DateUtils.toDate(parts));
+			setPeriod("day");
 		}
 	};
-
-	const quality = plugin.storage.getStats();
-	const showPeriodControls = tab !== "quality";
 
 	return (
 		<div className="ft-dashboard">
 			<aside className="ft-sidebar">
-				<div className="ft-brand">{I18n.t("app.title")}</div>
+				<div className="ft-brand">
+					<span className="ft-brand-mark"><Icon name="book-open-text" /></span>
+					<div>
+						<strong>Focus Time</strong>
+						<span>Dashboard</span>
+					</div>
+				</div>
+
 				<nav className="ft-nav">
 					{TAB_ICONS.map((item) => (
 						<NavButton
@@ -173,178 +195,228 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin }) {
 						/>
 					))}
 				</nav>
+
+				<div className="ft-sidebar-footer">
+					<div className="ft-today-label">{I18n.t("dashboard.sidebar.today")}</div>
+					<div className="ft-today-value">{TimeUtils.getFormattedReadingTime(todayMs)}</div>
+					<div className="ft-goal-track">
+						<span style={{width: `${goalPercent}%`}} />
+					</div>
+					<div className={`ft-goal-meta ${todayMs >= goalMs ? "is-met" : ""}`}>
+						{I18n.t("dashboard.sidebar.goal", {
+							current: Math.round(todayMs / 60_000),
+							goal: Math.round(goalMs / 60_000)
+						})}
+					</div>
+				</div>
 			</aside>
 
 			<main className="ft-main">
-				<header className="ft-header">
-					<div className="ft-header-title">
-						<h2>{I18n.t(`dashboard.tabs.${tab}`)}</h2>
-						<p>{I18n.t("dashboard.subtitle", {sessions: stats.sessionCount, notes: stats.noteCount})}</p>
-					</div>
-					{showPeriodControls ? (
+				<div className="ft-main-inner">
+					<header className="ft-header">
+						<div className="ft-header-title">
+							<h1>{I18n.t(`dashboard.tabs.${tab}`)}</h1>
+							<p>{subtitle}</p>
+						</div>
 						<div className="ft-controls">
 							<div className="ft-period-tabs" role="tablist">
 								{(["day", "week", "month", "year"] as Period[]).map((item) => (
-									<button
+									<div
 										key={item}
-										type="button"
-										className={period === item ? "is-active" : ""}
+										className={`ft-period-tab ${period === item ? "is-active" : ""}`}
+										role="tab"
+										tabIndex={0}
+										aria-selected={period === item}
 										onClick={() => setPeriod(item)}
+										onKeyDown={(event) => activate(event, () => setPeriod(item))}
 									>
 										{I18n.t(`dashboard.views.${item}`)}
-									</button>
+									</div>
 								))}
 							</div>
 							<DateNavigator viewType={period} currentDate={anchor} onDateChange={setAnchor} />
 						</div>
-					) : null}
-				</header>
+					</header>
 
-				{tab === "overview" ? (
-					<div className="ft-content">
-						<div className="ft-kpis">
-							<KpiCard
-								label={I18n.t("dashboard.kpi.total")}
-								value={TimeUtils.getFormattedReadingTime(stats.totalMs)}
-								hint={totalDelta?.text}
-								tone={totalDelta?.tone}
-							/>
-							<KpiCard
-								label={I18n.t("dashboard.kpi.sessions")}
-								value={String(stats.sessionCount)}
-								hint={sessionDelta?.text}
-								tone={sessionDelta?.tone}
-							/>
-							<KpiCard
-								label={I18n.t("dashboard.kpi.avgSession")}
-								value={TimeUtils.getFormattedReadingTime(stats.avgSessionMs)}
-								hint={avgDelta?.text}
-								tone={avgDelta?.tone}
-							/>
-							<KpiCard
-								label={I18n.t("dashboard.kpi.deepWork")}
-								value={`${Math.round(stats.deepWorkRatio * 100)}%`}
-								hint={TimeUtils.getFormattedReadingTime(stats.deepWorkMs)}
-							/>
-						</div>
-
-						<div className="ft-grid ft-grid-2">
-							<Panel title={I18n.t("dashboard.sections.trend")} action={<TrendLegend />}>
-								<TrendBars
-									stats={stats}
-									onSelectDay={(date) => {
-										const parts = DateUtils.parseKey(date);
-										if (parts) {
-											setAnchor(DateUtils.toDate(parts));
-											setPeriod("day");
-										}
-									}}
+					{tab === "overview" ? (
+						<div className="ft-content">
+							<div className="ft-kpi-grid">
+								<KpiCard
+									label={I18n.t("dashboard.kpi.total")}
+									value={TimeUtils.getFormattedReadingTime(stats.totalMs)}
+									hint={totalDelta?.text}
+									tone={totalDelta?.tone}
+									icon="clock"
 								/>
-							</Panel>
-							<Panel title={I18n.t("dashboard.sections.calendar")}>
-								<CalendarHeatmap
-									index={plugin.storage.index}
-									anchor={anchor}
-									onSelectDay={(date) => {
-										const parts = DateUtils.parseKey(date);
-										if (parts) {
-											setAnchor(DateUtils.toDate(parts));
-											setPeriod("day");
-										}
-									}}
+								<KpiCard
+									label={I18n.t("dashboard.kpi.sessions")}
+									value={String(stats.sessionCount)}
+									hint={sessionDelta?.text}
+									tone={sessionDelta?.tone}
+									icon="bar-chart-3"
 								/>
-							</Panel>
-						</div>
-
-						<div className="ft-grid ft-grid-2">
-							<Panel title={I18n.t("dashboard.sections.insights")}>
-								<InsightList items={insights.slice(0, 4)} />
-							</Panel>
-							<Panel title={I18n.t("dashboard.sections.topNotes")}>
-								<NoteBars stats={stats} getPath={(id) => plugin.storage.getPath(id)} onOpen={openNote} limit={5} />
-							</Panel>
-						</div>
-					</div>
-				) : null}
-
-				{tab === "trends" ? (
-					<div className="ft-content">
-						<div className="ft-kpis">
-							<KpiCard
-								label={I18n.t("dashboard.kpi.medianSession")}
-								value={TimeUtils.getFormattedReadingTime(stats.medianSessionMs)}
-							/>
-							<KpiCard
-								label={I18n.t("dashboard.kpi.longestSession")}
-								value={TimeUtils.getFormattedReadingTime(stats.longestSessionMs)}
-							/>
-							<KpiCard
-								label={I18n.t("dashboard.kpi.switches")}
-								value={String(stats.switchCount)}
-							/>
-							<KpiCard
-								label={I18n.t("dashboard.kpi.activeDays")}
-								value={String(stats.activeDays)}
-							/>
-						</div>
-						<Panel title={I18n.t("dashboard.sections.trend")} action={<TrendLegend />}>
-							<TrendBars stats={stats} height={240} />
-						</Panel>
-						<div className="ft-grid ft-grid-2">
-							<Panel title={I18n.t("dashboard.sections.hourly")}>
-								<HourHeatmap matrix={stats.hourMatrix} />
-							</Panel>
-							<Panel title={I18n.t("dashboard.sections.sessionLength")}>
-								<SessionHistogram buckets={sessionHistogram(stats.sessions)} />
-							</Panel>
-						</div>
-					</div>
-				) : null}
-
-				{tab === "notes" ? (
-					<div className="ft-content">
-						<Panel title={I18n.t("dashboard.sections.topNotes")}>
-							<NoteBars stats={stats} getPath={(id) => plugin.storage.getPath(id)} onOpen={openNote} limit={30} />
-						</Panel>
-					</div>
-				) : null}
-
-				{tab === "categories" ? (
-					<div className="ft-content">
-						<Panel title={I18n.t("dashboard.sections.folders")}>
-							<FolderBars folders={stats.folderTotals} />
-						</Panel>
-					</div>
-				) : null}
-
-				{tab === "quality" ? (
-					<div className="ft-content">
-						<div className="ft-kpis">
-							<KpiCard label={I18n.t("dashboard.quality.events")} value={String(quality.events)} />
-							<KpiCard label={I18n.t("dashboard.quality.sessions")} value={String(quality.sessions)} />
-							<KpiCard label={I18n.t("dashboard.quality.notes")} value={`${quality.notes} / ${quality.registeredNotes}`} />
-							<KpiCard
-								label={I18n.t("dashboard.quality.unmapped")}
-								value={TimeUtils.getFormattedReadingTime(quality.unmappedMs)}
-							/>
-						</div>
-						<Panel
-							title={I18n.t("dashboard.sections.quality")}
-							action={
-								<button type="button" className="ft-button" disabled={busy} onClick={() => void onRescan()}>
-									{busy ? I18n.t("common.loading") : I18n.t("dashboard.quality.rescan")}
-								</button>
-							}
-						>
-							<div className="ft-quality-grid">
-								<div><span>{I18n.t("dashboard.quality.schema")}</span><strong>{quality.schemaVersion}</strong></div>
-								<div><span>{I18n.t("dashboard.quality.legacyDays")}</span><strong>{quality.legacyDays}</strong></div>
-								<div><span>{I18n.t("dashboard.quality.migrated")}</span><strong>{quality.migratedAt ? new Date(quality.migratedAt).toLocaleString(I18n.getInstance().getLanguage()) : "—"}</strong></div>
-								<div><span>{I18n.t("dashboard.quality.folder")}</span><strong>{quality.dataFolder}</strong></div>
+								<KpiCard
+									label={I18n.t("dashboard.kpi.avgSession")}
+									value={TimeUtils.getFormattedReadingTime(stats.avgSessionMs)}
+									hint={avgDelta?.text}
+									tone={avgDelta?.tone}
+									icon="hourglass"
+								/>
+								<KpiCard
+									label={I18n.t("dashboard.kpi.deepWork")}
+									value={`${Math.round(stats.deepWorkRatio * 100)}%`}
+									hint={TimeUtils.getFormattedReadingTime(stats.deepWorkMs)}
+									icon="flame"
+								/>
 							</div>
-						</Panel>
-					</div>
-				) : null}
+
+							<div className="ft-overview-grid">
+								<Panel
+									title={I18n.t("dashboard.sections.trend")}
+									action={<span className="ft-card-total">{TimeUtils.getFormattedReadingTime(stats.totalMs)}</span>}
+									className="ft-span-2"
+								>
+									<TrendBars stats={stats} height={240} onSelectDay={selectDay} />
+								</Panel>
+								<Panel title={I18n.t("dashboard.sections.calendar")}>
+									<CalendarHeatmap index={plugin.storage.index} anchor={anchor} onSelectDay={selectDay} />
+								</Panel>
+							</div>
+
+							<div className="ft-overview-grid">
+								<Panel title={I18n.t("dashboard.sections.insights")}>
+									<InsightList items={insights.slice(0, 4)} />
+								</Panel>
+								<Panel
+									title={I18n.t("dashboard.sections.topNotes")}
+									action={
+										<span
+											className="ft-card-link"
+											role="button"
+											tabIndex={0}
+											onClick={() => {
+												setCategoryFilter(null);
+												setTab("notes");
+											}}
+											onKeyDown={(event) => activate(event, () => {
+												setCategoryFilter(null);
+												setTab("notes");
+											})}
+										>
+											{I18n.t("dashboard.seeAll")}
+										</span>
+									}
+								>
+									<NoteBars stats={stats} getPath={(id) => plugin.storage.getPath(id)} onOpen={openNote} limit={5} />
+								</Panel>
+							</div>
+						</div>
+					) : null}
+
+					{tab === "trends" ? (
+						<div className="ft-content">
+							<div className="ft-kpi-grid">
+								<KpiCard
+									label={I18n.t("dashboard.kpi.medianSession")}
+									value={TimeUtils.getFormattedReadingTime(stats.medianSessionMs)}
+									icon="hourglass"
+								/>
+								<KpiCard
+									label={I18n.t("dashboard.kpi.longestSession")}
+									value={TimeUtils.getFormattedReadingTime(stats.longestSessionMs)}
+									icon="hourglass"
+								/>
+								<KpiCard
+									label={I18n.t("dashboard.kpi.switches")}
+									value={String(stats.switchCount)}
+									icon="shuffle"
+								/>
+								<KpiCard
+									label={I18n.t("dashboard.kpi.activeDays")}
+									value={String(stats.activeDays)}
+									icon="calendar-days"
+								/>
+							</div>
+							<Panel
+								title={I18n.t("dashboard.sections.trend")}
+								action={<span className="ft-card-total">{TimeUtils.getFormattedReadingTime(stats.totalMs)}</span>}
+							>
+								<TrendBars stats={stats} height={260} onSelectDay={selectDay} />
+							</Panel>
+							<div className="ft-two-grid">
+								<Panel title={I18n.t("dashboard.sections.hourly")}>
+									<HourHeatmap matrix={stats.hourMatrix} />
+								</Panel>
+								<Panel title={I18n.t("dashboard.sections.sessionLength")}>
+									<SessionHistogram buckets={sessionHistogram(stats.sessions)} />
+								</Panel>
+							</div>
+						</div>
+					) : null}
+
+					{tab === "notes" ? (
+						<div className="ft-content">
+							<Panel
+								title={I18n.t("dashboard.sections.topNotes")}
+								desc={categoryFilter
+									? I18n.t("dashboard.notes.filterDesc", {category: categoryLabel(categoryFilter)})
+									: I18n.t("dashboard.notes.desc")}
+							>
+								{categoryFilter ? (
+									<div className="ft-filter-row">
+										<span>{I18n.t("dashboard.filter")}</span>
+										<span className="ft-filter-chip">
+											{categoryLabel(categoryFilter)}
+											<span
+												className="ft-filter-clear"
+												role="button"
+												tabIndex={0}
+												title={I18n.t("dashboard.clearFilter")}
+												onClick={() => setCategoryFilter(null)}
+												onKeyDown={(event) => activate(event, () => setCategoryFilter(null))}
+											>
+												×
+											</span>
+										</span>
+									</div>
+								) : null}
+								<NoteBars
+									stats={stats}
+									getPath={(id) => plugin.storage.getPath(id)}
+									onOpen={openNote}
+									limit={30}
+									category={categoryFilter}
+								/>
+							</Panel>
+						</div>
+					) : null}
+
+					{tab === "categories" ? (
+						<div className="ft-content">
+							<div className="ft-two-grid">
+								<Panel title={I18n.t("dashboard.sections.folders")} desc={categoryDesc}>
+									<FolderBars
+										folders={stats.folderTotals}
+										onSelect={(category) => {
+											setCategoryFilter(category);
+											setTab("notes");
+										}}
+									/>
+								</Panel>
+								<Panel title={I18n.t("dashboard.categories.byNotes")}>
+									<FolderBars
+										folders={stats.folderNoteCounts}
+										mode="count"
+										onSelect={(category) => {
+											setCategoryFilter(category);
+											setTab("notes");
+										}}
+									/>
+								</Panel>
+							</div>
+						</div>
+					) : null}
+				</div>
 			</main>
 		</div>
 	);
