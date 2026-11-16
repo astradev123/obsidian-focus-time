@@ -47,19 +47,77 @@ export function Icon(props: { name: string; className?: string }) {
 	);
 }
 
+export function HelpTip(props: { textKey: string; align?: "left" | "right" | "top"; className?: string }) {
+	const [open, setOpen] = React.useState(false);
+	const ref = React.useRef<HTMLSpanElement | null>(null);
+
+	React.useEffect(() => {
+		if (!open) {
+			return;
+		}
+		const close = (event: MouseEvent) => {
+			if (ref.current && !ref.current.contains(event.target as Node)) {
+				setOpen(false);
+			}
+		};
+		document.addEventListener("mousedown", close);
+		return () => document.removeEventListener("mousedown", close);
+	}, [open]);
+
+	return (
+		<span
+			className={`ft-help is-${props.align ?? "left"} ${props.className ?? ""} ${open ? "is-open" : ""}`}
+			ref={ref}
+			onMouseEnter={() => setOpen(true)}
+			onMouseLeave={() => setOpen(false)}
+		>
+			<span
+				className="ft-help-trigger"
+				role="button"
+				tabIndex={0}
+				aria-label={I18n.t(props.textKey)}
+				aria-expanded={open}
+				onClick={(event) => {
+					event.stopPropagation();
+					setOpen((value) => !value);
+				}}
+				onFocus={() => setOpen(true)}
+				onBlur={() => setOpen(false)}
+				onKeyDown={(event) => {
+					if (event.key === "Escape") {
+						setOpen(false);
+					}
+					if (event.key === "Enter" || event.key === " ") {
+						event.preventDefault();
+						setOpen((value) => !value);
+					}
+				}}
+			>
+				?
+			</span>
+			<span className="ft-help-popover" role="tooltip" aria-hidden={!open}>{I18n.t(props.textKey)}</span>
+		</span>
+	);
+}
+
 export function KpiCard(props: {
 	label: string;
 	value: string;
 	hint?: string;
 	tone?: "up" | "down" | "flat";
 	icon: string;
+	help?: string;
+	helpAlign?: "left" | "right" | "top";
 }) {
-	const {label, value, hint, tone, icon} = props;
+	const {label, value, hint, tone, icon, help, helpAlign} = props;
 	return (
 		<div className="ft-kpi">
 			<div className="ft-kpi-top">
 				<span className="ft-kpi-icon"><Icon name={icon} /></span>
-				<span className="ft-kpi-label">{label}</span>
+				<span className="ft-kpi-label">
+					{label}
+					{help ? <HelpTip textKey={help} align={helpAlign} className="is-card" /> : null}
+				</span>
 			</div>
 			<div className="ft-kpi-value">{value}</div>
 			{hint ? <div className={`ft-kpi-hint ${tone ? `is-${tone}` : ""}`}>{hint}</div> : null}

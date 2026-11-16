@@ -74,6 +74,10 @@
 			"migrated": "迁移时间",
 			"rescan": "重新扫描旧数据",
 			"rescanDesc": "导入旧版本写入的日文件。"
+		},
+		"help": {
+			"name": "概念提示",
+			"desc": "在会话、深工作等指标旁显示小问号，关闭后全部隐藏。"
 		}
 	},
 	"notice": {
@@ -179,7 +183,7 @@
 			"hourly": "时段分布",
 			"sessionLength": "会话长度",
 			"folders": "目录分布",
-			"insights": "洞察",
+			"insights": "小结",
 			"topNotes": "笔记排行",
 			"quality": "数据质量"
 		},
@@ -233,7 +237,8 @@
 		"seeAll": "查看全部",
 		"error": "仪表盘渲染失败",
 		"filter": "筛选",
-		"clearFilter": "清除筛选"
+		"clearFilter": "清除筛选",
+		"brandSubtitle": "专注数据"
 	},
 	"weekday": {
 		"sunday": "周日",
@@ -243,5 +248,17 @@
 		"thursday": "周四",
 		"friday": "周五",
 		"saturday": "周六"
+	},
+	"help": {
+		"sessions": "一段连续的专注记录。切换笔记、窗口失焦或空闲超时后会开始新的会话。",
+		"avgSession": "所选时间范围内，每次会话的平均时长。",
+		"deepWork": "单次时长达到 25 分钟及以上的会话计入深工作。",
+		"medianSession": "把会话按长度排序后位于中间的值，比平均值更不容易被一次超长会话拉高。",
+		"longestSession": "所选范围内最长的一次会话。",
+		"switches": "距上一次会话 30 分钟内切换到另一篇笔记的次数。",
+		"activeDays": "所选范围内至少有一次专注记录的天数。",
+		"goal": "在设置中调整。当天总时长达到目标时，才计入连续达标。",
+		"calendar": "每个格子代表一天，颜色越深表示专注时间越长。",
+		"categories": "按笔记所在的一级目录汇总；根目录笔记和网页归档会单独归类。"
 	}
 }

@@ -7,6 +7,7 @@ export interface FocusTimeSettings {
 	idleMinutes: number;
 	readingIdleMinutes: number;
 	dailyGoalMinutes: number;
+	showHelpIcons: boolean;
 	/**
 	 * `auto` follows Obsidian's UI language, otherwise a locale tag such as `en` or `zh`.
 	 */
@@ -19,6 +20,7 @@ export const DEFAULT_SETTINGS: FocusTimeSettings = {
 	idleMinutes: 5,
 	readingIdleMinutes: 10,
 	dailyGoalMinutes: 60,
+	showHelpIcons: true,
 	language: "auto"
 };
 
@@ -71,6 +73,7 @@ export class SettingsStore {
 			idleMinutes: clampMinutes(input.idleMinutes, DEFAULT_SETTINGS.idleMinutes),
 			readingIdleMinutes: clampMinutes(input.readingIdleMinutes, DEFAULT_SETTINGS.readingIdleMinutes),
 			dailyGoalMinutes: Number.isFinite(goal) ? Math.min(720, Math.max(15, Math.round(goal))) : DEFAULT_SETTINGS.dailyGoalMinutes,
+			showHelpIcons: typeof input.showHelpIcons === "boolean" ? input.showHelpIcons : DEFAULT_SETTINGS.showHelpIcons,
 			language: typeof input.language === "string" && input.language.length > 0 ? input.language : DEFAULT_SETTINGS.language
 		};
 	}

@@ -74,6 +74,10 @@
 			"migrated": "Migrated at",
 			"rescan": "Rescan legacy data",
 			"rescanDesc": "Import day files written by older versions."
+		},
+		"help": {
+			"name": "Concept hints",
+			"desc": "Show a small ? next to metrics like sessions and deep work. Turn off to hide all hints."
 		}
 	},
 	"notice": {
@@ -179,7 +183,7 @@
 			"hourly": "Time of day",
 			"sessionLength": "Session length",
 			"folders": "Folders",
-			"insights": "Insights",
+			"insights": "Summary",
 			"topNotes": "Top notes",
 			"quality": "Data quality"
 		},
@@ -233,7 +237,8 @@
 		"seeAll": "View all",
 		"error": "The dashboard failed to render",
 		"filter": "Filter",
-		"clearFilter": "Clear filter"
+		"clearFilter": "Clear filter",
+		"brandSubtitle": "Focus data"
 	},
 	"weekday": {
 		"sunday": "Sun",
@@ -243,5 +248,17 @@
 		"thursday": "Thu",
 		"friday": "Fri",
 		"saturday": "Sat"
+	},
+	"help": {
+		"sessions": "A continuous focus block. Switching notes, losing focus, or going idle starts a new session.",
+		"avgSession": "Average length of the sessions in the selected range.",
+		"deepWork": "Time from sessions of 25 minutes or longer.",
+		"medianSession": "The middle session length; less affected by one very long session than the average.",
+		"longestSession": "The longest single session in the selected range.",
+		"switches": "Note changes within 30 minutes of the previous session.",
+		"activeDays": "Days with at least one focus session in the selected range.",
+		"goal": "Set in Settings. A day counts toward your streak when its total reaches this goal.",
+		"calendar": "Each square is one day. Darker means more focus time.",
+		"categories": "Grouped by top-level folder. Root notes and web clips are grouped separately."
 	}
 }

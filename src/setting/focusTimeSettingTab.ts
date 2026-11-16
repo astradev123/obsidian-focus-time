@@ -19,6 +19,7 @@ export class FocusTimeSettingTab extends PluginSettingTab {
 		this.addStrictModeSetting(containerEl);
 		this.addIdleSetting(containerEl);
 		this.addGoalSetting(containerEl);
+		this.addHelpSetting(containerEl);
 	}
 
 	private addLanguageSetting(containerEl: HTMLElement) {
@@ -117,6 +118,21 @@ export class FocusTimeSettingTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange(async (value) => {
 						await this.plugin.settingsManager.update({dailyGoalMinutes: value});
+					})
+			);
+	}
+
+	private addHelpSetting(containerEl: HTMLElement) {
+		const settings = this.plugin.settingsManager.get();
+		new Setting(containerEl)
+			.setName(I18n.t("settings.help.name"))
+			.setDesc(I18n.t("settings.help.desc"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(settings.showHelpIcons)
+					.onChange(async (value) => {
+						await this.plugin.settingsManager.update({showHelpIcons: value});
+						this.plugin.storage.notifyChanged();
 					})
 			);
 	}

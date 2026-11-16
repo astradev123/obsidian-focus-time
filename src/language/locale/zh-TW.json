@@ -74,6 +74,10 @@
 			"migrated": "遷移時間",
 			"rescan": "重新掃描舊資料",
 			"rescanDesc": "匯入舊版本寫入的日檔案。"
+		},
+		"help": {
+			"name": "概念提示",
+			"desc": "在會話、深工作等指標旁顯示小問號，關閉後全部隱藏。"
 		}
 	},
 	"notice": {
@@ -179,7 +183,7 @@
 			"hourly": "時段分布",
 			"sessionLength": "工作階段長度",
 			"folders": "目錄分布",
-			"insights": "洞察",
+			"insights": "小結",
 			"topNotes": "筆記排行",
 			"quality": "資料品質"
 		},
@@ -233,7 +237,8 @@
 		"seeAll": "查看全部",
 		"error": "儀表盤渲染失敗",
 		"filter": "篩選",
-		"clearFilter": "清除篩選"
+		"clearFilter": "清除篩選",
+		"brandSubtitle": "專注資料"
 	},
 	"weekday": {
 		"sunday": "週日",
@@ -243,5 +248,17 @@
 		"thursday": "週四",
 		"friday": "週五",
 		"saturday": "週六"
+	},
+	"help": {
+		"sessions": "一段連續的專注記錄。切換筆記、視窗失焦或閒置逾時後會開始新的會話。",
+		"avgSession": "所選時間範圍內，每次會話的平均時長。",
+		"deepWork": "單次時長達到 25 分鐘及以上的會話計入深工作。",
+		"medianSession": "把會話按長度排序後位於中間的值，比平均值更不容易被一次超長會話拉高。",
+		"longestSession": "所選範圍內最長的一次會話。",
+		"switches": "距上一次會話 30 分鐘內切換到另一篇筆記的次數。",
+		"activeDays": "所選範圍內至少有一次專注記錄的天數。",
+		"goal": "在設定中調整。當天總時長達到目標時，才計入連續達標。",
+		"calendar": "每個格子代表一天，顏色越深表示專注時間越長。",
+		"categories": "按筆記所在的一級目錄彙總；根目錄筆記和網頁歸檔會單獨歸類。"
 	}
 }
