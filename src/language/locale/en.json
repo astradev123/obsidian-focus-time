@@ -238,7 +238,10 @@
 		"error": "The dashboard failed to render",
 		"filter": "Filter",
 		"clearFilter": "Clear filter",
-		"brandSubtitle": "Focus data"
+		"brandSubtitle": "Focus data",
+		"chart": {
+			"scrollHint": "Scroll left for earlier months"
+		}
 	},
 	"weekday": {
 		"sunday": "Sun",

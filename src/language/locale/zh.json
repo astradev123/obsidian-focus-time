@@ -238,7 +238,10 @@
 		"error": "仪表盘渲染失败",
 		"filter": "筛选",
 		"clearFilter": "清除筛选",
-		"brandSubtitle": "专注数据"
+		"brandSubtitle": "专注数据",
+		"chart": {
+			"scrollHint": "向左滚动查看更早"
+		}
 	},
 	"weekday": {
 		"sunday": "周日",

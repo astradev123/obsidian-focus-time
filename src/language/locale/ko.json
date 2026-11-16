@@ -238,7 +238,10 @@
 		"error": "대시보드를 렌더링하지 못했습니다",
 		"filter": "필터",
 		"clearFilter": "필터 지우기",
-		"brandSubtitle": "집중 데이터"
+		"brandSubtitle": "집중 데이터",
+		"chart": {
+			"scrollHint": "왼쪽으로 스크롤하여 이전 기록 보기"
+		}
 	},
 	"weekday": {
 		"sunday": "일",

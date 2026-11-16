@@ -538,6 +538,9 @@
 	border-radius: 10px;
 	background: var(--background-primary);
 	box-sizing: border-box;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: thin;
 }
 
 .ft-bars {
@@ -559,6 +562,22 @@
 
 .ft-bar-col.is-clickable {
 	cursor: pointer;
+}
+
+.ft-chart-plot.is-scrollable {
+	mask-image: linear-gradient(to right, transparent 0, black 20px);
+	-webkit-mask-image: linear-gradient(to right, transparent 0, black 20px);
+}
+
+.ft-bars.is-scrollable {
+	width: max-content;
+	min-width: 100%;
+	justify-content: flex-start;
+}
+
+.ft-bars.is-scrollable .ft-bar-col {
+	flex: 0 0 34px;
+	width: 34px;
 }
 
 .ft-bar-track {
@@ -591,6 +610,13 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.ft-chart-hint {
+	margin-top: 6px;
+	text-align: right;
+	color: var(--text-muted);
+	font-size: 10px;
 }
 
 /* Calendar heatmap */

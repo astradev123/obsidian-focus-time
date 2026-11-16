@@ -238,7 +238,10 @@
 		"error": "ダッシュボードの描画に失敗しました",
 		"filter": "フィルター",
 		"clearFilter": "フィルターを解除",
-		"brandSubtitle": "集中データ"
+		"brandSubtitle": "集中データ",
+		"chart": {
+			"scrollHint": "左へスクロールして過去を表示"
+		}
 	},
 	"weekday": {
 		"sunday": "日",

@@ -238,7 +238,10 @@
 		"error": "儀表盤渲染失敗",
 		"filter": "篩選",
 		"clearFilter": "清除篩選",
-		"brandSubtitle": "專注資料"
+		"brandSubtitle": "專注資料",
+		"chart": {
+			"scrollHint": "向左捲動查看更早"
+		}
 	},
 	"weekday": {
 		"sunday": "週日",

@@ -204,6 +204,15 @@ function formatDayLabel(date: string): string {
 export function TrendBars(props: { stats: RangeStats; onSelectDay?: (date: string) => void; height?: number }) {
 	const {stats, onSelectDay, height = 220} = props;
 	const entries = buildTrendEntries(stats);
+	const monthly = eachDate(stats.range).length > 31;
+	const scrollable = monthly && entries.length > 16;
+	const plotRef = React.useRef<HTMLDivElement | null>(null);
+
+	React.useEffect(() => {
+		if (scrollable && plotRef.current) {
+			plotRef.current.scrollLeft = plotRef.current.scrollWidth;
+		}
+	}, [scrollable, entries.length, stats.range.from, stats.range.to]);
 
 	if (entries.length === 0) {
 		return <div className="ft-empty">{I18n.t("dashboard.empty.total")}</div>;
@@ -212,14 +221,15 @@ export function TrendBars(props: { stats: RangeStats; onSelectDay?: (date: strin
 	const max = niceMax(Math.max(...entries.map((entry) => entry.ms)));
 
 	return (
+		<>
 		<div className="ft-chart" style={{height}}>
 			<div className="ft-chart-axis">
 				<span>{formatAxis(max)}</span>
 				<span>{formatAxis(max / 2)}</span>
 				<span>0</span>
 			</div>
-			<div className="ft-chart-plot">
-				<div className="ft-bars">
+			<div className={`ft-chart-plot ${scrollable ? "is-scrollable" : ""}`} ref={plotRef}>
+				<div className={`ft-bars ${scrollable ? "is-scrollable" : ""}`}>
 					{entries.map((entry) => {
 						const ratio = max > 0 ? entry.ms / max : 0;
 						const title = entry.date
@@ -247,6 +257,8 @@ export function TrendBars(props: { stats: RangeStats; onSelectDay?: (date: strin
 				</div>
 			</div>
 		</div>
+		{scrollable ? <div className="ft-chart-hint">{I18n.t("dashboard.chart.scrollHint")}</div> : null}
+		</>
 	);
 }
 
