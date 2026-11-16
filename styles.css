@@ -240,6 +240,13 @@
 	color: var(--text-success);
 }
 
+.ft-goal-extra {
+	margin-top: 4px;
+	font-size: 10px;
+	line-height: 1.35;
+	color: var(--text-muted);
+}
+
 /* Main */
 
 .ft-main {
@@ -437,6 +444,33 @@
 
 .ft-kpi-hint.is-down {
 	color: var(--text-error);
+}
+
+.ft-kpi-split {
+	margin-top: 8px;
+}
+
+.ft-split-bar {
+	display: flex;
+	height: 5px;
+	border-radius: 3px;
+	overflow: hidden;
+	background: var(--background-modifier-border);
+}
+
+.ft-split-edit {
+	background: var(--interactive-accent);
+}
+
+.ft-split-read {
+	background: var(--color-green, var(--text-success));
+}
+
+.ft-split-label {
+	display: block;
+	margin-top: 4px;
+	font-size: 10px;
+	color: var(--text-muted);
 }
 
 /* Cards */
@@ -897,6 +931,22 @@
 }
 
 /* Notes */
+
+.ft-note-summary {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 8px;
+	font-size: 10px;
+	color: var(--text-muted);
+}
+
+.ft-note-summary span {
+	padding: 2px 7px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 999px;
+	background: var(--background-primary);
+}
 
 .ft-filter-row {
 	display: flex;

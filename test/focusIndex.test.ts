@@ -68,6 +68,9 @@ describe("FocusIndex", () => {
 		expect(index.getNoteTotal("n2")).toBe(120_000);
 		expect(index.getNoteTotal("n3")).toBe(5_000);
 		expect(index.getNoteAggregate("n1").sessions).toBe(1);
+		expect(index.getNoteAggregate("n1").firstDay).toBe("2026-01-05");
+		expect(index.getNoteAggregate("n2").firstDay).toBe("2026-01-05");
+		expect(index.getNoteAggregate("n3").firstDay).toBe("");
 		expect(index.isLegacyDate("2026-01-05")).toBe(true);
 
 		const stats = index.getStats();

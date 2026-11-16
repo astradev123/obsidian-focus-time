@@ -5,7 +5,7 @@ import I18n from "../../language/i18n";
 import { DateUtils } from "../../util/dateUtils";
 import { TimeUtils } from "../../util/timeUtils";
 import { Period, getRange, previousRange } from "../../analytics/period";
-import { getGoalStreak, getPeakHour, getRangeStats, sessionHistogram } from "../../analytics/metrics";
+import { getGoalStats, getPeakHour, getRangeStats, sessionHistogram } from "../../analytics/metrics";
 import { DateNavigator } from "../components/DateNavigator";
 import {
 	CalendarHeatmap,
@@ -111,17 +111,27 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab
 
 	const firstActive = plugin.storage.index.getActiveDays()[0];
 	const range = getRange(period, anchor, firstActive);
-	const stats = getRangeStats(plugin.storage.index, range, (noteId) => plugin.storage.getPath(noteId));
+	const stats = getRangeStats(
+		plugin.storage.index,
+		range,
+		(noteId) => plugin.storage.getPath(noteId),
+		{allTime: period === "total"}
+	);
 	const prev = period === "total"
 		? null
 		: getRangeStats(plugin.storage.index, previousRange(range), (noteId) => plugin.storage.getPath(noteId));
 	const goalMs = plugin.settingsManager.getGoalMs();
 	const today = DateUtils.toLocalDate();
 	const todayMs = plugin.storage.index.getDayTotal(today);
-	const streak = getGoalStreak(plugin.storage.index, goalMs, today);
+	const goalStats = getGoalStats(plugin.storage.index, goalMs, today);
 	const totalDelta = prev ? delta(stats.totalMs, prev.totalMs) : undefined;
 	const sessionDelta = prev ? delta(stats.sessionCount, prev.sessionCount) : undefined;
 	const avgDelta = prev ? delta(stats.avgSessionMs, prev.avgSessionMs) : undefined;
+	const totalHint = totalDelta?.text ?? (stats.unallocatedMs > 0
+		? I18n.t("dashboard.kpi.unallocated", {time: TimeUtils.getFormattedReadingTime(stats.unallocatedMs)})
+		: undefined);
+	const returningMs = stats.newNoteMs + stats.returningNoteMs;
+	const returningShare = returningMs > 0 ? Math.round((stats.returningNoteMs / returningMs) * 100) : 0;
 	const goalPercent = goalMs > 0 ? Math.min(100, (todayMs / goalMs) * 100) : 0;
 	const showHelp = plugin.settingsManager.get().showHelpIcons;
 	const subtitle = I18n.t("dashboard.subtitle", {sessions: stats.sessionCount, notes: stats.noteCount});
@@ -156,8 +166,10 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab
 			tone: "neutral"
 		});
 	}
-	if (streak > 1) {
-		insights.push({key: "dashboard.insight.streak", params: {days: streak}, tone: "neutral"});
+	if (goalStats.todayMet && goalStats.current > 1) {
+		insights.push({key: "dashboard.insight.streak", params: {days: goalStats.current}, tone: "neutral"});
+	} else if (!goalStats.todayMet && goalStats.throughYesterday > 1) {
+		insights.push({key: "dashboard.insight.streakYesterday", params: {days: goalStats.throughYesterday}, tone: "neutral"});
 	}
 	if (stats.deepWorkRatio > 0) {
 		insights.push({
@@ -218,6 +230,12 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab
 							goal: Math.round(goalMs / 60_000)
 						})}
 					</div>
+					<div className="ft-goal-extra">
+						{I18n.t("dashboard.sidebar.goalQuality", {
+							rate: Math.round(goalStats.hitRate * 100),
+							days: goalStats.longest
+						})}
+					</div>
 				</div>
 			</aside>
 
@@ -258,9 +276,10 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab
 								<KpiCard
 									label={I18n.t("dashboard.kpi.total")}
 									value={TimeUtils.getFormattedReadingTime(stats.totalMs)}
-									hint={totalDelta?.text}
+									hint={totalHint}
 									tone={totalDelta?.tone}
 									icon="clock"
+									split={{edit: stats.editMs, read: stats.readMs, classified: stats.classifiedMs}}
 								/>
 								<KpiCard
 									label={I18n.t("dashboard.kpi.sessions")}
@@ -281,8 +300,8 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab
 								/>
 								<KpiCard
 									label={I18n.t("dashboard.kpi.deepWork")}
-									value={`${Math.round(stats.deepWorkRatio * 100)}%`}
-									hint={TimeUtils.getFormattedReadingTime(stats.deepWorkMs)}
+									value={stats.classifiedMs > 0 ? `${Math.round(stats.deepWorkRatio * 100)}%` : "—"}
+									hint={stats.classifiedMs > 0 ? TimeUtils.getFormattedReadingTime(stats.deepWorkMs) : I18n.t("dashboard.kpi.noSessionDetail")}
 									icon="flame"
 									help={showHelp ? "help.deepWork" : undefined}
 									helpAlign="right"
@@ -391,6 +410,13 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab
 									? I18n.t("dashboard.notes.filterDesc", {category: categoryLabel(categoryFilter)})
 									: I18n.t("dashboard.notes.desc")}
 							>
+								{!categoryFilter && period !== "total" ? (
+									<div className="ft-note-summary">
+										<span>{I18n.t("dashboard.notes.newCount", {count: stats.newNoteCount})}</span>
+										<span>{I18n.t("dashboard.notes.returningCount", {count: stats.returningNoteCount})}</span>
+										{stats.returningNoteCount > 0 ? <span>{I18n.t("dashboard.notes.returningShare", {percent: returningShare})}</span> : null}
+									</div>
+								) : null}
 								{categoryFilter ? (
 									<div className="ft-filter-row">
 										<span>{I18n.t("dashboard.filter")}</span>

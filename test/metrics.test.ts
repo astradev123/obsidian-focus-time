@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FocusIndex } from "../src/core/storage/focusIndex";
 import { FocusEvent } from "../src/core/storage/types";
-import { getGoalStreak, getPeakHour, getRangeStats, getStreak, mergeSessions, sessionHistogram, categoryForPath, ROOT_CATEGORY, OTHER_CATEGORY } from "../src/analytics/metrics";
+import { getGoalStats, getGoalStreak, getPeakHour, getRangeStats, getStreak, mergeSessions, sessionHistogram, categoryForPath, ROOT_CATEGORY, OTHER_CATEGORY } from "../src/analytics/metrics";
 import { previousRange } from "../src/analytics/period";
 
 function session(id: string, ses: string, note: string, start: number, ms: number, kind: "edit" | "read" = "read"): FocusEvent {
@@ -64,6 +64,12 @@ describe("analytics metrics", () => {
 		expect(stats.folderNoteCounts.get("Books")).toBe(1);
 		expect(stats.legacyDays).toBe(1);
 		expect(stats.deepWorkMs).toBe(40 * 60_000);
+		expect(stats.editMs).toBe(40 * 60_000);
+		expect(stats.readMs).toBe(25 * 60_000);
+		expect(stats.classifiedMs).toBe(65 * 60_000);
+		expect(stats.deepWorkRatio).toBeCloseTo(40 / 65);
+		expect(stats.newNoteCount).toBe(2);
+		expect(stats.returningNoteCount).toBe(0);
 		expect(stats.switchCount).toBe(0);
 		expect(stats.hourMatrix[1][9]).toBe(40 * 60_000);
 	});
@@ -103,6 +109,64 @@ describe("analytics metrics", () => {
 
 	it("calculates the previous range", () => {
 		expect(previousRange({from: "2026-01-05", to: "2026-01-06"})).toEqual({from: "2026-01-03", to: "2026-01-04"});
+	});
+
+	it("counts returning notes from their first recorded day", () => {
+		const {index} = buildIndex();
+		const stats = getRangeStats(index, {from: "2026-01-06", to: "2026-01-06"}, (noteId) => (noteId === "n1" ? "Work/a.md" : "Books/b.md"));
+
+		expect(stats.newNoteCount).toBe(1);
+		expect(stats.returningNoteCount).toBe(1);
+	});
+
+	it("counts undated legacy totals only for the all-time range", () => {
+		const {index} = buildIndex();
+		index.add({
+			v: 1,
+			id: "baseline",
+			dev: "dev1",
+			at: 0,
+			type: "legacyTotal",
+			note: "n3",
+			ms: 30 * 60_000,
+			src: "v0-readData"
+		});
+
+		const week = getRangeStats(index, {from: "2026-01-05", to: "2026-01-06"}, () => undefined);
+		const total = getRangeStats(index, {from: "2026-01-05", to: "2026-01-06"}, () => undefined, {allTime: true});
+
+		expect(week.totalMs).toBe(75 * 60_000);
+		expect(week.unallocatedMs).toBe(0);
+		expect(total.totalMs).toBe(105 * 60_000);
+		expect(total.unallocatedMs).toBe(30 * 60_000);
+		expect(total.noteTotals.get("n3")).toBe(30 * 60_000);
+	});
+
+	it("separates today's goal state from the streak through yesterday", () => {
+		const {index} = buildIndex();
+
+		const met = getGoalStats(index, 30 * 60_000, "2026-01-06");
+		expect(met.todayMet).toBe(true);
+		expect(met.current).toBe(2);
+		expect(met.throughYesterday).toBe(1);
+		expect(met.longest).toBe(2);
+		expect(met.hitRate).toBe(1);
+
+		const notYet = getGoalStats(index, 40 * 60_000, "2026-01-06");
+		expect(notYet.todayMet).toBe(false);
+		expect(notYet.current).toBe(0);
+		expect(notYet.throughYesterday).toBe(1);
+		expect(notYet.longest).toBe(1);
+		expect(notYet.hitRate).toBe(0.5);
+	});
+
+	it("excludes future days from goal stats", () => {
+		const {index} = buildIndex();
+		index.add(session("future", "z", "n1", new Date(2026, 0, 7, 10, 0, 0).getTime(), 10 * 60_000));
+		const stats = getGoalStats(index, 30 * 60_000, "2026-01-06");
+
+		expect(stats.activeDays).toBe(2);
+		expect(stats.hitRate).toBe(1);
 	});
 
 	it("maps paths to clean top-level categories", () => {

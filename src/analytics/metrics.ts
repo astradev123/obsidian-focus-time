@@ -32,6 +32,14 @@ export interface RangeStats {
 	longestSessionMs: number;
 	deepWorkMs: number;
 	deepWorkRatio: number;
+	editMs: number;
+	readMs: number;
+	classifiedMs: number;
+	newNoteCount: number;
+	returningNoteCount: number;
+	newNoteMs: number;
+	returningNoteMs: number;
+	unallocatedMs: number;
 	switchCount: number;
 	hourMatrix: number[][];
 	dayTotals: Array<{date: string; ms: number}>;
@@ -107,7 +115,8 @@ export function mergeSessions(events: SessionEvent[]): SessionSummary[] {
 export function getRangeStats(
 	index: FocusIndex,
 	range: DateRange,
-	getPath: (noteId: string) => string | undefined
+	getPath: (noteId: string) => string | undefined,
+	options: { allTime?: boolean } = {}
 ): RangeStats {
 	const dayTotals: Array<{date: string; ms: number}> = [];
 	const dayKinds = new Map<string, DayKinds>();
@@ -153,8 +162,44 @@ export function getRangeStats(
 		hourMatrix[weekday][hour] += event.ms;
 	}
 
+	let editMs = 0;
+	let readMs = 0;
+	for (const kinds of dayKinds.values()) {
+		editMs += kinds.edit;
+		readMs += kinds.read;
+	}
+	const classifiedMs = editMs + readMs;
+
 	for (const [date, kinds] of dayKinds) {
 		kinds.legacy = Math.max(0, kinds.total - kinds.edit - kinds.read);
+	}
+
+	let unallocatedMs = 0;
+	if (options.allTime) {
+		for (const noteId of index.getNoteIds()) {
+			const baseline = index.getNoteBaseline(noteId);
+			if (baseline > 0) {
+				noteTotals.set(noteId, (noteTotals.get(noteId) ?? 0) + baseline);
+				noteSet.add(noteId);
+				unallocatedMs += baseline;
+			}
+		}
+		totalMs += unallocatedMs;
+	}
+
+	let newNoteCount = 0;
+	let returningNoteCount = 0;
+	let newNoteMs = 0;
+	let returningNoteMs = 0;
+	for (const [noteId, ms] of noteTotals) {
+		const firstDay = index.getNoteAggregate(noteId).firstDay;
+		if (!firstDay || firstDay < range.from) {
+			returningNoteCount++;
+			returningNoteMs += ms;
+		} else {
+			newNoteCount++;
+			newNoteMs += ms;
+		}
 	}
 
 	const sessions = mergeSessions(inRange);
@@ -192,7 +237,15 @@ export function getRangeStats(
 		medianSessionMs,
 		longestSessionMs,
 		deepWorkMs,
-		deepWorkRatio: totalMs > 0 ? deepWorkMs / totalMs : 0,
+		deepWorkRatio: classifiedMs > 0 ? Math.min(1, deepWorkMs / classifiedMs) : 0,
+		editMs,
+		readMs,
+		classifiedMs,
+		newNoteCount,
+		returningNoteCount,
+		newNoteMs,
+		returningNoteMs,
+		unallocatedMs,
 		switchCount,
 		hourMatrix,
 		dayTotals,
@@ -230,6 +283,81 @@ export function getGoalStreak(index: FocusIndex, goalMs: number, anchorDate: str
 		cursor = DateUtils.toLocalDate(DateUtils.addDays(DateUtils.toDate(parts), -1));
 	}
 	return streak;
+}
+
+export interface GoalStats {
+	current: number;
+	throughYesterday: number;
+	longest: number;
+	hitDays: number;
+	activeDays: number;
+	hitRate: number;
+	todayMet: boolean;
+}
+
+export function getGoalStats(index: FocusIndex, goalMs: number, anchorDate: string): GoalStats {
+	const activeDays = index.getActiveDays();
+	let activeCount = 0;
+	const goalDays = new Set<string>();
+
+	for (const date of activeDays) {
+		if (date > anchorDate) {
+			continue;
+		}
+		const total = index.getDayTotal(date);
+		if (total > 0) {
+			activeCount++;
+		}
+		if (goalMs > 0 ? total >= goalMs : total > 0) {
+			goalDays.add(date);
+		}
+	}
+
+	let longest = 0;
+	let run = 0;
+	let previous: string | null = null;
+	for (const date of Array.from(goalDays).sort()) {
+		let expected = "";
+		if (previous) {
+			const parts = DateUtils.parseKey(previous);
+			if (parts) {
+				expected = DateUtils.toLocalDate(DateUtils.addDays(DateUtils.toDate(parts), 1));
+			}
+		}
+		run = expected === date ? run + 1 : 1;
+		longest = Math.max(longest, run);
+		previous = date;
+	}
+
+	const countBack = (start: string): number => {
+		let cursor = start;
+		let count = 0;
+		while (goalDays.has(cursor) && count < 3650) {
+			count++;
+			const parts = DateUtils.parseKey(cursor);
+			if (!parts) {
+				break;
+			}
+			cursor = DateUtils.toLocalDate(DateUtils.addDays(DateUtils.toDate(parts), -1));
+		}
+		return count;
+	};
+
+	const todayMet = goalDays.has(anchorDate);
+	const anchorParts = DateUtils.parseKey(anchorDate);
+	const yesterday = anchorParts
+		? DateUtils.toLocalDate(DateUtils.addDays(DateUtils.toDate(anchorParts), -1))
+		: anchorDate;
+
+	return {
+		current: todayMet ? countBack(anchorDate) : 0,
+		throughYesterday: countBack(yesterday),
+		longest,
+		hitDays: goalDays.size,
+		activeDays: activeCount,
+		hitRate: activeCount > 0 ? goalDays.size / activeCount : 0,
+		todayMet
+	};
 }
 
 export function getPeakHour(matrix: number[][]): {weekday: number; hour: number; ms: number} | null {

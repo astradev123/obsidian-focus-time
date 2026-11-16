@@ -108,8 +108,11 @@ export function KpiCard(props: {
 	icon: string;
 	help?: string;
 	helpAlign?: "left" | "right" | "top";
+	split?: { edit: number; read: number; classified: number };
 }) {
-	const {label, value, hint, tone, icon, help, helpAlign} = props;
+	const {label, value, hint, tone, icon, help, helpAlign, split} = props;
+	const editPercent = split && split.classified > 0 ? Math.round((split.edit / split.classified) * 100) : 0;
+	const readPercent = split && split.classified > 0 ? 100 - editPercent : 0;
 	return (
 		<div className="ft-kpi">
 			<div className="ft-kpi-top">
@@ -121,6 +124,17 @@ export function KpiCard(props: {
 			</div>
 			<div className="ft-kpi-value">{value}</div>
 			{hint ? <div className={`ft-kpi-hint ${tone ? `is-${tone}` : ""}`}>{hint}</div> : null}
+			{split && split.classified > 0 ? (
+				<div className="ft-kpi-split" title={I18n.t("help.split")}>
+					<span className="ft-split-bar">
+						<span className="ft-split-edit" style={{width: `${editPercent}%`}} />
+						<span className="ft-split-read" style={{width: `${readPercent}%`}} />
+					</span>
+					<span className="ft-split-label">
+						{I18n.t("dashboard.kpi.split", {edit: editPercent, read: readPercent})}
+					</span>
+				</div>
+			) : null}
 		</div>
 	);
 }

@@ -6,6 +6,8 @@ export interface NoteAggregate {
 	sessions: number;
 	firstAt: number;
 	lastAt: number;
+	firstDay: string;
+	lastDay: string;
 }
 
 export interface DayAggregate {
@@ -25,6 +27,8 @@ export class FocusIndex {
 	private readonly noteSessions = new Map<string, Set<string>>();
 	private readonly noteFirstAt = new Map<string, number>();
 	private readonly noteLastAt = new Map<string, number>();
+	private readonly noteFirstDay = new Map<string, string>();
+	private readonly noteLastDay = new Map<string, string>();
 	private readonly legacyDates = new Set<string>();
 	private readonly legacyBaseline = new Map<string, number>();
 	private readonly sessions: SessionEvent[] = [];
@@ -40,6 +44,8 @@ export class FocusIndex {
 		this.noteSessions.clear();
 		this.noteFirstAt.clear();
 		this.noteLastAt.clear();
+		this.noteFirstDay.clear();
+		this.noteLastDay.clear();
 		this.legacyDates.clear();
 		this.legacyBaseline.clear();
 		this.sessions.length = 0;
@@ -116,12 +122,18 @@ export class FocusIndex {
 		return Math.max(0, this.noteTotals.get(noteId) ?? 0);
 	}
 
+	public getNoteBaseline(noteId: string): number {
+		return this.legacyBaseline.get(noteId) ?? 0;
+	}
+
 	public getNoteAggregate(noteId: string): NoteAggregate {
 		return {
 			ms: this.getNoteTotal(noteId),
 			sessions: this.noteSessions.get(noteId)?.size ?? 0,
 			firstAt: this.noteFirstAt.get(noteId) ?? 0,
-			lastAt: this.noteLastAt.get(noteId) ?? 0
+			lastAt: this.noteLastAt.get(noteId) ?? 0,
+			firstDay: this.noteFirstDay.get(noteId) ?? "",
+			lastDay: this.noteLastDay.get(noteId) ?? ""
 		};
 	}
 
@@ -192,6 +204,15 @@ export class FocusIndex {
 		}
 		notes.set(noteId, (notes.get(noteId) ?? 0) + ms);
 		this.addNoteTotal(noteId, ms);
+
+		const firstDay = this.noteFirstDay.get(noteId);
+		if (!firstDay || normalized < firstDay) {
+			this.noteFirstDay.set(noteId, normalized);
+		}
+		const lastDay = this.noteLastDay.get(noteId);
+		if (!lastDay || normalized > lastDay) {
+			this.noteLastDay.set(noteId, normalized);
+		}
 	}
 
 	private addNoteTotal(noteId: string, ms: number): void {

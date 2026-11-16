@@ -152,7 +152,10 @@
 		"notes": {
 			"title": "集中したノート",
 			"desc": "クリックでノートを開く",
-			"filterDesc": "カテゴリ：{category}"
+			"filterDesc": "カテゴリ：{category}",
+			"newCount": "新規ノート {count}件",
+			"returningCount": "再訪 {count}件",
+			"returningShare": "再訪時間 {percent}%"
 		},
 		"metrics": {
 			"focusNotes": "集中ノート数",
@@ -175,7 +178,10 @@
 			"longestSession": "最長セッション",
 			"switches": "コンテキスト切替",
 			"deepWork": "深い作業",
-			"activeDays": "アクティブ日数"
+			"activeDays": "アクティブ日数",
+			"split": "編集 {edit}% · 読書 {read}%",
+			"unallocated": "旧版の未割当時間 {time} を含む",
+			"noSessionDetail": "セッション明細なし"
 		},
 		"sections": {
 			"trend": "集中の推移",
@@ -195,7 +201,8 @@
 			"streak": "{days}日連続で達成",
 			"deepWork": "集中時間の {percent}% が深い作業",
 			"legacy": "{days}日は旧形式の日次データです",
-			"none": "数回記録するとインサイトが表示されます"
+			"none": "数回記録するとインサイトが表示されます",
+			"streakYesterday": "昨日まで {days}日連続達成"
 		},
 		"buckets": {
 			"lt5": "5分未満",
@@ -232,7 +239,8 @@
 		},
 		"sidebar": {
 			"today": "今日",
-			"goal": "{current} / {goal} 分"
+			"goal": "{current} / {goal} 分",
+			"goalQuality": "累計達成率 {rate}% · 最長 {days}日"
 		},
 		"seeAll": "すべて表示",
 		"error": "ダッシュボードの描画に失敗しました",
@@ -255,13 +263,14 @@
 	"help": {
 		"sessions": "連続した集中記録です。ノート切替、ウィンドウの非アクティブ、アイドル超過で新しいセッションになります。",
 		"avgSession": "選択期間の1セッションあたりの平均時間。",
-		"deepWork": "25分以上のセッションを深い作業として集計します。",
+		"deepWork": "25分以上のセッションを深い作業として集計します。割合はセッション明細のある時間だけで計算します。",
 		"medianSession": "セッション長を並べた中央の値。平均より長い1回の影響を受けにくくなります。",
 		"longestSession": "選択期間で最も長いセッション。",
 		"switches": "前のセッションから30分以内に別のノートへ切り替えた回数。",
 		"activeDays": "選択期間で1回以上記録がある日数。",
-		"goal": "設定で変更できます。その日の合計が目標に達すると連続達成に数えます。",
+		"goal": "設定で変更できます。その日の合計が目標に達すると連続達成に数えます。達成率は記録のある日で計算します。",
 		"calendar": "1マスが1日です。色が濃いほど集中時間が長くなります。",
-		"categories": "ノートの最上位フォルダーで集計します。"
+		"categories": "ノートの最上位フォルダーで集計します。",
+		"split": "編集/読書の明細があるセッションで集計します。旧版の日次データは含みません。"
 	}
 }

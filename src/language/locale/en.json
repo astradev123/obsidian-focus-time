@@ -152,7 +152,10 @@
 		"notes": {
 			"title": "Focus notes",
 			"desc": "Click a note to open it",
-			"filterDesc": "Category: {category}"
+			"filterDesc": "Category: {category}",
+			"newCount": "{count} new notes",
+			"returningCount": "{count} returning",
+			"returningShare": "{percent}% returning time"
 		},
 		"metrics": {
 			"focusNotes": "Focus notes",
@@ -175,7 +178,10 @@
 			"longestSession": "Longest session",
 			"switches": "Context switches",
 			"deepWork": "Deep work",
-			"activeDays": "Active days"
+			"activeDays": "Active days",
+			"split": "Edit {edit}% · Read {read}%",
+			"unallocated": "Includes {time} undated legacy time",
+			"noSessionDetail": "No session detail"
 		},
 		"sections": {
 			"trend": "Focus trend",
@@ -195,7 +201,8 @@
 			"streak": "{days}-day goal streak",
 			"deepWork": "{percent}% of focus time was deep work",
 			"legacy": "{days} days use legacy day-level data",
-			"none": "Track a few sessions to see insights"
+			"none": "Track a few sessions to see insights",
+			"streakYesterday": "{days}-day streak through yesterday"
 		},
 		"buckets": {
 			"lt5": "< 5 min",
@@ -232,7 +239,8 @@
 		},
 		"sidebar": {
 			"today": "Today",
-			"goal": "{current} / {goal} min"
+			"goal": "{current} / {goal} min",
+			"goalQuality": "All-time hit {rate}% · best {days}d"
 		},
 		"seeAll": "View all",
 		"error": "The dashboard failed to render",
@@ -255,13 +263,14 @@
 	"help": {
 		"sessions": "A continuous focus block. Switching notes, losing focus, or going idle starts a new session.",
 		"avgSession": "Average length of the sessions in the selected range.",
-		"deepWork": "Time from sessions of 25 minutes or longer.",
+		"deepWork": "Time from sessions of 25 minutes or longer. The percentage uses only time with session detail.",
 		"medianSession": "The middle session length; less affected by one very long session than the average.",
 		"longestSession": "The longest single session in the selected range.",
 		"switches": "Note changes within 30 minutes of the previous session.",
 		"activeDays": "Days with at least one focus session in the selected range.",
-		"goal": "Set in Settings. A day counts toward your streak when its total reaches this goal.",
+		"goal": "Set in Settings. A day counts toward your streak when its total reaches this goal. Hit rate is calculated over days with any focus time.",
 		"calendar": "Each square is one day. Darker means more focus time.",
-		"categories": "Grouped by top-level folder."
+		"categories": "Grouped by top-level folder.",
+		"split": "Based on sessions with edit/read detail; legacy day data is excluded."
 	}
 }

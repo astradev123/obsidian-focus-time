@@ -152,7 +152,10 @@
 		"notes": {
 			"title": "집중한 노트",
 			"desc": "클릭하면 노트가 열립니다",
-			"filterDesc": "분류: {category}"
+			"filterDesc": "분류: {category}",
+			"newCount": "새 노트 {count}개",
+			"returningCount": "재방문 {count}개",
+			"returningShare": "재방문 시간 {percent}%"
 		},
 		"metrics": {
 			"focusNotes": "집중 노트 수",
@@ -175,7 +178,10 @@
 			"longestSession": "최장 세션",
 			"switches": "컨텍스트 전환",
 			"deepWork": "깊은 작업",
-			"activeDays": "활동 일수"
+			"activeDays": "활동 일수",
+			"split": "편집 {edit}% · 읽기 {read}%",
+			"unallocated": "이전 버전 미배분 시간 {time} 포함",
+			"noSessionDetail": "세션 상세 없음"
 		},
 		"sections": {
 			"trend": "집중 추세",
@@ -195,7 +201,8 @@
 			"streak": "{days}일 연속 달성",
 			"deepWork": "집중 시간의 {percent}%가 깊은 작업",
 			"legacy": "{days}일은 이전 형식 일별 데이터입니다",
-			"none": "몇 번 기록하면 인사이트가 표시됩니다"
+			"none": "몇 번 기록하면 인사이트가 표시됩니다",
+			"streakYesterday": "어제까지 {days}일 연속 달성"
 		},
 		"buckets": {
 			"lt5": "5분 미만",
@@ -232,7 +239,8 @@
 		},
 		"sidebar": {
 			"today": "오늘",
-			"goal": "{current} / {goal}분"
+			"goal": "{current} / {goal}분",
+			"goalQuality": "누적 달성률 {rate}% · 최장 {days}일"
 		},
 		"seeAll": "전체 보기",
 		"error": "대시보드를 렌더링하지 못했습니다",
@@ -255,13 +263,14 @@
 	"help": {
 		"sessions": "연속된 집중 기록입니다. 노트 전환, 창 비활성, 유휴 초과 시 새 세션이 시작됩니다.",
 		"avgSession": "선택 기간의 세션당 평균 시간입니다.",
-		"deepWork": "25분 이상 세션을 깊은 작업으로 집계합니다.",
+		"deepWork": "25분 이상 세션을 깊은 작업으로 집계합니다. 비율은 세션 상세가 있는 시간만으로 계산합니다.",
 		"medianSession": "세션 길이를 정렬한 가운데 값입니다. 아주 긴 세션 하나의 영향을 덜 받습니다.",
 		"longestSession": "선택 기간에서 가장 긴 세션입니다.",
 		"switches": "이전 세션 이후 30분 안에 다른 노트로 전환한 횟수입니다.",
 		"activeDays": "선택 기간에 한 번 이상 기록이 있는 날짜 수입니다.",
-		"goal": "설정에서 변경할 수 있습니다. 그날 합계가 목표에 도달하면 연속 달성에 포함됩니다.",
+		"goal": "설정에서 변경할 수 있습니다. 그날 합계가 목표에 도달하면 연속 달성에 포함됩니다. 달성률은 기록이 있는 날 기준으로 계산합니다.",
 		"calendar": "칸 하나가 하루입니다. 색이 진할수록 집중 시간이 깁니다.",
-		"categories": "노트의 최상위 폴더 기준으로 집계합니다."
+		"categories": "노트의 최상위 폴더 기준으로 집계합니다.",
+		"split": "편집/읽기 상세가 있는 세션 기준입니다. 이전 버전 일별 데이터는 제외됩니다."
 	}
 }

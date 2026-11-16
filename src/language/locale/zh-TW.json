@@ -152,7 +152,10 @@
 		"notes": {
 			"title": "專注筆記",
 			"desc": "點擊筆記可開啟",
-			"filterDesc": "分類：{category}"
+			"filterDesc": "分類：{category}",
+			"newCount": "新筆記 {count} 篇",
+			"returningCount": "回訪 {count} 篇",
+			"returningShare": "回訪時長 {percent}%"
 		},
 		"metrics": {
 			"focusNotes": "專注筆記數",
@@ -175,7 +178,10 @@
 			"longestSession": "最長工作階段",
 			"switches": "情境切換",
 			"deepWork": "深度工作",
-			"activeDays": "活躍天數"
+			"activeDays": "活躍天數",
+			"split": "編輯 {edit}% · 閱讀 {read}%",
+			"unallocated": "含 {time} 舊版未分配時間",
+			"noSessionDetail": "無會話明細"
 		},
 		"sections": {
 			"trend": "專注趨勢",
@@ -195,7 +201,8 @@
 			"streak": "連續 {days} 天達標",
 			"deepWork": "{percent}% 的專注時長屬於深度工作",
 			"legacy": "{days} 天使用舊版日粒度資料",
-			"none": "再記錄幾次工作階段就能看到洞察"
+			"none": "再記錄幾次工作階段就能看到洞察",
+			"streakYesterday": "截至昨天連續 {days} 天達標"
 		},
 		"buckets": {
 			"lt5": "< 5 分鐘",
@@ -232,7 +239,8 @@
 		},
 		"sidebar": {
 			"today": "今日專注",
-			"goal": "{current} / {goal} 分鐘"
+			"goal": "{current} / {goal} 分鐘",
+			"goalQuality": "累計達標率 {rate}% · 最長 {days} 天"
 		},
 		"seeAll": "查看全部",
 		"error": "儀表盤渲染失敗",
@@ -255,13 +263,14 @@
 	"help": {
 		"sessions": "一段連續的專注記錄。切換筆記、視窗失焦或閒置逾時後會開始新的會話。",
 		"avgSession": "所選時間範圍內，每次會話的平均時長。",
-		"deepWork": "單次時長達到 25 分鐘及以上的會話計入深工作。",
+		"deepWork": "單次時長達到 25 分鐘及以上的會話計入深工作。佔比只按有會話明細的時長計算。",
 		"medianSession": "把會話按長度排序後位於中間的值，比平均值更不容易被一次超長會話拉高。",
 		"longestSession": "所選範圍內最長的一次會話。",
 		"switches": "距上一次會話 30 分鐘內切換到另一篇筆記的次數。",
 		"activeDays": "所選範圍內至少有一次專注記錄的天數。",
-		"goal": "在設定中調整。當天總時長達到目標時，才計入連續達標。",
+		"goal": "在設定中調整。當天總時長達到目標時，才計入連續達標；達標率按有記錄的天數計算。",
 		"calendar": "每個格子代表一天，顏色越深表示專注時間越長。",
-		"categories": "按筆記所在的一級目錄彙總。"
+		"categories": "按筆記所在的一級目錄彙總。",
+		"split": "按有編輯/閱讀明細的會話統計；舊版日資料不參與。"
 	}
 }

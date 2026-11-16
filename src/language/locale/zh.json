@@ -152,7 +152,10 @@
 		"notes": {
 			"title": "专注笔记列表",
 			"desc": "点击笔记可打开",
-			"filterDesc": "分类：{category}"
+			"filterDesc": "分类：{category}",
+			"newCount": "新笔记 {count} 篇",
+			"returningCount": "回访 {count} 篇",
+			"returningShare": "回访时长 {percent}%"
 		},
 		"metrics": {
 			"focusNotes": "专注笔记数",
@@ -175,7 +178,10 @@
 			"longestSession": "最长会话",
 			"switches": "上下文切换",
 			"deepWork": "深工作",
-			"activeDays": "活跃天数"
+			"activeDays": "活跃天数",
+			"split": "编辑 {edit}% · 阅读 {read}%",
+			"unallocated": "含 {time} 旧版未分配时间",
+			"noSessionDetail": "无会话明细"
 		},
 		"sections": {
 			"trend": "专注趋势",
@@ -195,7 +201,8 @@
 			"streak": "连续 {days} 天达标",
 			"deepWork": "{percent}% 的专注时长属于深工作",
 			"legacy": "{days} 天使用旧版日粒度数据",
-			"none": "再记录几次会话就能看到洞察"
+			"none": "再记录几次会话就能看到洞察",
+			"streakYesterday": "截至昨天连续 {days} 天达标"
 		},
 		"buckets": {
 			"lt5": "< 5 分钟",
@@ -232,7 +239,8 @@
 		},
 		"sidebar": {
 			"today": "今日专注",
-			"goal": "{current} / {goal} 分钟"
+			"goal": "{current} / {goal} 分钟",
+			"goalQuality": "累计达标率 {rate}% · 最长 {days} 天"
 		},
 		"seeAll": "查看全部",
 		"error": "仪表盘渲染失败",
@@ -255,13 +263,14 @@
 	"help": {
 		"sessions": "一段连续的专注记录。切换笔记、窗口失焦或空闲超时后会开始新的会话。",
 		"avgSession": "所选时间范围内，每次会话的平均时长。",
-		"deepWork": "单次时长达到 25 分钟及以上的会话计入深工作。",
+		"deepWork": "单次时长达到 25 分钟及以上的会话计入深工作。占比只按有会话明细的时长计算。",
 		"medianSession": "把会话按长度排序后位于中间的值，比平均值更不容易被一次超长会话拉高。",
 		"longestSession": "所选范围内最长的一次会话。",
 		"switches": "距上一次会话 30 分钟内切换到另一篇笔记的次数。",
 		"activeDays": "所选范围内至少有一次专注记录的天数。",
-		"goal": "在设置中调整。当天总时长达到目标时，才计入连续达标。",
+		"goal": "在设置中调整。当天总时长达到目标时，才计入连续达标；达标率按有记录的天数计算。",
 		"calendar": "每个格子代表一天，颜色越深表示专注时间越长。",
-		"categories": "按笔记所在的一级目录汇总。"
+		"categories": "按笔记所在的一级目录汇总。",
+		"split": "按有编辑/阅读明细的会话统计；旧版日数据不参与。"
 	}
 }
