@@ -50,7 +50,7 @@
 		},
 		"idle": {
 			"name": "Idle detection",
-			"desc": "Stop counting after a period without input.",
+			"desc": "Stop counting after the set time without input. Typing, clicking, scrolling or selecting text counts as input; moving the mouse alone does not.",
 			"off": "Off",
 			"fixed": "5 minutes",
 			"custom": "Custom",
@@ -259,6 +259,6 @@
 		"activeDays": "Days with at least one focus session in the selected range.",
 		"goal": "Set in Settings. A day counts toward your streak when its total reaches this goal.",
 		"calendar": "Each square is one day. Darker means more focus time.",
-		"categories": "Grouped by top-level folder. Root notes and web clips are grouped separately."
+		"categories": "Grouped by top-level folder."
 	}
 }
