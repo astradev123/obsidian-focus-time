@@ -180,7 +180,6 @@
 			"deepWork": "深い作業",
 			"activeDays": "アクティブ日数",
 			"split": "編集 {edit}% · 読書 {read}%",
-			"unallocated": "旧版の未割当時間 {time} を含む",
 			"noSessionDetail": "セッション明細なし"
 		},
 		"sections": {

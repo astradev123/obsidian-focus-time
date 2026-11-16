@@ -127,9 +127,7 @@ export function DashboardRoot(props: { plugin: FocusTimePlugin; initialTab?: Tab
 	const totalDelta = prev ? delta(stats.totalMs, prev.totalMs) : undefined;
 	const sessionDelta = prev ? delta(stats.sessionCount, prev.sessionCount) : undefined;
 	const avgDelta = prev ? delta(stats.avgSessionMs, prev.avgSessionMs) : undefined;
-	const totalHint = totalDelta?.text ?? (stats.unallocatedMs > 0
-		? I18n.t("dashboard.kpi.unallocated", {time: TimeUtils.getFormattedReadingTime(stats.unallocatedMs)})
-		: undefined);
+	const totalHint = totalDelta?.text;
 	const returningMs = stats.newNoteMs + stats.returningNoteMs;
 	const returningShare = returningMs > 0 ? Math.round((stats.returningNoteMs / returningMs) * 100) : 0;
 	const goalPercent = goalMs > 0 ? Math.min(100, (todayMs / goalMs) * 100) : 0;

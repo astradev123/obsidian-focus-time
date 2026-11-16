@@ -8,7 +8,7 @@ import { LegacyScan, LegacyVerification, buildLegacyEvents, scanLegacy, summariz
 import { MetaStore } from "./metaStore";
 import { NoteRegistry } from "./noteRegistry";
 import { archivePath, dataPath, eventsPath, reportsPath } from "./paths";
-import { SessionEvent, SessionInput } from "./types";
+import { RenameEvent, SessionEvent, SessionInput } from "./types";
 
 export interface MigrationReport {
 	ok: boolean;
@@ -263,6 +263,23 @@ export class StorageService {
 			}
 		}
 
+		// Replay rename events so a registry that missed its debounced save
+		// still follows the latest path.
+		const renames = all
+			.filter((event): event is RenameEvent => event.type === "rename")
+			.sort((a, b) => a.at - b.at);
+		let renamed = false;
+		for (const event of renames) {
+			const current = this.registry.getPath(event.note);
+			if (current !== undefined && current !== event.to) {
+				this.registry.rename(event.note, event.to);
+				renamed = true;
+			}
+		}
+		if (renamed) {
+			await this.registry.flush();
+		}
+
 		this.index.rebuild(all);
 		if (this.lastScan) {
 			this.index.addUnmapped(this.lastScan.unmappedMs);
@@ -369,31 +386,67 @@ export class StorageService {
 	}
 
 	public async handleRename(oldPath: string, newPath: string): Promise<void> {
+		if (oldPath === newPath) {
+			return;
+		}
 		const noteId = this.registry.getId(oldPath);
 		if (!noteId) {
 			return;
 		}
 		this.registry.rename(noteId, newPath);
-		await this.events.record({
-			v: 1,
-			id: newEventId("r"),
-			dev: this.deviceId,
-			at: Date.now(),
-			type: "rename",
-			note: noteId,
-			from: oldPath,
-			to: newPath
-		});
+		this.emitChange();
+		try {
+			await this.events.record({
+				v: 1,
+				id: newEventId("r"),
+				dev: this.deviceId,
+				at: Date.now(),
+				type: "rename",
+				note: noteId,
+				from: oldPath,
+				to: newPath
+			});
+		} catch (error) {
+			console.error("[focus-time] Failed to record rename event", error);
+		}
 	}
 
 	public async handleFolderRename(oldPrefix: string, newPrefix: string): Promise<void> {
-		const prefix = oldPrefix.endsWith("/") ? oldPrefix : `${oldPrefix}/`;
+		const fromPrefix = oldPrefix.endsWith("/") ? oldPrefix.slice(0, -1) : oldPrefix;
+		const toPrefix = newPrefix.endsWith("/") ? newPrefix.slice(0, -1) : newPrefix;
+		const prefix = `${fromPrefix}/`;
+		const changes: Array<{noteId: string; from: string; to: string}> = [];
+
+		// Update every path synchronously before any await so a tracker flush
+		// during a large folder move never creates a second id for a moved note.
 		for (const entry of this.registry.entries()) {
 			if (!entry.path.startsWith(prefix)) {
 				continue;
 			}
-			const nextPath = `${newPrefix}/${entry.path.slice(prefix.length)}`;
-			await this.handleRename(entry.path, nextPath);
+			const nextPath = `${toPrefix}/${entry.path.slice(prefix.length)}`;
+			this.registry.rename(entry.id, nextPath);
+			changes.push({noteId: entry.id, from: entry.path, to: nextPath});
+		}
+
+		if (changes.length === 0) {
+			return;
+		}
+		this.emitChange();
+		for (const change of changes) {
+			try {
+				await this.events.record({
+					v: 1,
+					id: newEventId("r"),
+					dev: this.deviceId,
+					at: Date.now(),
+					type: "rename",
+					note: change.noteId,
+					from: change.from,
+					to: change.to
+				});
+			} catch (error) {
+				console.error("[focus-time] Failed to record folder rename event", error);
+			}
 		}
 	}
 

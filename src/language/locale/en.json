@@ -180,7 +180,6 @@
 			"deepWork": "Deep work",
 			"activeDays": "Active days",
 			"split": "Edit {edit}% · Read {read}%",
-			"unallocated": "Includes {time} undated legacy time",
 			"noSessionDetail": "No session detail"
 		},
 		"sections": {

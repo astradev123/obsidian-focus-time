@@ -41,7 +41,7 @@ function setup() {
 	} as unknown as PluginDataManager;
 
 	const storage = new StorageService(app as never, PLUGIN_DIR, "dev1", dataManager, dailyManager);
-	return {adapter, storage};
+	return {adapter, storage, app, dataManager, dailyManager};
 }
 
 describe("StorageService migration", () => {
@@ -75,6 +75,73 @@ describe("StorageService migration", () => {
 		expect(imported).toBe(1);
 		expect(storage.getTotalForPath("b.md")).toBe(40_000);
 		expect(storage.getStats().events).toBe(4);
+	});
+
+	it("keeps ids and totals when a folder with nested notes is moved", async () => {
+		const {storage} = setup();
+		await storage.init();
+
+		const x = await storage.ensureNote("A/x.md");
+		const y = await storage.ensureNote("A/sub/y.md");
+		const z = await storage.ensureNote("C/z.md");
+		const keep = await storage.ensureNote("A2/keep.md");
+		const now = Date.now();
+		await storage.recordSession({
+			ses: "move-session",
+			note: x,
+			path: "A/x.md",
+			start: now,
+			end: now + 60_000,
+			ms: 60_000,
+			kind: "edit",
+			idle: "off"
+		});
+		expect(storage.getTotalForPath("A/x.md")).toBe(60_000);
+
+		await storage.handleFolderRename("A", "B");
+
+		expect(storage.getPath(x)).toBe("B/x.md");
+		expect(storage.getPath(y)).toBe("B/sub/y.md");
+		expect(storage.getPath(z)).toBe("C/z.md");
+		expect(storage.getPath(keep)).toBe("A2/keep.md");
+		expect(storage.getTotalForPath("B/x.md")).toBe(60_000);
+		expect(storage.getTotalForPath("A/x.md")).toBe(0);
+
+		await storage.handleRename("B/sub/y.md", "D/y.md");
+		expect(storage.getPath(y)).toBe("D/y.md");
+		expect(storage.getPath(x)).toBe("B/x.md");
+	});
+
+	it("recovers a missed registry path from rename events on reload", async () => {
+		const {adapter, storage, app, dataManager, dailyManager} = setup();
+		await storage.init();
+
+		const noteId = await storage.ensureNote("A/x.md");
+		const now = Date.now();
+		await storage.recordSession({
+			ses: "replay-session",
+			note: noteId,
+			path: "A/x.md",
+			start: now,
+			end: now + 60_000,
+			ms: 60_000,
+			kind: "edit",
+			idle: "off"
+		});
+		await storage.handleFolderRename("A", "B");
+		await storage.flush();
+
+		const registry = JSON.parse(adapter.files.get("_focus_time/notes.json") ?? "{}");
+		registry.byId[noteId].path = "A/x.md";
+		delete registry.byPath["B/x.md"];
+		registry.byPath["A/x.md"] = noteId;
+		adapter.files.set("_focus_time/notes.json", JSON.stringify(registry));
+
+		const reloaded = new StorageService(app as never, PLUGIN_DIR, "dev1", dataManager, dailyManager);
+		await reloaded.init();
+
+		expect(reloaded.getPath(noteId)).toBe("B/x.md");
+		expect(reloaded.getTotalForPath("B/x.md")).toBe(60_000);
 	});
 
 	it("does not re-import unchanged day files", async () => {

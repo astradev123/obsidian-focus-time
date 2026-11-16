@@ -180,7 +180,6 @@
 			"deepWork": "深度工作",
 			"activeDays": "活躍天數",
 			"split": "編輯 {edit}% · 閱讀 {read}%",
-			"unallocated": "含 {time} 舊版未分配時間",
 			"noSessionDetail": "無會話明細"
 		},
 		"sections": {

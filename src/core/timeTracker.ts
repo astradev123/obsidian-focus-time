@@ -77,6 +77,9 @@ export class TimeTracker {
 		plugin.registerEvent(this.app.workspace.on("active-leaf-change", () => {
 			void this.handleFileChange();
 		}));
+		plugin.registerEvent(this.app.vault.on("rename", (_file, oldPath) => {
+			this.handlePendingPathChange(oldPath, _file.path);
+		}));
 		plugin.registerInterval(window.setInterval(() => this.tick(), TICK_MS));
 		plugin.registerInterval(window.setInterval(() => {
 			void this.flush("timer");
@@ -156,7 +159,7 @@ export class TimeTracker {
 			if (segment.ms <= 0) {
 				continue;
 			}
-			if (!this.pending || this.pending.filePath !== file.path || this.pending.date !== segment.date) {
+			if (!this.pending || this.pending.file !== file || this.pending.date !== segment.date) {
 				void this.flush("bucket-change");
 				this.pending = {
 					file,
@@ -173,6 +176,31 @@ export class TimeTracker {
 		}
 	}
 
+	private handlePendingPathChange(oldPath: string, newPath: string): void {
+		if (!this.pending) {
+			return;
+		}
+		const from = oldPath.endsWith("/") ? oldPath.slice(0, -1) : oldPath;
+		const to = newPath.endsWith("/") ? newPath.slice(0, -1) : newPath;
+		if (this.pending.filePath === from) {
+			this.pending.filePath = to;
+			return;
+		}
+		const prefix = `${from}/`;
+		if (this.pending.filePath.startsWith(prefix)) {
+			this.pending.filePath = `${to}/${this.pending.filePath.slice(prefix.length)}`;
+		}
+	}
+
+	private resolvePendingPath(pending: PendingBucket): string {
+		// The rename listener updates pending.filePath; prefer it while it still
+		// exists. Fall back to the TFile path if the listener missed the event.
+		if (this.app.vault.getAbstractFileByPath(pending.filePath)) {
+			return pending.filePath;
+		}
+		return pending.file.path;
+	}
+
 	private async flush(reason: FlushReason): Promise<void> {
 		const pending = this.pending;
 		this.pending = null;
@@ -180,12 +208,13 @@ export class TimeTracker {
 			return;
 		}
 
+		const filePath = this.resolvePendingPath(pending);
 		try {
-			const noteId = await this.storage.ensureNote(pending.filePath);
+			const noteId = await this.storage.ensureNote(filePath);
 			await this.storage.recordSession({
 				ses: pending.ses,
 				note: noteId,
-				path: pending.filePath,
+				path: filePath,
 				start: pending.start,
 				end: pending.end,
 				ms: pending.ms,

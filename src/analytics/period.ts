@@ -9,9 +9,10 @@ export interface DateRange {
 
 export function getRange(period: Period, anchor: Date, firstDate?: string): DateRange {
 	if (period === "total") {
+		const to = DateUtils.toLocalDate(anchor);
 		return {
-			from: firstDate ?? DateUtils.toLocalDate(anchor),
-			to: DateUtils.toLocalDate(anchor)
+			from: firstDate && firstDate <= to ? firstDate : to,
+			to
 		};
 	}
 	if (period === "day") {

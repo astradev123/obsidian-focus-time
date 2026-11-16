@@ -13,6 +13,7 @@ describe("period ranges", () => {
 	it("falls back to today when there is no history", () => {
 		const anchor = new Date(2026, 10, 16);
 		expect(getRange("total", anchor)).toEqual({from: "2026-11-16", to: "2026-11-16"});
+		expect(getRange("total", anchor, "2027-01-01")).toEqual({from: "2026-11-16", to: "2026-11-16"});
 	});
 
 	it("does not truncate long ranges", () => {
