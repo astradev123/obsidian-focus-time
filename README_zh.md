@@ -42,7 +42,7 @@
 - `notes.json`：笔记 id 与当前路径的映射。
 - `meta.json`：存储版本与迁移状态。
 - `archive/`：迁移前的 `data.json` 与日文件只读备份。
-- 旧版本写在 vault 根目录或插件目录下的 `_focus_time/` 会在启动时自动搬进 `store/`。
+- 旧版本写在 vault 根目录的 `_focus_time/` 会在启动时自动搬进 `store/`。
 - 数据在插件目录里，删除插件文件夹会一起删除数据；卸载前请先导出备份。
 - `reports/`：迁移报告。
 - `exports/`：CSV / JSON / Markdown 导出。

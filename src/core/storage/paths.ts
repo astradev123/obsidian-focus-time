@@ -21,10 +21,6 @@ export function legacyDataRootPath(): string {
 	return normalizePath(LEGACY_DATA_FOLDER);
 }
 
-export function legacyPluginDataPath(pluginDir: string): string {
-	return normalizePath(`${pluginDir}/${LEGACY_DATA_FOLDER}`);
-}
-
 export function dataPath(...parts: string[]): string {
 	return normalizePath([dataRoot, ...parts].filter(Boolean).join("/"));
 }

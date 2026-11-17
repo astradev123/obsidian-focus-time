@@ -7,7 +7,7 @@ import { FocusIndex } from "./focusIndex";
 import { LegacyScan, LegacyVerification, buildLegacyEvents, scanLegacy, summarizeScan, verifyLegacy } from "./legacy";
 import { MetaStore } from "./metaStore";
 import { NoteRegistry } from "./noteRegistry";
-import { archivePath, configureDataRoot, dataPath, eventsPath, legacyDataRootPath, legacyPluginDataPath, reportsPath } from "./paths";
+import { archivePath, configureDataRoot, dataPath, eventsPath, legacyDataRootPath, reportsPath } from "./paths";
 import { RenameEvent, SessionEvent, SessionInput } from "./types";
 
 export interface MigrationReport {
@@ -111,20 +111,13 @@ export class StorageService {
 	}
 
 	/**
-	 * Older builds used `_focus_time/` either at the vault root or directly in
-	 * the plugin folder. Move both into the current `store/` folder. Copies are
+	 * Older builds wrote `_focus_time/` at the vault root, which shows up in
+	 * the file explorer. Move it into the current `store/` folder. Copies are
 	 * removed only after every file has been copied; a failed copy is cleaned
 	 * up so the next start can retry.
 	 */
 	private async migrateLegacyData(): Promise<void> {
-		const target = dataPath();
-		const sources = [
-			{path: legacyPluginDataPath(this.pluginDir), label: "plugin-legacy"},
-			{path: legacyDataRootPath(), label: "vault-root"}
-		];
-		for (const source of sources) {
-			await this.migrateLegacyFolder(source.path, target, source.label);
-		}
+		await this.migrateLegacyFolder(legacyDataRootPath(), dataPath(), "vault-root");
 	}
 
 	private async migrateLegacyFolder(source: string, target: string, label: string): Promise<void> {

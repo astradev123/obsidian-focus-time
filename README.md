@@ -42,7 +42,7 @@ Focus Time keeps its data in the plugin folder, under `.obsidian/plugins/focus-t
 - `notes.json` — stable note ids and their current paths.
 - `meta.json` — schema version and migration state.
 - `archive/` — a read-only copy of the previous `data.json` and day files, created before migration.
-- Older builds that wrote `_focus_time/` at the vault root or directly in the plugin folder are moved into `store/` automatically on startup.
+- Older builds that wrote `_focus_time/` at the vault root are moved into `store/` automatically on startup.
 - Because this folder lives inside the plugin, deleting the plugin folder also deletes its data. Export or back it up before uninstalling.
 - `reports/` — migration reports.
 - `exports/` — CSV / JSON / Markdown exports.
