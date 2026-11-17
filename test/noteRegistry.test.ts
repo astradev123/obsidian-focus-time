@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { FileStore } from "../src/core/storage/fileStore";
 import { NoteRegistry } from "../src/core/storage/noteRegistry";
+import { configureDataRoot } from "../src/core/storage/paths";
 import { FakeAdapter, createFakeApp } from "./helpers/fakeAdapter";
 
+const PLUGIN_DIR = ".obsidian/plugins/focus-time";
+
 function createRegistry() {
+	configureDataRoot(PLUGIN_DIR);
 	const adapter = new FakeAdapter();
 	const files = new FileStore(createFakeApp(adapter) as never);
 	return {adapter, registry: new NoteRegistry(files)};
@@ -19,7 +23,7 @@ describe("NoteRegistry", () => {
 
 		expect(registry.getId("a.md")).toBe(id);
 		expect(registry.getPath(id)).toBe("a.md");
-		expect(adapter.files.has("_focus_time/notes.json")).toBe(true);
+		expect(adapter.files.has(`${PLUGIN_DIR}/_focus_time/notes.json`)).toBe(true);
 	});
 
 	it("keeps the new path when legacy data re-imports an old path", async () => {

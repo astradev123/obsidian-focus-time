@@ -7,7 +7,7 @@ import { FocusIndex } from "./focusIndex";
 import { LegacyScan, LegacyVerification, buildLegacyEvents, scanLegacy, summarizeScan, verifyLegacy } from "./legacy";
 import { MetaStore } from "./metaStore";
 import { NoteRegistry } from "./noteRegistry";
-import { archivePath, dataPath, eventsPath, reportsPath } from "./paths";
+import { archivePath, configureDataRoot, dataPath, eventsPath, legacyDataRootPath, reportsPath } from "./paths";
 import { RenameEvent, SessionEvent, SessionInput } from "./types";
 
 export interface MigrationReport {
@@ -57,6 +57,7 @@ export class StorageService {
 		private readonly dataManager: PluginDataManager,
 		private readonly dailyManager: DailyReadDataManager
 	) {
+		configureDataRoot(pluginDir);
 		this.files = new FileStore(app);
 		this.meta = new MetaStore(this.files);
 		this.registry = new NoteRegistry(this.files);
@@ -81,6 +82,7 @@ export class StorageService {
 	}
 
 	private async doInit(): Promise<void> {
+		await this.migrateRootData();
 		await this.files.ensureFolder(dataPath());
 		await this.files.ensureFolder(eventsPath());
 		await this.files.ensureFolder(archivePath());
@@ -100,6 +102,57 @@ export class StorageService {
 		await this.events.archiveConflicts();
 		await this.events.publish();
 		await this.reloadIndex();
+	}
+
+	/**
+	 * Older builds wrote focus data to `_focus_time/` at the vault root, which
+	 * shows up in the file explorer. Move that folder into the plugin directory.
+	 * Copies are only removed after every file has been copied, and a failed
+	 * copy is cleaned up so the next start can retry.
+	 */
+	private async migrateRootData(): Promise<void> {
+		const legacy = legacyDataRootPath();
+		const target = dataPath();
+		if (legacy === target || !(await this.files.exists(legacy))) {
+			return;
+		}
+
+		const looksLikeData = (await this.files.exists(`${legacy}/meta.json`))
+			|| (await this.files.exists(`${legacy}/notes.json`))
+			|| (await this.files.exists(`${legacy}/events`));
+		if (!looksLikeData) {
+			return;
+		}
+
+		const targetHasData = (await this.files.exists(`${target}/meta.json`))
+			|| (await this.files.exists(`${target}/notes.json`))
+			|| (await this.files.exists(`${target}/events`));
+		if (!targetHasData) {
+			// A real folder rename is atomic and cheap.
+			try {
+				await this.files.adapter.rename(legacy, target);
+				return;
+			} catch {
+				// Fall through to a recursive copy (some adapters only rename files).
+			}
+		}
+
+		const targetRoot = targetHasData
+			? `${target}/archive/root-import-${Date.now()}`
+			: target;
+		try {
+			const files = await this.files.listTree(legacy);
+			for (const file of files) {
+				const relative = file.slice(legacy.length + 1);
+				await this.files.copy(file, `${targetRoot}/${relative}`);
+			}
+			await this.files.removeFolder(legacy);
+		} catch (error) {
+			if (!targetHasData) {
+				await this.files.removeFolder(targetRoot);
+			}
+			console.error("[focus-time] Failed to move root focus data into the plugin folder", error);
+		}
 	}
 
 	/**

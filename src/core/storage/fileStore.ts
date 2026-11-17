@@ -96,6 +96,38 @@ export class FileStore {
 		}
 	}
 
+	public async listTree(path: string): Promise<string[]> {
+		const files: string[] = [];
+		const walk = async (folder: string): Promise<void> => {
+			let listing: {files: string[]; folders: string[]};
+			try {
+				listing = await this.adapter.list(folder);
+			} catch {
+				return;
+			}
+			files.push(...listing.files);
+			for (const child of listing.folders) {
+				await walk(child);
+			}
+		};
+		await walk(path);
+		return files;
+	}
+
+	public async removeFolder(path: string): Promise<void> {
+		try {
+			if (typeof this.adapter.rmdir === "function") {
+				await this.adapter.rmdir(path, true);
+				return;
+			}
+		} catch {
+			// Fall back to deleting files one by one.
+		}
+		for (const file of await this.listTree(path)) {
+			await this.remove(file);
+		}
+	}
+
 	public async copy(from: string, to: string): Promise<void> {
 		const parent = dirname(to);
 		if (parent) {

@@ -87,6 +87,29 @@ export class FakeAdapter {
 		this.dirs.delete(path);
 	}
 
+	async rmdir(path: string, recursive = false): Promise<void> {
+		const prefix = `${path}/`;
+		if (!recursive) {
+			const hasChildren = Array.from(this.files.keys()).some((file) => file.startsWith(prefix))
+				|| Array.from(this.dirs).some((dir) => dir.startsWith(prefix));
+			if (hasChildren) {
+				throw new Error(`ENOTEMPTY: ${path}`);
+			}
+			this.dirs.delete(path);
+			return;
+		}
+		for (const file of Array.from(this.files.keys())) {
+			if (file.startsWith(prefix)) {
+				this.files.delete(file);
+			}
+		}
+		for (const dir of Array.from(this.dirs)) {
+			if (dir === path || dir.startsWith(prefix)) {
+				this.dirs.delete(dir);
+			}
+		}
+	}
+
 	private touch(path: string): void {
 		this.mtimes.set(path, this.clock++);
 	}

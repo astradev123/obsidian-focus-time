@@ -1,9 +1,28 @@
 import { normalizePath } from "obsidian";
 
 export const DATA_FOLDER = "_focus_time";
+export const LEGACY_DATA_FOLDER = "_focus_time";
+
+let dataRoot = DATA_FOLDER;
+
+/**
+ * Keep plugin data out of the vault tree. Obsidian passes a manifest dir such
+ * as `.obsidian/plugins/focus-time`.
+ */
+export function configureDataRoot(pluginDir: string): void {
+	dataRoot = normalizePath(`${pluginDir}/${DATA_FOLDER}`);
+}
+
+export function dataRootPath(): string {
+	return dataRoot;
+}
+
+export function legacyDataRootPath(): string {
+	return normalizePath(LEGACY_DATA_FOLDER);
+}
 
 export function dataPath(...parts: string[]): string {
-	return normalizePath([DATA_FOLDER, ...parts].filter(Boolean).join("/"));
+	return normalizePath([dataRoot, ...parts].filter(Boolean).join("/"));
 }
 
 export function eventsPath(): string {

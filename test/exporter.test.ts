@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { Exporter } from "../src/core/export/exporter";
 import { FileStore } from "../src/core/storage/fileStore";
 import { FocusIndex } from "../src/core/storage/focusIndex";
+import { configureDataRoot } from "../src/core/storage/paths";
 import { FocusEvent } from "../src/core/storage/types";
 import I18n from "../src/language/i18n";
 import { FakeAdapter, createFakeApp } from "./helpers/fakeAdapter";
@@ -27,7 +28,10 @@ const events: FocusEvent[] = [
 	}
 ];
 
+const PLUGIN_DIR = ".obsidian/plugins/focus-time";
+
 function createExporter() {
+	configureDataRoot(PLUGIN_DIR);
 	const adapter = new FakeAdapter();
 	const files = new FileStore(createFakeApp(adapter) as never);
 	const index = new FocusIndex();
@@ -51,7 +55,7 @@ describe("Exporter", () => {
 		const path = await exporter.exportCsv();
 		const content = adapter.files.get(path) ?? "";
 
-		expect(path.startsWith("_focus_time/exports/")).toBe(true);
+		expect(path.startsWith(`${PLUGIN_DIR}/_focus_time/exports/`)).toBe(true);
 		expect(content.split("\n")[0]).toBe("date,start,end,duration_min,note,kind,device,id");
 		expect(content).toContain('"Work/a,b.md"');
 		expect(content).toContain("30.0");
