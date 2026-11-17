@@ -23,7 +23,7 @@ describe("NoteRegistry", () => {
 
 		expect(registry.getId("a.md")).toBe(id);
 		expect(registry.getPath(id)).toBe("a.md");
-		expect(adapter.files.has(`${PLUGIN_DIR}/_focus_time/notes.json`)).toBe(true);
+		expect(adapter.files.has(`${PLUGIN_DIR}/store/notes.json`)).toBe(true);
 	});
 
 	it("keeps the new path when legacy data re-imports an old path", async () => {

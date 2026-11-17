@@ -7,7 +7,7 @@ import { FocusIndex } from "./focusIndex";
 import { LegacyScan, LegacyVerification, buildLegacyEvents, scanLegacy, summarizeScan, verifyLegacy } from "./legacy";
 import { MetaStore } from "./metaStore";
 import { NoteRegistry } from "./noteRegistry";
-import { archivePath, configureDataRoot, dataPath, eventsPath, legacyDataRootPath, reportsPath } from "./paths";
+import { archivePath, configureDataRoot, dataPath, eventsPath, legacyDataRootPath, legacyPluginDataPath, reportsPath } from "./paths";
 import { RenameEvent, SessionEvent, SessionInput } from "./types";
 
 export interface MigrationReport {
@@ -82,7 +82,7 @@ export class StorageService {
 	}
 
 	private async doInit(): Promise<void> {
-		await this.migrateRootData();
+		await this.migrateLegacyData();
 		await this.files.ensureFolder(dataPath());
 		await this.files.ensureFolder(eventsPath());
 		await this.files.ensureFolder(archivePath());
@@ -104,33 +104,39 @@ export class StorageService {
 		await this.reloadIndex();
 	}
 
+	private async hasDataFolder(path: string): Promise<boolean> {
+		return (await this.files.exists(`${path}/meta.json`))
+			|| (await this.files.exists(`${path}/notes.json`))
+			|| (await this.files.exists(`${path}/events`));
+	}
+
 	/**
-	 * Older builds wrote focus data to `_focus_time/` at the vault root, which
-	 * shows up in the file explorer. Move that folder into the plugin directory.
-	 * Copies are only removed after every file has been copied, and a failed
-	 * copy is cleaned up so the next start can retry.
+	 * Older builds used `_focus_time/` either at the vault root or directly in
+	 * the plugin folder. Move both into the current `store/` folder. Copies are
+	 * removed only after every file has been copied; a failed copy is cleaned
+	 * up so the next start can retry.
 	 */
-	private async migrateRootData(): Promise<void> {
-		const legacy = legacyDataRootPath();
+	private async migrateLegacyData(): Promise<void> {
 		const target = dataPath();
-		if (legacy === target || !(await this.files.exists(legacy))) {
+		const sources = [
+			{path: legacyPluginDataPath(this.pluginDir), label: "plugin-legacy"},
+			{path: legacyDataRootPath(), label: "vault-root"}
+		];
+		for (const source of sources) {
+			await this.migrateLegacyFolder(source.path, target, source.label);
+		}
+	}
+
+	private async migrateLegacyFolder(source: string, target: string, label: string): Promise<void> {
+		if (source === target || !(await this.files.exists(source)) || !(await this.hasDataFolder(source))) {
 			return;
 		}
 
-		const looksLikeData = (await this.files.exists(`${legacy}/meta.json`))
-			|| (await this.files.exists(`${legacy}/notes.json`))
-			|| (await this.files.exists(`${legacy}/events`));
-		if (!looksLikeData) {
-			return;
-		}
-
-		const targetHasData = (await this.files.exists(`${target}/meta.json`))
-			|| (await this.files.exists(`${target}/notes.json`))
-			|| (await this.files.exists(`${target}/events`));
+		const targetHasData = await this.hasDataFolder(target);
 		if (!targetHasData) {
 			// A real folder rename is atomic and cheap.
 			try {
-				await this.files.adapter.rename(legacy, target);
+				await this.files.adapter.rename(source, target);
 				return;
 			} catch {
 				// Fall through to a recursive copy (some adapters only rename files).
@@ -138,25 +144,27 @@ export class StorageService {
 		}
 
 		const targetRoot = targetHasData
-			? `${target}/archive/root-import-${Date.now()}`
+			? `${target}/archive/${label}-${Date.now()}`
 			: target;
 		try {
-			const files = await this.files.listTree(legacy);
+			const files = await this.files.listTree(source);
 			for (const file of files) {
-				const relative = file.slice(legacy.length + 1);
+				const relative = file.slice(source.length + 1);
 				await this.files.copy(file, `${targetRoot}/${relative}`);
 			}
-			await this.files.removeFolder(legacy);
+			await this.files.removeFolder(source);
 		} catch (error) {
 			if (!targetHasData) {
 				await this.files.removeFolder(targetRoot);
 			}
-			console.error("[focus-time] Failed to move root focus data into the plugin folder", error);
+			console.error(`[focus-time] Failed to move legacy focus data (${label})`, error);
 		}
 	}
 
 	/**
-	 * Copy the v0 store into `_focus_time/archive/` before touching anything.
+	 * Copy the v0 store into `store/archive/` before touching anything.
+	 */	/**
+	 * Copy the v0 store into `store/archive/` before touching anything.
 	 */
 	public async backupV0(backupDir: string): Promise<{ files: number; dataJson: boolean }> {
 		let copied = 0;

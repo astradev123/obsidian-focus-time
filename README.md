@@ -9,7 +9,7 @@ If you find this plugin useful, you can support me on [Buy Me a Coffee](https://
 ## Features Overview
 
 - **Accurate tracking**: idle detection with separate reading thresholds, midnight splitting, sleep-safe timing, and exact settlement on note switches.
-- **Local-first event log**: append-only monthly shards per device, stored in `_focus_time/` inside the plugin folder, hidden from the file explorer. No database, no write conflicts.
+- **Local-first event log**: append-only monthly shards per device, stored in `store/` inside the plugin folder, hidden from the file explorer. No database, no write conflicts.
 - **Automatic migration**: existing `data.json` and day files are backed up, imported and verified; original files are never modified.
 - **Analytics dashboard**: overview, trends, notes and folders, with edit/read split, goal consistency, new vs returning notes, calendar heatmaps, time-of-day grids, session histograms and rule-based insights.
 - **Exports**: CSV sessions, full JSON backup, and a Markdown report.
@@ -36,13 +36,13 @@ If you find this plugin useful, you can support me on [Buy Me a Coffee](https://
 
 ## Data storage
 
-Focus Time keeps its data in the plugin folder, under `.obsidian/plugins/focus-time/_focus_time/`:
+Focus Time keeps its data in the plugin folder, under `.obsidian/plugins/focus-time/store/`:
 
 - `events/YYYY-MM.<device>.jsonl` — append-only session events. Each device writes its own shard, so two devices never write the same file.
 - `notes.json` — stable note ids and their current paths.
 - `meta.json` — schema version and migration state.
 - `archive/` — a read-only copy of the previous `data.json` and day files, created before migration.
-- Older builds that wrote `_focus_time/` at the vault root are moved here automatically on startup.
+- Older builds that wrote `_focus_time/` at the vault root or directly in the plugin folder are moved into `store/` automatically on startup.
 - Because this folder lives inside the plugin, deleting the plugin folder also deletes its data. Export or back it up before uninstalling.
 - `reports/` — migration reports.
 - `exports/` — CSV / JSON / Markdown exports.

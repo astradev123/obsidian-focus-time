@@ -55,7 +55,7 @@ describe("Exporter", () => {
 		const path = await exporter.exportCsv();
 		const content = adapter.files.get(path) ?? "";
 
-		expect(path.startsWith(`${PLUGIN_DIR}/_focus_time/exports/`)).toBe(true);
+		expect(path.startsWith(`${PLUGIN_DIR}/store/exports/`)).toBe(true);
 		expect(content.split("\n")[0]).toBe("date,start,end,duration_min,note,kind,device,id");
 		expect(content).toContain('"Work/a,b.md"');
 		expect(content).toContain("30.0");
