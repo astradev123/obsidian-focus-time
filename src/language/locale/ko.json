@@ -228,7 +228,8 @@
 			"desc": "최상위 폴더 기준",
 			"summary": "{count}개 분류 · 최다: {top}",
 			"byNotes": "노트 수",
-			"noteCount": "{count}개"
+			"noteCount": "{count}개",
+			"noteCount_one": "{count}개"
 		},
 		"calendar": {
 			"less": "적음",

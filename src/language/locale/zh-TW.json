@@ -228,7 +228,8 @@
 			"desc": "依一級目錄彙總",
 			"summary": "{count} 個分類 · 最多：{top}",
 			"byNotes": "依筆記數",
-			"noteCount": "{count} 篇"
+			"noteCount": "{count} 篇",
+			"noteCount_one": "{count} 篇"
 		},
 		"calendar": {
 			"less": "少",

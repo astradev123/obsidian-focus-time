@@ -168,12 +168,18 @@ function buildTrendEntries(stats: RangeStats): TrendEntry[] {
 	const dates = eachDate(stats.range);
 
 	if (dates.length <= 31) {
-		return dates.map((date) => {
+		// A full month does not leave room for 31 labels; show every fifth day.
+		const dense = dates.length > 20;
+		return dates.map((date, index) => {
 			const parts = DateUtils.parseKey(date);
 			const weekday = parts ? DateUtils.toDate(parts).getDay() : 0;
-			const label = dates.length === 7
-				? I18n.t(`weekday.${WEEKDAY_KEYS[weekday]}`)
-				: String(Number(date.slice(-2)));
+			const day = Number(date.slice(-2));
+			let label = String(day);
+			if (dates.length === 7) {
+				label = I18n.t(`weekday.${WEEKDAY_KEYS[weekday]}`);
+			} else if (dense) {
+				label = day === 1 || day % 5 === 0 || index === dates.length - 1 ? String(day) : "";
+			}
 			return {key: date, label, ms: totals.get(date) ?? 0, date};
 		});
 	}
@@ -465,7 +471,7 @@ export function FolderBars(props: {
 						<span className="ft-folder-bar" style={{width: `${(ms / max) * 100}%`}} />
 					</span>
 					<span className="ft-folder-time">
-						{mode === "count" ? I18n.t("dashboard.categories.noteCount", {count: ms}) : TimeUtils.getFormattedReadingTime(ms)}
+						{mode === "count" ? I18n.plural("dashboard.categories.noteCount", ms) : TimeUtils.getFormattedReadingTime(ms)}
 					</span>
 				</div>
 			))}

@@ -228,7 +228,8 @@
 			"desc": "トップフォルダーで集計",
 			"summary": "{count} カテゴリ · 最多：{top}",
 			"byNotes": "ノート数",
-			"noteCount": "{count} 件"
+			"noteCount": "{count} 件",
+			"noteCount_one": "{count} 件"
 		},
 		"calendar": {
 			"less": "少",

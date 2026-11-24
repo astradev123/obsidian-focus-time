@@ -46,6 +46,8 @@ function NavButton(props: { id: Tab; icon: string; label: string; active: boolea
 			className={`ft-nav-button ${props.active ? "is-active" : ""}`}
 			role="button"
 			tabIndex={0}
+			title={I18n.t(props.label)}
+			aria-label={I18n.t(props.label)}
 			onClick={props.onClick}
 			onKeyDown={(event) => activate(event, props.onClick)}
 		>

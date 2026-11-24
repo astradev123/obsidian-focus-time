@@ -228,7 +228,8 @@
 			"desc": "按一级目录汇总",
 			"summary": "{count} 个分类 · 最多：{top}",
 			"byNotes": "按笔记数",
-			"noteCount": "{count} 篇"
+			"noteCount": "{count} 篇",
+			"noteCount_one": "{count} 篇"
 		},
 		"calendar": {
 			"less": "少",

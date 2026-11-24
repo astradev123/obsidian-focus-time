@@ -228,7 +228,8 @@
 			"desc": "Grouped by top-level folder",
 			"summary": "{count} categories · top: {top}",
 			"byNotes": "By note count",
-			"noteCount": "{count} notes"
+			"noteCount": "{count} notes",
+			"noteCount_one": "{count} note"
 		},
 		"calendar": {
 			"less": "Less",
