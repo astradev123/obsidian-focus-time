@@ -1,7 +1,6 @@
 import { normalizePath } from "obsidian";
 
 export const DATA_FOLDER = "store";
-export const LEGACY_DATA_FOLDER = "_focus_time";
 
 let dataRoot = DATA_FOLDER;
 
@@ -15,10 +14,6 @@ export function configureDataRoot(pluginDir: string): void {
 
 export function dataRootPath(): string {
 	return dataRoot;
-}
-
-export function legacyDataRootPath(): string {
-	return normalizePath(LEGACY_DATA_FOLDER);
 }
 
 export function dataPath(...parts: string[]): string {

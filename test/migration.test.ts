@@ -50,7 +50,6 @@ describe("StorageService migration", () => {
 
 		await storage.init();
 		expect(adapter.files.has(`${PLUGIN_DIR}/store/meta.json`)).toBe(true);
-		expect(adapter.files.has("_focus_time/meta.json")).toBe(false);
 		expect(Array.from(adapter.files.keys()).some((key) => key.startsWith(`${PLUGIN_DIR}/store/archive/v0-`))).toBe(true);
 		expect(Array.from(adapter.files.keys()).some((key) => key.startsWith(`${PLUGIN_DIR}/store/reports/migration-`))).toBe(true);
 
@@ -75,21 +74,6 @@ describe("StorageService migration", () => {
 		expect(imported).toBe(1);
 		expect(storage.getTotalForPath("b.md")).toBe(40_000);
 		expect(storage.getStats().events).toBe(4);
-	});
-
-	it("moves a legacy root _focus_time folder into the plugin directory", async () => {
-		const {adapter, storage} = setup();
-		adapter.dirs.add("_focus_time");
-		adapter.dirs.add("_focus_time/events");
-		adapter.files.set("_focus_time/meta.json", JSON.stringify({schemaVersion: 1, createdAt: 1}));
-		adapter.files.set("_focus_time/notes.json", JSON.stringify({version: 1, byPath: {}, byId: {}}));
-
-		await storage.init();
-		expect(adapter.files.has(`${PLUGIN_DIR}/store/meta.json`)).toBe(true);
-		expect(adapter.files.has(`${PLUGIN_DIR}/store/notes.json`)).toBe(true);
-		expect(adapter.files.has("_focus_time/meta.json")).toBe(false);
-		expect(adapter.dirs.has("_focus_time")).toBe(false);
-		expect(storage.getStats().dataFolder).toBe(`${PLUGIN_DIR}/store`);
 	});
 
 	it("keeps ids and totals when a folder with nested notes is moved", async () => {

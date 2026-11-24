@@ -7,7 +7,7 @@ import { FocusIndex } from "./focusIndex";
 import { LegacyScan, LegacyVerification, buildLegacyEvents, scanLegacy, summarizeScan, verifyLegacy } from "./legacy";
 import { MetaStore } from "./metaStore";
 import { NoteRegistry } from "./noteRegistry";
-import { archivePath, configureDataRoot, dataPath, eventsPath, legacyDataRootPath, reportsPath } from "./paths";
+import { archivePath, configureDataRoot, dataPath, eventsPath, reportsPath } from "./paths";
 import { RenameEvent, SessionEvent, SessionInput } from "./types";
 
 export interface MigrationReport {
@@ -82,7 +82,6 @@ export class StorageService {
 	}
 
 	private async doInit(): Promise<void> {
-		await this.migrateLegacyData();
 		await this.files.ensureFolder(dataPath());
 		await this.files.ensureFolder(eventsPath());
 		await this.files.ensureFolder(archivePath());
@@ -104,59 +103,7 @@ export class StorageService {
 		await this.reloadIndex();
 	}
 
-	private async hasDataFolder(path: string): Promise<boolean> {
-		return (await this.files.exists(`${path}/meta.json`))
-			|| (await this.files.exists(`${path}/notes.json`))
-			|| (await this.files.exists(`${path}/events`));
-	}
-
 	/**
-	 * Older builds wrote `_focus_time/` at the vault root, which shows up in
-	 * the file explorer. Move it into the current `store/` folder. Copies are
-	 * removed only after every file has been copied; a failed copy is cleaned
-	 * up so the next start can retry.
-	 */
-	private async migrateLegacyData(): Promise<void> {
-		await this.migrateLegacyFolder(legacyDataRootPath(), dataPath(), "vault-root");
-	}
-
-	private async migrateLegacyFolder(source: string, target: string, label: string): Promise<void> {
-		if (source === target || !(await this.files.exists(source)) || !(await this.hasDataFolder(source))) {
-			return;
-		}
-
-		const targetHasData = await this.hasDataFolder(target);
-		if (!targetHasData) {
-			// A real folder rename is atomic and cheap.
-			try {
-				await this.files.adapter.rename(source, target);
-				return;
-			} catch {
-				// Fall through to a recursive copy (some adapters only rename files).
-			}
-		}
-
-		const targetRoot = targetHasData
-			? `${target}/archive/${label}-${Date.now()}`
-			: target;
-		try {
-			const files = await this.files.listTree(source);
-			for (const file of files) {
-				const relative = file.slice(source.length + 1);
-				await this.files.copy(file, `${targetRoot}/${relative}`);
-			}
-			await this.files.removeFolder(source);
-		} catch (error) {
-			if (!targetHasData) {
-				await this.files.removeFolder(targetRoot);
-			}
-			console.error(`[focus-time] Failed to move legacy focus data (${label})`, error);
-		}
-	}
-
-	/**
-	 * Copy the v0 store into `store/archive/` before touching anything.
-	 */	/**
 	 * Copy the v0 store into `store/archive/` before touching anything.
 	 */
 	public async backupV0(backupDir: string): Promise<{ files: number; dataJson: boolean }> {
