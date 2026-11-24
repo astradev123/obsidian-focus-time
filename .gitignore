@@ -25,3 +25,6 @@ data.json
 .DS_Store
 /package-lock.json
 /data/
+
+# Screenshot render output
+/scripts/screenshots/.out/
