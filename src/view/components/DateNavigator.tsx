@@ -1,4 +1,5 @@
 import I18n from "../../language/i18n";
+import { DateUtils } from "../../util/dateUtils";
 
 interface DateNavigatorProps {
 	viewType: 'day' | 'week' | 'month' | 'year';
@@ -63,22 +64,18 @@ export function DateNavigator(props: DateNavigatorProps) {
 	};
 
 	const formatDate = () => {
+		const locale = I18n.getInstance().getLanguage();
 		if (viewType === 'day') {
-			return `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+			return new Intl.DateTimeFormat(locale, {year: 'numeric', month: 'short', day: 'numeric'}).format(currentDate);
 		} else if (viewType === 'week') {
-			const startOfWeek = new Date(currentDate);
-			const day = startOfWeek.getDay();
-			const diff = startOfWeek.getDate() - day;
-			startOfWeek.setDate(diff);
-
-			const endOfWeek = new Date(startOfWeek);
-			endOfWeek.setDate(endOfWeek.getDate() + 6);
-
-			return `${startOfWeek.getFullYear()}-${String(startOfWeek.getMonth() + 1).padStart(2, '0')}-${String(startOfWeek.getDate()).padStart(2, '0')} ~ ${endOfWeek.getFullYear()}-${String(endOfWeek.getMonth() + 1).padStart(2, '0')}-${String(endOfWeek.getDate()).padStart(2, '0')}`;
+			const startOfWeek = DateUtils.startOfWeek(currentDate);
+			const endOfWeek = DateUtils.addDays(startOfWeek, 6);
+			const formatter = new Intl.DateTimeFormat(locale, {year: 'numeric', month: 'short', day: 'numeric'});
+			return `${formatter.format(startOfWeek)} – ${formatter.format(endOfWeek)}`;
 		} else if (viewType === 'month') {
-			return `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+			return new Intl.DateTimeFormat(locale, {year: 'numeric', month: 'long'}).format(currentDate);
 		} else if (viewType === 'year') {
-			return `${currentDate.getFullYear()}`;
+			return new Intl.DateTimeFormat(locale, {year: 'numeric'}).format(currentDate);
 		}
 	};
 
@@ -142,7 +139,7 @@ export function DateNavigator(props: DateNavigatorProps) {
 			<button
 				className="date-nav-button"
 				onClick={handlePrevious}
-				aria-label={I18n.t('datePrevious')}
+				aria-label={I18n.t('common.previous')}
 			>
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 					<polyline points="15 18 9 12 15 6"></polyline>
@@ -157,7 +154,7 @@ export function DateNavigator(props: DateNavigatorProps) {
 				className="date-nav-button"
 				onClick={handleNext}
 				disabled={!canGoNext()}
-				aria-label={I18n.t('dateNext')}
+				aria-label={I18n.t('common.next')}
 			>
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 					<polyline points="9 18 15 12 9 6"></polyline>
@@ -169,7 +166,7 @@ export function DateNavigator(props: DateNavigatorProps) {
 					className="date-today-button"
 					onClick={handleToday}
 				>
-					{I18n.t('today')}
+					{I18n.t('common.today')}
 				</button>
 			)}
 		</div>

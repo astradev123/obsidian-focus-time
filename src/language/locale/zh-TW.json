@@ -1,0 +1,276 @@
+{
+	"app": {
+		"title": "專注時間儀表板",
+		"menu": "選單"
+	},
+	"command": {
+		"openDashboard": "開啟專注時間儀表板",
+		"toggleTracking": "暫停或繼續專注計時",
+		"rescanLegacy": "重新掃描舊版專注資料",
+		"exportCsv": "匯出專注工作階段為 CSV",
+		"exportJson": "匯出專注資料為 JSON",
+		"exportMarkdown": "匯出專注報告為 Markdown",
+		"writeFrontmatter": "將專注時長寫入目前筆記"
+	},
+	"common": {
+		"loading": "載入中…",
+		"today": "今天",
+		"unknown": "未知",
+		"noData": "暫無資料",
+		"fileNotFound": "檔案不存在",
+		"previous": "上一個",
+		"next": "下一個"
+	},
+	"time": {
+		"zero": "0 分鐘",
+		"minutes": "{minute}分鐘",
+		"hoursMinutes": "{hour}小時 {minute}分鐘",
+		"lessThanOneMinute": "< 1分鐘"
+	},
+	"status": {
+		"focusing": "專注中",
+		"pausedIdle": "已暫停 · {minute} 分鐘無操作",
+		"pausedBlur": "已暫停 · 視窗失焦",
+		"pausedManual": "已暫停",
+		"short": {
+			"idle": "閒置",
+			"blur": "失焦",
+			"manual": "暫停"
+		}
+	},
+	"settings": {
+		"language": {
+			"name": "語言",
+			"desc": "預設跟隨 Obsidian 的介面語言。",
+			"auto": "跟隨 Obsidian"
+		},
+		"strictMode": {
+			"name": "嚴格模式",
+			"desc": "視窗失去焦點時暫停計時。"
+		},
+		"idle": {
+			"name": "閒置偵測",
+			"desc": "超過設定時間沒有輸入時停止計時。打字、點擊、捲動、選取文字算輸入；只移動滑鼠不算。",
+			"off": "關閉",
+			"fixed": "5 分鐘",
+			"custom": "自訂",
+			"perMode": "閱讀單獨閾值",
+			"minutes": "編輯閾值（分鐘）",
+			"readingMinutes": "閱讀閾值（分鐘）"
+		},
+		"goal": {
+			"name": "每日專注目標",
+			"desc": "用於連續達標天數與目標進度。",
+			"minutes": "目標時長（分鐘）"
+		},
+		"data": {
+			"heading": "資料",
+			"folder": "資料目錄",
+			"schema": "儲存版本",
+			"events": "事件數",
+			"notes": "筆記數",
+			"legacyDays": "舊版天數",
+			"unmapped": "未對應時長",
+			"migrated": "遷移時間",
+			"rescan": "重新掃描舊資料",
+			"rescanDesc": "匯入舊版本寫入的日檔案。"
+		},
+		"help": {
+			"name": "概念提示",
+			"desc": "在會話、深工作等指標旁顯示小問號，關閉後全部隱藏。"
+		}
+	},
+	"notice": {
+		"migrating": "正在遷移專注資料…",
+		"migrated": "專注資料遷移完成。",
+		"migrationFailed": "遷移失敗。原始資料未被修改，請查看遷移報告。",
+		"rescan": "已匯入 {count} 筆舊版記錄。",
+		"exported": "已匯出到 {path}",
+		"frontmatterDone": "已將專注時長寫入 frontmatter。",
+		"noActiveNote": "請先開啟一篇 Markdown 筆記。"
+	},
+	"export": {
+		"title": "專注時間報告",
+		"range": "時間範圍",
+		"total": "專注總時長",
+		"sessions": "工作階段數",
+		"avgSession": "平均工作階段",
+		"deepWork": "深度工作",
+		"topNotes": "筆記排行",
+		"note": "筆記",
+		"time": "時長",
+		"noData": "暫無資料",
+		"generatedAt": "產生時間"
+	},
+	"embed": {
+		"title": "專注時間",
+		"total": "專注總時長",
+		"sessions": "工作階段數",
+		"today": "今天",
+		"week": "本週",
+		"month": "本月",
+		"note": "目前筆記"
+	},
+	"dashboard": {
+		"subtitle": "{sessions} 個工作階段 · {notes} 篇筆記",
+		"legend": {
+			"edit": "編輯",
+			"read": "閱讀",
+			"legacy": "舊版"
+		},
+		"tabs": {
+			"statistics": "統計",
+			"leaderboard": "排行榜",
+			"overview": "總覽",
+			"trends": "趨勢",
+			"notes": "筆記",
+			"categories": "分類",
+			"quality": "品質"
+		},
+		"statistics": {
+			"title": "專注統計"
+		},
+		"views": {
+			"day": "日",
+			"week": "週",
+			"month": "月",
+			"year": "年",
+			"total": "總計"
+		},
+		"charts": {
+			"daily": "每日專注時長分布",
+			"monthly": "每月專注時長分布",
+			"yearly": "年度專注時長分布"
+		},
+		"empty": {
+			"day": "該日期無資料",
+			"week": "本週無資料",
+			"month": "該月無資料",
+			"year": "該年份暫無資料",
+			"total": "暫無資料"
+		},
+		"notes": {
+			"title": "專注筆記",
+			"desc": "點擊筆記可開啟",
+			"filterDesc": "分類：{category}",
+			"newCount": "新筆記 {count} 篇",
+			"returningCount": "回訪 {count} 篇",
+			"returningShare": "回訪時長 {percent}%"
+		},
+		"metrics": {
+			"focusNotes": "專注筆記數",
+			"focusTime": "專注時間",
+			"focusDays": "專注天數",
+			"totalNotes": "總筆記數",
+			"totalFocusTime": "總專注時間",
+			"totalFocusDays": "總專注天數"
+		},
+		"leaderboard": {
+			"title": "專注時長排行榜",
+			"empty": "暫無資料，快去閱讀吧！",
+			"hint": "僅統計專注時長大於 1 分鐘的筆記"
+		},
+		"kpi": {
+			"total": "專注總時長",
+			"sessions": "工作階段數",
+			"avgSession": "平均工作階段",
+			"medianSession": "中位工作階段",
+			"longestSession": "最長工作階段",
+			"switches": "情境切換",
+			"deepWork": "深度工作",
+			"activeDays": "活躍天數",
+			"split": "編輯 {edit}% · 閱讀 {read}%",
+			"noSessionDetail": "無會話明細"
+		},
+		"sections": {
+			"trend": "專注趨勢",
+			"calendar": "近 12 週",
+			"hourly": "時段分布",
+			"sessionLength": "工作階段長度",
+			"folders": "目錄分布",
+			"insights": "小結",
+			"topNotes": "筆記排行",
+			"quality": "資料品質"
+		},
+		"insight": {
+			"up": "較上一週期成長 {percent}%",
+			"down": "較上一週期下降 {percent}%",
+			"peak": "最專注：{weekday} {hour} 點左右",
+			"goal": "今日 {current} / {goal} 分鐘",
+			"streak": "連續 {days} 天達標",
+			"deepWork": "{percent}% 的專注時長屬於深度工作",
+			"legacy": "{days} 天使用舊版日粒度資料",
+			"none": "再記錄幾次工作階段就能看到洞察",
+			"streakYesterday": "截至昨天連續 {days} 天達標"
+		},
+		"buckets": {
+			"lt5": "< 5 分鐘",
+			"lt15": "5–15",
+			"lt30": "15–30",
+			"lt60": "30–60",
+			"gt60": "60+ 分鐘"
+		},
+		"quality": {
+			"schema": "儲存版本",
+			"events": "事件數",
+			"sessions": "工作階段數",
+			"notes": "筆記數",
+			"legacyDays": "舊版天數",
+			"unmapped": "未對應時長",
+			"migrated": "遷移時間",
+			"folder": "資料目錄",
+			"rescan": "重新掃描舊資料",
+			"rescanDone": "已匯入 {count} 筆記錄"
+		},
+		"categories": {
+			"root": "根目錄",
+			"other": "其他",
+			"desc": "依一級目錄彙總",
+			"summary": "{count} 個分類 · 最多：{top}",
+			"byNotes": "依筆記數",
+			"noteCount": "{count} 篇",
+			"noteCount_one": "{count} 篇"
+		},
+		"calendar": {
+			"less": "少",
+			"more": "多",
+			"total": "12 週合計",
+			"activeDays": "{days} 天有記錄"
+		},
+		"sidebar": {
+			"today": "今日專注",
+			"goal": "{current} / {goal} 分鐘",
+			"goalQuality": "累計達標率 {rate}% · 最長 {days} 天"
+		},
+		"seeAll": "查看全部",
+		"error": "儀表盤渲染失敗",
+		"filter": "篩選",
+		"clearFilter": "清除篩選",
+		"brandSubtitle": "專注資料",
+		"chart": {
+			"scrollHint": "向左捲動查看更早"
+		}
+	},
+	"weekday": {
+		"sunday": "週日",
+		"monday": "週一",
+		"tuesday": "週二",
+		"wednesday": "週三",
+		"thursday": "週四",
+		"friday": "週五",
+		"saturday": "週六"
+	},
+	"help": {
+		"sessions": "一段連續的專注記錄。切換筆記、視窗失焦或閒置逾時後會開始新的會話。",
+		"avgSession": "所選時間範圍內，每次會話的平均時長。",
+		"deepWork": "單次時長達到 25 分鐘及以上的會話計入深工作。佔比只按有會話明細的時長計算。",
+		"medianSession": "把會話按長度排序後位於中間的值，比平均值更不容易被一次超長會話拉高。",
+		"longestSession": "所選範圍內最長的一次會話。",
+		"switches": "距上一次會話 30 分鐘內切換到另一篇筆記的次數。",
+		"activeDays": "所選範圍內至少有一次專注記錄的天數。",
+		"goal": "在設定中調整。當天總時長達到目標時，才計入連續達標；達標率按有記錄的天數計算。",
+		"calendar": "每個格子代表一天，顏色越深表示專注時間越長。",
+		"categories": "按筆記所在的一級目錄彙總。",
+		"split": "按有編輯/閱讀明細的會話統計；舊版日資料不參與。"
+	}
+}

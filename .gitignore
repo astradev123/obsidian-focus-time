@@ -18,7 +18,13 @@ main.js
 # obsidian
 data.json
 
+# workbuddy project memory
+.workbuddy/
+
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
 /package-lock.json
 /data/
+
+# Screenshot render output
+/scripts/screenshots/.out/

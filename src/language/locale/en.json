@@ -1,49 +1,276 @@
 {
-	"minutes": "{minute}m",
-	"hours_minutes": "{hour}h {minute}m",
-	"lessThanOneMinute": "< 1m",
-	"language": "Language",
-	"strictMode": "Strict mode",
-	"strictModeDesc": "Timer will be suspend if the window lost focus while the strict mode activated.",
-	"leaderboardTitle": "Focus Time Leaderboard",
-	"leaderboardNoData": "No data available, start reading now!",
-	"leaderboardNoData2": "Only notes with focus time greater than 1 minute are counted",
-	"openLeaderboardModal": "Open Focus Time Dashboard",
-	"fileNotFound": "File not found",
-	"focusTimeTitle": "Focus Time Dashboard",
-	"leaderboard": "Leaderboard",
-	"statistics": "Statistics",
-	"statisticsTitle": "Focus Statistics",
-	"viewDay": "Day",
-	"viewWeek": "Week",
-	"viewMonth": "Month",
-	"viewYear": "Year",
-	"viewTotal": "Total",
-	"focusNoteCount": "Focus Note Count",
-	"focusTime": "Focus Time",
-	"focusDays": "Focus Days",
-	"totalNoteCount": "Total Notes",
-	"totalFocusTime": "Total Focus Time",
-	"totalFocusDays": "Total Focus Days",
-	"noDataForDate": "No data for this date",
-	"noDataForWeek": "No data for this week",
-	"noDataForMonth": "No data for this month",
-	"noDataForYear": "No data for this year",
-	"noDataAvailable": "No data available",
-	"loading": "Loading...",
-	"today": "Today",
-	"datePrevious": "Previous",
-	"dateNext": "Next",
-	"focusNotes": "Focus Notes",
-	"dailyDistribution": "Daily Focus Time Distribution",
-	"monthlyDistribution": "Monthly Focus Time Distribution",
-	"yearlyDistribution": "Yearly Focus Time Distribution",
-	"menu": "Menu",
-	"sunday": "Sun",
-	"monday": "Mon",
-	"tuesday": "Tue",
-	"wednesday": "Wed",
-	"thursday": "Thu",
-	"friday": "Fri",
-	"saturday": "Sat"
+	"app": {
+		"title": "Focus Time",
+		"menu": "Menu"
+	},
+	"command": {
+		"openDashboard": "Open Focus Time dashboard",
+		"toggleTracking": "Pause or resume focus tracking",
+		"rescanLegacy": "Rescan legacy focus data",
+		"exportCsv": "Export focus sessions as CSV",
+		"exportJson": "Export focus data as JSON",
+		"exportMarkdown": "Export a focus report as Markdown",
+		"writeFrontmatter": "Write focus totals to the current note"
+	},
+	"common": {
+		"loading": "Loading…",
+		"today": "Today",
+		"unknown": "Unknown",
+		"noData": "No data available",
+		"fileNotFound": "File not found",
+		"previous": "Previous",
+		"next": "Next"
+	},
+	"time": {
+		"zero": "0 min",
+		"minutes": "{minute}m",
+		"hoursMinutes": "{hour}h {minute}m",
+		"lessThanOneMinute": "< 1m"
+	},
+	"status": {
+		"focusing": "Focusing",
+		"pausedIdle": "Paused · no input for {minute} min",
+		"pausedBlur": "Paused · window not focused",
+		"pausedManual": "Paused",
+		"short": {
+			"idle": "idle",
+			"blur": "unfocused",
+			"manual": "paused"
+		}
+	},
+	"settings": {
+		"language": {
+			"name": "Language",
+			"desc": "Follows Obsidian's language by default.",
+			"auto": "Follow Obsidian"
+		},
+		"strictMode": {
+			"name": "Strict mode",
+			"desc": "Pause tracking when the window loses focus."
+		},
+		"idle": {
+			"name": "Idle detection",
+			"desc": "Stop counting after the set time without input. Typing, clicking, scrolling or selecting text counts as input; moving the mouse alone does not.",
+			"off": "Off",
+			"fixed": "5 minutes",
+			"custom": "Custom",
+			"perMode": "Separate reading threshold",
+			"minutes": "Editing threshold (minutes)",
+			"readingMinutes": "Reading threshold (minutes)"
+		},
+		"goal": {
+			"name": "Daily focus goal",
+			"desc": "Used for streaks and goal progress.",
+			"minutes": "Goal (minutes)"
+		},
+		"data": {
+			"heading": "Data",
+			"folder": "Data folder",
+			"schema": "Schema version",
+			"events": "Events",
+			"notes": "Notes",
+			"legacyDays": "Legacy days",
+			"unmapped": "Unmapped time",
+			"migrated": "Migrated at",
+			"rescan": "Rescan legacy data",
+			"rescanDesc": "Import day files written by older versions."
+		},
+		"help": {
+			"name": "Concept hints",
+			"desc": "Show a small ? next to metrics like sessions and deep work. Turn off to hide all hints."
+		}
+	},
+	"notice": {
+		"migrating": "Migrating focus data…",
+		"migrated": "Focus data migration complete.",
+		"migrationFailed": "Migration failed. Your original data is untouched; check the migration report.",
+		"rescan": "Imported {count} legacy record(s).",
+		"exported": "Exported to {path}",
+		"frontmatterDone": "Focus totals written to frontmatter.",
+		"noActiveNote": "Open a Markdown note first."
+	},
+	"export": {
+		"title": "Focus Time report",
+		"range": "Range",
+		"total": "Total focus",
+		"sessions": "Sessions",
+		"avgSession": "Average session",
+		"deepWork": "Deep work",
+		"topNotes": "Top notes",
+		"note": "Note",
+		"time": "Time",
+		"noData": "No data",
+		"generatedAt": "Generated at"
+	},
+	"embed": {
+		"title": "Focus Time",
+		"total": "Total focus",
+		"sessions": "Sessions",
+		"today": "Today",
+		"week": "This week",
+		"month": "This month",
+		"note": "This note"
+	},
+	"dashboard": {
+		"subtitle": "{sessions} sessions · {notes} notes",
+		"legend": {
+			"edit": "Editing",
+			"read": "Reading",
+			"legacy": "Legacy"
+		},
+		"tabs": {
+			"statistics": "Statistics",
+			"leaderboard": "Leaderboard",
+			"overview": "Overview",
+			"trends": "Trends",
+			"notes": "Notes",
+			"categories": "Categories",
+			"quality": "Quality"
+		},
+		"statistics": {
+			"title": "Focus statistics"
+		},
+		"views": {
+			"day": "Day",
+			"week": "Week",
+			"month": "Month",
+			"year": "Year",
+			"total": "Total"
+		},
+		"charts": {
+			"daily": "Daily focus distribution",
+			"monthly": "Monthly focus distribution",
+			"yearly": "Yearly focus distribution"
+		},
+		"empty": {
+			"day": "No data for this date",
+			"week": "No data this week",
+			"month": "No data this month",
+			"year": "No data this year",
+			"total": "No data yet"
+		},
+		"notes": {
+			"title": "Focus notes",
+			"desc": "Click a note to open it",
+			"filterDesc": "Category: {category}",
+			"newCount": "{count} new notes",
+			"returningCount": "{count} returning",
+			"returningShare": "{percent}% returning time"
+		},
+		"metrics": {
+			"focusNotes": "Focus notes",
+			"focusTime": "Focus time",
+			"focusDays": "Focus days",
+			"totalNotes": "Total notes",
+			"totalFocusTime": "Total focus time",
+			"totalFocusDays": "Total focus days"
+		},
+		"leaderboard": {
+			"title": "Focus time leaderboard",
+			"empty": "No data yet. Start reading now!",
+			"hint": "Only notes with more than 1 minute are counted."
+		},
+		"kpi": {
+			"total": "Total focus",
+			"sessions": "Sessions",
+			"avgSession": "Avg session",
+			"medianSession": "Median session",
+			"longestSession": "Longest session",
+			"switches": "Context switches",
+			"deepWork": "Deep work",
+			"activeDays": "Active days",
+			"split": "Edit {edit}% · Read {read}%",
+			"noSessionDetail": "No session detail"
+		},
+		"sections": {
+			"trend": "Focus trend",
+			"calendar": "Last 12 weeks",
+			"hourly": "Time of day",
+			"sessionLength": "Session length",
+			"folders": "Folders",
+			"insights": "Summary",
+			"topNotes": "Top notes",
+			"quality": "Data quality"
+		},
+		"insight": {
+			"up": "Up {percent}% vs previous period",
+			"down": "Down {percent}% vs previous period",
+			"peak": "Peak focus: {weekday} around {hour}:00",
+			"goal": "Today {current} / {goal} min of your goal",
+			"streak": "{days}-day goal streak",
+			"deepWork": "{percent}% of focus time was deep work",
+			"legacy": "{days} days use legacy day-level data",
+			"none": "Track a few sessions to see insights",
+			"streakYesterday": "{days}-day streak through yesterday"
+		},
+		"buckets": {
+			"lt5": "< 5 min",
+			"lt15": "5–15",
+			"lt30": "15–30",
+			"lt60": "30–60",
+			"gt60": "60+ min"
+		},
+		"quality": {
+			"schema": "Schema",
+			"events": "Events",
+			"sessions": "Sessions",
+			"notes": "Notes",
+			"legacyDays": "Legacy days",
+			"unmapped": "Unmapped time",
+			"migrated": "Migrated",
+			"folder": "Data folder",
+			"rescan": "Rescan legacy data",
+			"rescanDone": "Imported {count} record(s)"
+		},
+		"categories": {
+			"root": "Root",
+			"other": "Other",
+			"desc": "Grouped by top-level folder",
+			"summary": "{count} categories · top: {top}",
+			"byNotes": "By note count",
+			"noteCount": "{count} notes",
+			"noteCount_one": "{count} note"
+		},
+		"calendar": {
+			"less": "Less",
+			"more": "More",
+			"total": "12-week total",
+			"activeDays": "{days} active days"
+		},
+		"sidebar": {
+			"today": "Today",
+			"goal": "{current} / {goal} min",
+			"goalQuality": "All-time hit {rate}% · best {days}d"
+		},
+		"seeAll": "View all",
+		"error": "The dashboard failed to render",
+		"filter": "Filter",
+		"clearFilter": "Clear filter",
+		"brandSubtitle": "Focus data",
+		"chart": {
+			"scrollHint": "Scroll left for earlier months"
+		}
+	},
+	"weekday": {
+		"sunday": "Sun",
+		"monday": "Mon",
+		"tuesday": "Tue",
+		"wednesday": "Wed",
+		"thursday": "Thu",
+		"friday": "Fri",
+		"saturday": "Sat"
+	},
+	"help": {
+		"sessions": "A continuous focus block. Switching notes, losing focus, or going idle starts a new session.",
+		"avgSession": "Average length of the sessions in the selected range.",
+		"deepWork": "Time from sessions of 25 minutes or longer. The percentage uses only time with session detail.",
+		"medianSession": "The middle session length; less affected by one very long session than the average.",
+		"longestSession": "The longest single session in the selected range.",
+		"switches": "Note changes within 30 minutes of the previous session.",
+		"activeDays": "Days with at least one focus session in the selected range.",
+		"goal": "Set in Settings. A day counts toward your streak when its total reaches this goal. Hit rate is calculated over days with any focus time.",
+		"calendar": "Each square is one day. Darker means more focus time.",
+		"categories": "Grouped by top-level folder.",
+		"split": "Based on sessions with edit/read detail; legacy day data is excluded."
+	}
 }
